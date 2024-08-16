@@ -1,0 +1,2 @@
+1- To kill the Vite port, in CMD
+npx kill-port 5173

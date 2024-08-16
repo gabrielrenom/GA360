@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "GA360",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
