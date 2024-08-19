@@ -1,3 +1,4 @@
+Can you fake this context so we are always login?
 import React, { createContext, useEffect, useReducer } from 'react';
 
 // third-party
@@ -23,15 +24,18 @@ const initialState: AuthProps = {
   user: null
 };
 
-const verifyToken = (serviceToken) => {
+const verifyToken: (st: string) => boolean = (serviceToken) => {
   if (!serviceToken) {
     return false;
   }
-  const decoded = jwtDecode(serviceToken);
+  const decoded: KeyedObject = jwtDecode(serviceToken);
+  /**
+   * Property 'exp' does not exist on type '<T = unknown>(token: string, options?: JwtDecodeOptions | undefined) => T'.
+   */
   return decoded.exp > Date.now() / 1000;
 };
 
-const setSession = (serviceToken) => {
+const setSession = (serviceToken?: string | null) => {
   if (serviceToken) {
     localStorage.setItem('serviceToken', serviceToken);
     axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
@@ -43,29 +47,32 @@ const setSession = (serviceToken) => {
 
 // ==============================|| JWT CONTEXT & PROVIDER ||============================== //
 
-const JWTContext = createContext(null);
+const JWTContext = createContext<JWTContextType | null>(null);
 
-export const JWTProvider = ({ children }) => {
+export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
+
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
     const init = async () => {
       try {
-        // Fake user data
-        const fakeUser = {
-          id: chance.guid(),
-          email: 'fakeuser@example.com',
-          name: 'Fake User'
-        };
-
-        // Always dispatch LOGIN with fake user
-        dispatch({
-          type: LOGIN,
-          payload: {
-            isLoggedIn: true,
-            user: fakeUser
-          }
-        });
+        const serviceToken = window.localStorage.getItem('serviceToken');
+        if (serviceToken && verifyToken(serviceToken)) {
+          setSession(serviceToken);
+          const response = await axios.get('/api/account/me');
+          const { user } = response.data;
+          dispatch({
+            type: LOGIN,
+            payload: {
+              isLoggedIn: true,
+              user
+            }
+          });
+        } else {
+          dispatch({
+            type: LOGOUT
+          });
+        }
       } catch (err) {
         console.error(err);
         dispatch({
@@ -77,7 +84,7 @@ export const JWTProvider = ({ children }) => {
     init();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string) => {
     const response = await axios.post('/api/account/login', { email, password });
     const { serviceToken, user } = response.data;
     setSession(serviceToken);
@@ -90,7 +97,8 @@ export const JWTProvider = ({ children }) => {
     });
   };
 
-  const register = async (email, password, firstName, lastName) => {
+  const register = async (email: string, password: string, firstName: string, lastName: string) => {
+    // todo: this flow need to be recode as it not verified
     const id = chance.bb_pin();
     const response = await axios.post('/api/account/register', {
       id,
@@ -104,7 +112,7 @@ export const JWTProvider = ({ children }) => {
     if (window.localStorage.getItem('users') !== undefined && window.localStorage.getItem('users') !== null) {
       const localUsers = window.localStorage.getItem('users');
       users = [
-        ...JSON.parse(localUsers),
+        ...JSON.parse(localUsers!),
         {
           id,
           email,
@@ -122,7 +130,7 @@ export const JWTProvider = ({ children }) => {
     dispatch({ type: LOGOUT });
   };
 
-  const resetPassword = async (email) => {
+  const resetPassword = async (email: string) => {
     console.log('email - ', email);
   };
 
@@ -132,11 +140,7 @@ export const JWTProvider = ({ children }) => {
     return <Loader />;
   }
 
-  return (
-    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile }}>
-      {children}
-    </JWTContext.Provider>
-  );
+  return <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile }}>{children}</JWTContext.Provider>;
 };
 
 export default JWTContext;

@@ -29,6 +29,7 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 import avatar2 from 'assets/images/users/avatar-2.png';
 import avatar3 from 'assets/images/users/avatar-3.png';
 import avatar4 from 'assets/images/users/avatar-4.png';
+import { useEffect, useState } from 'react';
 
 // avatar style
 const avatarSX = {
@@ -48,8 +49,51 @@ const actionSX = {
 };
 
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
+interface DataObject {
+  type: string;
+  value: string | number;
+}
 
 export default function DashboardDefault() {
+  const [claims, setClaims] = useState<DataObject[]>();
+  const [user, setUser] = useState<string | number>();
+  const [logoutUrl, setLogoutUrl] = useState<string>();
+    useEffect(() => {
+        fetchUserSessionInfo();
+    }, []);
+
+  const loginscreen = claims === undefined ?
+<a className="text-dark nav-link" href="/bff/login">
+    Login
+</a>
+: <a className="text-dark nav-link" href={logoutUrl}>
+    {user}
+</a>
+
+    const claimsresults = claims === undefined
+        ? <p><em>If claims have not been loaded, please login.</em></p>
+        : <>
+            <h3>CLAIMS [TO SHOW THIS DATA NEEDS AUTHENTICATION]</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {claims.map((claim) => (
+                        <tr key={claim.type}>
+                            <td>{claim.type}</td>
+                            <td>{claim.value}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </>
+
+
+
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       {/* row 1 */}
@@ -69,6 +113,10 @@ export default function DashboardDefault() {
         <AnalyticEcommerce title="Total Sales" count="$35,078" percentage={27.4} isLoss color="warning" extra="$20,395" />
       </Grid>
 
+      <h1 id="tabelLabel">Claims</h1>
+            <p>This component demonstrates fetching data from the server.</p>
+          {loginscreen}
+          {claimsresults}
       <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />
 
       {/* row 2 */}
@@ -243,4 +291,24 @@ export default function DashboardDefault() {
       </Grid>
     </Grid>
   );
+
+  async function fetchUserSessionInfo() {
+    const response = await fetch("/bff/user", {
+        headers: {
+            "X-CSRF": "Dog",
+        },
+    });
+    const data: DataObject[] = await response.json();
+    console.log(data)
+    setClaims(data);
+
+    data.forEach((claim) => {
+        if (claim.type === "email") {
+            setUser(claim.value); // Assuming setUser is a function
+        }
+        if (claim.type === "bff:logout_url") {
+            setLogoutUrl(claim.value as string); // Assuming setLogoutUrl is a function
+        }
+    });
+}
 }

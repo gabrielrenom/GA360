@@ -31,6 +31,8 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
     }
 }
 
+const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
+    env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7030';
 
 export default defineConfig({
     plugins: [plugin(), viteTsconfigPaths()],
@@ -54,7 +56,27 @@ export default defineConfig({
             '^/weatherforecast': {
                 target: 'https://localhost:7030/',
                 secure: false
-            }
+            },
+            '^/menu': {
+                target: 'https://localhost:7030/',
+                secure: false
+            },
+            '^/signin-oidc': {
+                target,
+                secure: false
+            },
+            '^/bff/login': {
+                target,
+                secure: false
+            },
+            '^/bff/user': {
+                target,
+                secure: false
+            },
+            '^/signout-callback-oidc': {
+                target,
+                secure: false
+            },
         },
         port: 5173,
         https: {
