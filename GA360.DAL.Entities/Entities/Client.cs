@@ -1,15 +1,12 @@
-﻿using Abp.Domain.Entities;
-using Abp.Domain.Entities.Auditing;
-using System;
-using System.Collections.Generic;
+﻿using GA360.DAL.Entities.BaseEntities;
+using GA360.DAL.Entities.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using static CRM.Enums.StatusEnum;
+using static GA360.DAL.Entities.Enums.StatusEnum;
 
 namespace CRM.Entities
 {
-    public class Client : FullAuditedEntity<long>, IMayHaveTenant
+    public class Client : Audit, ITenant
     {
         [Required]
         public string Name { get; set; }
@@ -21,7 +18,7 @@ namespace CRM.Entities
         public string Website { get; set; }
         public string Description { get; set; }
         public ClientStatus Status { get; set; }
-        public int? TenantId { get; set; }
+        public Guid? TenantId { get; set; }
         public long? RegionId { get; set; }
         [ForeignKey(nameof(RegionId))]
         public Region Region { get; set; }

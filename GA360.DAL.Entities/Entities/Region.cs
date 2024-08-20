@@ -1,6 +1,4 @@
-﻿
-
-using GA360.DAL.Entities.BaseEntities;
+﻿using GA360.DAL.Entities.BaseEntities;
 
 namespace GA360.DAL.Entities.Entities;
 

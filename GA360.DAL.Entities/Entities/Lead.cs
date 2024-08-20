@@ -1,12 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GA360.DAL.Entities.BaseEntities;
+using static GA360.DAL.Entities.Enums.StatusEnum;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace GA360.DAL.Entities.Entities
 {
-    internal class Lead
+    public class Lead: Audit, ITenant
     {
+        [Required]
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public string Company { get; set; }
+        public string JobTitle { get; set; }
+        public string LeadSource { get; set; }
+        public LeadStatus Status { get; set; }
+        public long? RegionId { get; set; }
+        [ForeignKey(nameof(RegionId))]
+        public Region Region { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public Guid? TenantId { get; set; }
     }
 }

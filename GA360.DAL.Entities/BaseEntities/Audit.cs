@@ -6,7 +6,21 @@ using System.Threading.Tasks;
 
 namespace GA360.DAL.Entities.BaseEntities
 {
-    internal class Audit
+    public class Audit:BaseEntity
     {
+        //
+        // Summary:
+        //     Is this entity Deleted?
+        public virtual bool IsDeleted { get; set; }
+
+        //
+        // Summary:
+        //     Which user deleted this entity?
+        public virtual long? DeleterUserId { get; set; }
+
+        //
+        // Summary:
+        //     Deletion time of this entity.
+        public virtual DateTime? DeletionTime { get; set; }
     }
 }
