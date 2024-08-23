@@ -1,8 +1,9 @@
-import { lazy } from 'react';
+import { lazy, useEffect } from 'react';
 
 // project import
 import AuthLayout from 'layout/Auth';
 import Loadable from 'components/Loadable';
+import { Navigate } from 'react-router';
 
 // render - login
 const AuthLogin = Loadable(lazy(() => import('pages/auth/login')));
@@ -13,6 +14,13 @@ const AuthResetPassword = Loadable(lazy(() => import('pages/auth/reset-password'
 const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/code-verification')));
 
 // ==============================|| AUTH ROUTING ||============================== //
+const ExternalRedirect = () => {
+  useEffect(() => {
+    window.location.href = 'https://localhost:5173/bff/login';
+  }, []);
+
+  return null;
+};
 
 const LoginRoutes = {
   path: '/',
@@ -21,9 +29,13 @@ const LoginRoutes = {
       path: '/',
       element: <AuthLayout />,
       children: [
+        //  {
+        //    path: 'login',
+        //    element: <AuthLogin />
+        //  },
         {
-          path: 'login',
-          element: <AuthLogin />
+         path: 'login',
+         element: <ExternalRedirect />
         },
         {
           path: 'register',

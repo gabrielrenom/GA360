@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GA360.Server.Controllers
@@ -27,6 +28,20 @@ namespace GA360.Server.Controllers
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("landing")]
+        public async Task<IActionResult> GetLandingMenu()
+        {
+            return Ok("Open Menu");
+        }
+
+        [Authorize]
+        [HttpGet("authnlanding")]
+        public async Task<IActionResult> GetAuthnMenu()
+        {
+            return Ok("Authn Menu");
         }
     }
 }

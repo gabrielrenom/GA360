@@ -38,14 +38,9 @@ export default axiosServices;
 export const fetcher = async (args: string | [string, AxiosRequestConfig]) => {
   const [url, config] = Array.isArray(args) ? args : [args];
 
-  //CALL TO BFF
-  console.log("CALL TO BFF")
-  const response = await axiosServices.get('/menu');
-  const data = response.data;
-  console.log(data);
-   //
-
   const res = await axiosServices.get(url, { ...config });
+
+  console.log(res.data)
   return res.data;
 };
 

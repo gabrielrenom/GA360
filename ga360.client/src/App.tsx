@@ -12,10 +12,12 @@ import Notistack from 'components/third-party/Notistack';
 
 // auth-provider
 //import { JWTProvider as AuthProvider } from 'contexts/FakeContext';
-import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
+// import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
 // import { FirebaseProvider as AuthProvider } from 'contexts/FirebaseContext';
 // import { AWSCognitoProvider as AuthProvider } from 'contexts/AWSCognitoContext';
 // import { Auth0Provider as AuthProvider } from 'contexts/Auth0Context';
+import { DuendeProvider as AuthProvider } from 'contexts/DuendeContext';
+
 
 // ==============================|| APP - THEME, ROUTER, LOCAL ||============================== //
 

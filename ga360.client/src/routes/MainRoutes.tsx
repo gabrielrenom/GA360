@@ -6,6 +6,7 @@ import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
 import PagesLayout from 'layout/Pages';
 import SimpleLayout from 'layout/Simple';
+import ClaimsDashboard from '../pages/claims/claims'
 
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
@@ -495,6 +496,10 @@ const MainRoutes = {
         {
           path: 'map',
           element: <Map />
+        },
+        {
+          path: 'claimsdashboard',
+          element: <ClaimsDashboard />
         },
         {
           path: 'sample-page',
