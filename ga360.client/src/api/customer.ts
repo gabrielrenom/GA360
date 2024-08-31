@@ -41,6 +41,44 @@ export function useGetCustomer() {
   return memoizedValue;
 }
 
+
+//export function useGetCustomer() {
+//    const [data, setData] = useState<any>(null);
+//    const [isLoading, setIsLoading] = useState<boolean>(true);
+//    const [error, setError] = useState<Error | null>(null);
+//    const [isValidating, setIsValidating] = useState<boolean>(false);
+
+//    useEffect(() => {
+//        const fetchData = async () => {
+//            setIsValidating(true);
+//            try {
+//                const result = await fetcher(endpoints.key + endpoints.list);
+//                setData(result);
+//            } catch (err) {
+//                setError(err);
+//            } finally {
+//                setIsLoading(false);
+//                setIsValidating(false);
+//            }
+//        };
+
+//        fetchData();
+//    }, []);
+
+//    const memoizedValue = useMemo(
+//        () => ({
+//            customers: data?.customers as CustomerList[],
+//            customersLoading: isLoading,
+//            customersError: error,
+//            customersValidating: isValidating,
+//            customersEmpty: !isLoading && !data?.customers?.length
+//        }),
+//        [data, error, isLoading, isValidating]
+//    );
+
+//    return memoizedValue;
+//}
+
 export async function insertCustomer(newCustomer: CustomerList) {
   // to update local state based on key
   mutate(
@@ -108,7 +146,6 @@ export async function deleteCustomer(customerId: number) {
 }
 
 export function useGetCustomerMaster() {
-  console.log("getting customer")
   const { data, isLoading } = useSWR(endpoints.key + endpoints.modal, () => initialState, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
@@ -136,4 +173,12 @@ export function handlerCustomerDialog(modal: boolean) {
     },
     false
   );
+}
+
+function useState<T>(arg0: boolean): [any, any] {
+    throw new Error('Function not implemented.');
+}
+
+function useEffect(arg0: () => void, arg1: never[]) {
+    throw new Error('Function not implemented.');
 }

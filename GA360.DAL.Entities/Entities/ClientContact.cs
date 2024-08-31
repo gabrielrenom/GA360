@@ -10,10 +10,10 @@ public class ClientContact : Audit, ITenant
     [ForeignKey(nameof(ClientId))]
     public Client Client { get; set; }
     [Required]
-    public long ClientId { get; set; }
-    [ForeignKey(nameof(ContactId))]
-    public Contact Contact { get; set; }
+    public int ClientId { get; set; }
+
+    public Customer Customer { get; set; }
     [Required]
-    public long ContactId { get; set; }
+    public int CustomerId { get; set; }
     public Guid? TenantId { get; set; }
 }

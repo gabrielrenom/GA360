@@ -61,6 +61,10 @@ export default defineConfig({
                 target: 'https://localhost:7030/',
                 secure: false
             },
+            '^/api/customer/list': {
+                target,
+                secure: false
+            },
             '^/signin-oidc': {
                 target,
                 secure: false

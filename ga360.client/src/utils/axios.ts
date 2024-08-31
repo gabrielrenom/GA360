@@ -44,6 +44,24 @@ export const fetcher = async (args: string | [string, AxiosRequestConfig]) => {
   return res.data;
 };
 
+//export const fetcher = async (args: string | [string, RequestInit]): Promise<any> => {
+//    const [url, config] = Array.isArray(args) ? args : [args];
+
+//    try {
+//        const response = await fetch(url, { ...config });
+//        if (!response.ok) {
+//            throw new Error(`HTTP error! status: ${response.status}`);
+//        }
+//        console.log(response);
+//        const data = await response.json();
+//        return data;
+//    } catch (error) {
+//        console.error('Error fetching data:', error);
+//        throw error;
+//    }
+//};
+
+
 export const fetcherPost = async (args: string | [string, AxiosRequestConfig]) => {
   const [url, config] = Array.isArray(args) ? args : [args];
 

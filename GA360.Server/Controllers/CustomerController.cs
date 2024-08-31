@@ -4,18 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 namespace GA360.Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class ContactController: ControllerBase
+    [Route("api/[controller]")]
+    public class CustomerController: ControllerBase
     {
-        private readonly ILogger<ContactController> _logger;
+        private readonly ILogger<CustomerController> _logger;
 
-        public ContactController (ILogger<ContactController> logger)
+        public CustomerController (ILogger<CustomerController> logger)
         {
             _logger = logger;
         }
 
         [AllowAnonymous]
-        [HttpGet]
+        [HttpGet("list")]
         public async Task<IActionResult> GetAllContacts()
         {
             var users = new List<User>

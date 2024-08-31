@@ -10,6 +10,7 @@ import ClaimsDashboard from '../pages/claims/claims'
 
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
+import ComponentTest from '../pages/claims/componentTest';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -500,7 +501,11 @@ const MainRoutes = {
         {
           path: 'claimsdashboard',
           element: <ClaimsDashboard />
-        },
+          },
+          {
+              path: 'componenttest',
+              element: <ComponentTest />
+          },
         {
           path: 'sample-page',
           element: <SamplePage />

@@ -1,9 +1,14 @@
 using Duende.Bff;
 using Duende.Bff.Yarp;
+using GA360.DAL.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<CRMDbContext>(options =>
+options
+.UseSqlServer(builder.Configuration.GetConnectionString("CRM")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
 builder.Services.AddControllers();
 builder.Services.AddBff(x => {
@@ -88,3 +93,4 @@ app.UseEndpoints(endpoints =>
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+    

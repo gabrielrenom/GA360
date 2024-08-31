@@ -16,9 +16,8 @@ namespace GA360.DAL.Entities.Entities
         public string JobTitle { get; set; }
         public string LeadSource { get; set; }
         public LeadStatus Status { get; set; }
-        public long? RegionId { get; set; }
-        [ForeignKey(nameof(RegionId))]
-        public Region Region { get; set; }
+        public int? CountryId { get; set; }
+        public Country Country { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public Guid? TenantId { get; set; }

@@ -1,16 +1,11 @@
 // material-ui
-import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 
 // project import
 import MainCard from 'components/MainCard';
@@ -29,8 +24,22 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 import avatar2 from 'assets/images/users/avatar-2.png';
 import avatar3 from 'assets/images/users/avatar-3.png';
 import avatar4 from 'assets/images/users/avatar-4.png';
-import { useEffect, useState } from 'react';
 import { getInputValueAsString } from '@mui/base/unstable_useNumberInput/useNumberInput';
+
+import { Avatar, Chip, Grid, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import Box from "@mui/system/Box";
+import { useEffect, useMemo, useState } from "react";
+import { styled } from '@mui/material/styles';
+import { CustomerList } from "../../types/customer";
+import CustomerTable from "../../sections/apps/customer/CustomerTable";
+import { PatternFormat } from "react-number-format";
+import EditOutlined from "@ant-design/icons/EditOutlined";
+import PlusOutlined from "@ant-design/icons/PlusOutlined";
+import EyeOutlined from "@ant-design/icons/EyeOutlined";
+import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
+import { ImagePath, getImageUrl } from "../../utils/getImageUrl";
+import { IndeterminateCheckbox } from "../../components/third-party/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 
 // avatar style
 const avatarSX = {
@@ -51,46 +60,156 @@ const actionSX = {
 
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
-
 export default function DashboardDefault() {
-    const [claims, setClaims] = useState<DataObject[]>();
-    const [user, setUser] = useState<string | number>();
-    const [logoutUrl, setLogoutUrl] = useState<string>();
+    const [allowedCustomers, setAllowedCustomers] = useState<CustomerList[] | undefined>(undefined);
+
+    const [open, setOpen] = useState<boolean>(false);
+
+    const handleClose = () => {
+        setOpen(!open);
+    };
+
+    const columns = useMemo<ColumnDef<CustomerList>[]>(
+        () => [
+            {
+                id: 'select',
+                header: ({ table }) => (
+                    <IndeterminateCheckbox
+                        {...{
+                            checked: table.getIsAllRowsSelected(),
+                            indeterminate: table.getIsSomeRowsSelected(),
+                            onChange: table.getToggleAllRowsSelectedHandler()
+                        }}
+                    />
+                ),
+                cell: ({ row }) => (
+                    <IndeterminateCheckbox
+                        {...{
+                            checked: row.getIsSelected(),
+                            disabled: !row.getCanSelect(),
+                            indeterminate: row.getIsSomeSelected(),
+                            onChange: row.getToggleSelectedHandler()
+                        }}
+                    />
+                )
+            },
+            {
+                header: '#',
+                accessorKey: 'id',
+                meta: {
+                    className: 'cell-center'
+                }
+            },
+            {
+                header: 'User Info',
+                accessorKey: 'name',
+                cell: ({ row, getValue }) => (
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                        <Avatar
+                            alt="Avatar 1"
+                            size="sm"
+                            src={getImageUrl(`avatar-${!row.original.avatar ? 1 : row.original.avatar}.png`, ImagePath.USERS)}
+                        />
+                        <Stack spacing={0}>
+                            <Typography variant="subtitle1">{getValue() as string}</Typography>
+                            <Typography color="text.secondary">{row.original.email as string}</Typography>
+                        </Stack>
+                    </Stack>
+                )
+            },
+            {
+                header: 'Contact',
+                accessorKey: 'contact',
+                cell: ({ getValue }) => <PatternFormat displayType="text" format="+1 (###) ###-####" mask="_" defaultValue={getValue() as number} />
+            },
+            {
+                header: 'Age',
+                accessorKey: 'age',
+                meta: {
+                    className: 'cell-right'
+                }
+            },
+            {
+                header: 'Country',
+                accessorKey: 'country'
+            },
+            {
+                header: 'Status',
+                accessorKey: 'status',
+                cell: (cell) => {
+                    switch (cell.getValue()) {
+                        case 3:
+                            return <Chip color="error" label="Rejected" size="small" variant="light" />;
+                        case 1:
+                            return <Chip color="success" label="Verified" size="small" variant="light" />;
+                        case 2:
+                        default:
+                            return <Chip color="info" label="Pending" size="small" variant="light" />;
+                    }
+                }
+            },
+            {
+                header: 'Actions',
+                meta: {
+                    className: 'cell-center'
+                },
+                disableSortBy: true,
+                cell: ({ row }) => {
+                    const collapseIcon =
+                        row.getCanExpand() && row.getIsExpanded() ? <PlusOutlined style={{ transform: 'rotate(45deg)' }} /> : <EyeOutlined />;
+                    return (
+                        <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
+                            <Tooltip title="View">
+                                <IconButton color={row.getIsExpanded() ? 'error' : 'secondary'} onClick={row.getToggleExpandedHandler()}>
+                                    {collapseIcon}
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Edit">
+                                <IconButton
+                                    color="primary"
+                                    onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                                        e.stopPropagation();
+                                        setSelectedCustomer(row.original);
+                                        setCustomerModal(true);
+                                    }}
+                                >
+                                    <EditOutlined />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                                <IconButton
+                                    color="error"
+                                    onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                                        e.stopPropagation();
+                                        setOpen(true);
+                                        setCustomerDeleteId(Number(row.original.id));
+                                    }}
+                                >
+                                    <DeleteOutlined />
+                                </IconButton>
+                            </Tooltip>
+                        </Stack>
+                    );
+                }
+            }
+        ],
+        []
+    );
+  
     useEffect(() => {
-        fetchUserSessionInfo();
+        const fetchCustomerData = async () => {
+            try {
+                const customers = await fetchCustomerList();
+                setAllowedCustomers(customers);
+                console.log(customers)
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchCustomerData();
     }, []);
-
-    const loginscreen = claims === undefined ?
-        <a className="text-dark nav-link" href="/bff/login">
-            Login
-        </a>
-        : <a className="text-dark nav-link" href={logoutUrl}>
-            {user}
-        </a>
-
-    const claimsresults = claims === undefined
-        ? <p><em>If claims have not been loaded, please login.</em></p>
-        : <>
-            <h3>CLAIMS [TO SHOW THIS DATA NEEDS AUTHENTICATION]</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {claims.map((claim) => (
-                        <tr key={claim.type}>
-                            <td>{claim.type}</td>
-                            <td>{claim.value}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </>
-
-
 
     return (
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
@@ -111,7 +230,7 @@ export default function DashboardDefault() {
                 <AnalyticEcommerce title="Total Sales" count="$35,078" percentage={27.4} isLoss color="warning" extra="$20,395" />
             </Grid>
 
-            
+
             <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />
 
             {/* row 2 */}
@@ -139,7 +258,7 @@ export default function DashboardDefault() {
             </Grid>
 
             {/* row 3 */}
-            <Grid item xs={12} md={7} lg={8}>
+            <Grid item xs={12} md={12} lg={12}>
                 <Grid container alignItems="center" justifyContent="space-between">
                     <Grid item>
                         <Typography variant="h5">Recent Orders</Typography>
@@ -147,34 +266,20 @@ export default function DashboardDefault() {
                     <Grid item />
                 </Grid>
                 <MainCard sx={{ mt: 2 }} content={false}>
-                    <OrdersTable />
+
+                    {allowedCustomers === undefined ? <>Loading...</> :
+                        <CustomerTable data={allowedCustomers} columns={columns} modalToggler={() => {
+                            setCustomerModal(true);
+                            setSelectedCustomer(null);
+                        }} />
+                    }
                 </MainCard>
+                {/*<MainCard sx={{ mt: 2 }} content={false}>*/}
+                {/*    <OrdersTable />*/}
+                {/*</MainCard>*/}
+
             </Grid>
-            <Grid item xs={12} md={5} lg={4}>
-                <Grid container alignItems="center" justifyContent="space-between">
-                    <Grid item>
-                        <Typography variant="h5">Analytics Report</Typography>
-                    </Grid>
-                    <Grid item />
-                </Grid>
-                <MainCard sx={{ mt: 2 }} content={false}>
-                    <List sx={{ p: 0, '& .MuiListItemButton-root': { py: 2 } }}>
-                        <ListItemButton divider>
-                            <ListItemText primary="Company Finance Growth" />
-                            <Typography variant="h5">+45.14%</Typography>
-                        </ListItemButton>
-                        <ListItemButton divider>
-                            <ListItemText primary="Company Expenses Ratio" />
-                            <Typography variant="h5">0.58%</Typography>
-                        </ListItemButton>
-                        <ListItemButton>
-                            <ListItemText primary="Business Risk Cases" />
-                            <Typography variant="h5">Low</Typography>
-                        </ListItemButton>
-                    </List>
-                    <ReportAreaChart />
-                </MainCard>
-            </Grid>
+     
 
             {/* row 4 */}
             <Grid item xs={12} md={7} lg={8}>
@@ -285,31 +390,26 @@ export default function DashboardDefault() {
                 </MainCard>
             </Grid>
         </Grid>
+
+        //<div>
+
+        //    {allowedCustomers === undefined ? <>Loading...</> :
+        //        <CustomerTable data={allowedCustomers} columns={columns} modalToggler={() => {
+        //            setCustomerModal(true);
+        //            setSelectedCustomer(null);
+        //        }} />
+        //    }
+        //</div>
     );
 
-    async function fetchUserSessionInfo() {
-        const response = await fetch("/bff/user", {
+    async function fetchCustomerList() {
+        const response = await fetch("/api/customer/list", {
             headers: {
                 "X-CSRF": "Dog",
             },
         });
-        if (response.ok) {
-
-            const data: DataObject[] = await response.json();
-            const name: (string | number | undefined) = data.find((x: { type: string; }) => x.type === 'name')?.value;
-            const id: (string | number | undefined) = data.find((x: { type: string; }) => x.type === 'id')?.value;
-            const email: (string | number | undefined) = data.find((x: { type: string; }) => x.type === 'email')?.value;
-            const logouturl: (string | number | undefined) = data.find((x: { type: string; }) => x.type === 'bff:logout_url')?.value as string;
-
-            const user = {
-                name: name,
-                id: id,
-                email: email
-            };
-
-            setClaims(data);
-            setUser(email);
-            setLogoutUrl(logouturl);
-        }
+        const result = await response.json();
+        return result;
     }
+
 }
