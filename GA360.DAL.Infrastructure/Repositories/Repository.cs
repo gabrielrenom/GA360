@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using GA360.DAL.Infrastructure.Interfaces;
+using GA360.DAL.Entities.BaseEntities;
 
 namespace GA360.DAL.Infrastructure.Repositories
 {
@@ -14,7 +15,7 @@ namespace GA360.DAL.Infrastructure.Repositories
         }
 
         protected DbContext GetDbContext() { return _dbContext; }
-        public T Get(Guid key) => _dbContext.Set<T>().Where(p => p.Id == key).Single();
+        public T Get(int key) => _dbContext.Set<T>().Where(p => p.Id == key).Single();
 
         public void Add(T entity) => _dbContext.Add<T>(entity);
 
@@ -29,6 +30,7 @@ namespace GA360.DAL.Infrastructure.Repositories
         public int Count(Expression<Func<T, bool>> expression) => _dbContext.Set<T>().Where(expression).Count();
 
         public void SaveChanges() => _dbContext.SaveChanges();
+        public async Task SaveChangesAsync() => await _dbContext.SaveChangesAsync();
     }
 
 }

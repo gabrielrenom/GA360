@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -15,7 +15,12 @@
     </PackageReference>
 	  <PackageReference Include="Duende.BFF.Yarp" Version="2.0.0" />
 	  <PackageReference Include="Duende.BFF" Version="2.0.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
@@ -28,6 +33,7 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\GA360.DAL.Infrastructure\GA360.DAL.Infrastructure.csproj" />
+    <ProjectReference Include="..\GA360.Domain.Core\GA360.Domain.Core.csproj" />
   </ItemGroup>
 
 </Project>

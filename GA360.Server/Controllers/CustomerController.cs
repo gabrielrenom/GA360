@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using GA360.DAL.Entities.Entities;
+using GA360.Domain.Core.Interfaces;
+using GA360.Server.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GA360.Server.Controllers
@@ -8,10 +11,11 @@ namespace GA360.Server.Controllers
     public class CustomerController: ControllerBase
     {
         private readonly ILogger<CustomerController> _logger;
-
-        public CustomerController (ILogger<CustomerController> logger)
+        private readonly ICustomerService _customerService;
+        public CustomerController (ILogger<CustomerController> logger, ICustomerService customerService)
         {
             _logger = logger;
+            _customerService = customerService;
         }
 
         [AllowAnonymous]
@@ -95,6 +99,33 @@ namespace GA360.Server.Controllers
         };
 
             return Ok(users);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("create")]
+        public async Task<IActionResult> AddContact([FromBody] UserViewModel contact)
+        {
+            var result = await _customerService.AddCustomer(FromUserViewModelToCustomer(contact));
+            return Ok(result);
+        }
+
+        private Customer FromUserViewModelToCustomer(UserViewModel userViewModel)
+        {
+            return new Customer
+            {
+                About = userViewModel.About,
+                Contact = userViewModel.Contact,
+                   //Country
+                Email = userViewModel.Email,
+                LastName = userViewModel.LastName,
+                FirstName = userViewModel.FirstName,
+                Location = userViewModel.Location,
+                Role = userViewModel.Role,
+                Description = userViewModel.About,
+                FatherName = userViewModel.FatherName,
+                 Gender = userViewModel.Gender,
+                  
+            };
         }
     }
 

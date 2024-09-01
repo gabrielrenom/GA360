@@ -7,7 +7,7 @@ using static GA360.DAL.Entities.Enums.StatusEnum;
 
 namespace CRM.Entities;
 
-public class Client : Audit, ITenant
+public class Client : Audit, IModel
 {
     [Required]
     public string Name { get; set; }
@@ -22,7 +22,8 @@ public class Client : Audit, ITenant
     public int? CountryId { get; set; }
     public Country Country { get; set; }
     public int? ParentClientId { get; set; }
-    public virtual ICollection<ClientContact> ClientContacts { get; set; }
+    public virtual ICollection<ClientCustomer> ClientContacts { get; set; }
     public virtual Client ParentClient { get; set; }
     public virtual ICollection<Client> ChildClients { get; set; }
+    public int Id { get; set; }
 }

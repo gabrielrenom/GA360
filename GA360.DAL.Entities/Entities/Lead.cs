@@ -5,8 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GA360.DAL.Entities.Entities
 {
-    public class Lead: Audit, ITenant
+    public class Lead: Audit, IModel
     {
+        public int Id { get; set; }
         [Required]
         public string FirstName { get; set; }
         public string LastName { get; set; }

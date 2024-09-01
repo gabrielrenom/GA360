@@ -44,6 +44,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                     ModyfiedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeleterUserId = table.Column<long>(type: "bigint", nullable: true),
                     DeletionTime = table.Column<DateTime>(type: "datetime2", nullable: true)

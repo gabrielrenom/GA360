@@ -4,7 +4,7 @@ using static GA360.DAL.Entities.Enums.StatusEnum;
 
 namespace GA360.DAL.Entities.Entities;
 
-public class Customer : Audit, ITenant
+public class Customer : Audit, IModel
 {
     [Required]
     public string FirstName { get; set; }
@@ -23,5 +23,5 @@ public class Customer : Audit, ITenant
     public int CountryId { get; set; }
     public virtual Country Country { get; set; }
     public Guid? TenantId { get; set; }
-
+    public int Id { get; set; }
 }

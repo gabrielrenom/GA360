@@ -5,8 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CRM.Entities.Entities;
 
-public class ClientContact : Audit, ITenant
+public class ClientCustomer : Audit, IModel
 {
+    public int Id { get; set; }
     [ForeignKey(nameof(ClientId))]
     public Client Client { get; set; }
     [Required]

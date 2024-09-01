@@ -97,7 +97,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.ToTable("Clients");
                 });
 
-            modelBuilder.Entity("CRM.Entities.Entities.ClientContact", b =>
+            modelBuilder.Entity("CRM.Entities.Entities.ClientCustomer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -393,6 +393,9 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.ToTable("Skills");
@@ -414,7 +417,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Navigation("ParentClient");
                 });
 
-            modelBuilder.Entity("CRM.Entities.Entities.ClientContact", b =>
+            modelBuilder.Entity("CRM.Entities.Entities.ClientCustomer", b =>
                 {
                     b.HasOne("CRM.Entities.Client", "Client")
                         .WithMany("ClientContacts")

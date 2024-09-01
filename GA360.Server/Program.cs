@@ -1,6 +1,10 @@
 using Duende.Bff;
 using Duende.Bff.Yarp;
 using GA360.DAL.Infrastructure.Contexts;
+using GA360.DAL.Infrastructure.Interfaces;
+using GA360.DAL.Infrastructure.Repositories;
+using GA360.Domain.Core.Interfaces;
+using GA360.Domain.Core.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +15,11 @@ options
 .UseSqlServer(builder.Configuration.GetConnectionString("CRM")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<DbContext, CRMDbContext>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
 builder.Services.AddBff(x => {
     x.AntiForgeryHeaderValue = "Dog";
 })

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GA360.DAL.Infrastructure.Interfaces;
+namespace GA360.DAL.Entities.BaseEntities;
 
 public interface IModel
 {
-    Guid Id { get; set; }
+    int Id { get; set; }
 }

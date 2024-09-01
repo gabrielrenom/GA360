@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace GA360.DAL.Entities.BaseEntities
 {
-    public abstract class BaseEntity
+    public abstract class BaseEntity: ITenant
     {
-        public int Id { get; set; }
-        public string CreatedBy { get; set; }
-        public string ModyfiedBy { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime ModifiedAt { get; set; }
+        public string CreatedBy { get; set; } = "System";
+        public string ModyfiedBy { get; set; } = "System";
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime ModifiedAt { get; set; } = DateTime.Now;
+        public Guid? TenantId { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CRM.Entities;
 using CRM.Entities.Entities;
 using GA360.DAL.Entities.Entities;
+using GA360.DAL.Infrastructure.SeedData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -16,7 +17,7 @@ namespace GA360.DAL.Infrastructure.Contexts
         private readonly IConfiguration _configuration;
         public DbSet<Client> Clients { get; set; }
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<ClientContact> ClientContacts { get; set; }
+        public DbSet<ClientCustomer> ClientContacts { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Lead> Leads { get; set; }
         public DbSet<Skill> Skills { get; set; }
@@ -44,6 +45,11 @@ namespace GA360.DAL.Infrastructure.Contexts
             .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        public void SeedData()
+        {
+            CRMDbContextSeed.Initialize(this);
         }
     }
 }
