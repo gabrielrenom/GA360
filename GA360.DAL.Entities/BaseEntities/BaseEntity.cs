@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GA360.DAL.Entities.BaseEntities
 {
-    public abstract class BaseEntity: ITenant
+    public abstract class BaseEntity : ITenant
     {
         public string CreatedBy { get; set; } = "System";
         public string ModyfiedBy { get; set; } = "System";

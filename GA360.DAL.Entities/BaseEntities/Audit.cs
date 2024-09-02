@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GA360.DAL.Entities.BaseEntities
 {
-    public class Audit:BaseEntity
+    public class Audit : BaseEntity
     {
         //
         // Summary:

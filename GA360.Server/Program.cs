@@ -20,7 +20,8 @@ builder.Services.AddScoped<DbContext, CRMDbContext>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-builder.Services.AddBff(x => {
+builder.Services.AddBff(x =>
+{
     x.AntiForgeryHeaderValue = "Dog";
 })
 .AddRemoteApis();
@@ -97,9 +98,8 @@ app.MapControllers();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapRemoteBffApiEndpoint("/menu", "https://localhost:7030/menu").AllowAnonymous();
-        //.RequireAccessToken(TokenType.User);
+    //.RequireAccessToken(TokenType.User);
 });
 app.MapFallbackToFile("/index.html");
 
 app.Run();
-    

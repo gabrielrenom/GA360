@@ -25,5 +25,5 @@ namespace GA360.DAL.Infrastructure.Repositories
 
     }
 
-    
+
 }

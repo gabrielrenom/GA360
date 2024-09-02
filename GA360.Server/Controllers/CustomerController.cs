@@ -8,11 +8,11 @@ namespace GA360.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CustomerController: ControllerBase
+    public class CustomerController : ControllerBase
     {
         private readonly ILogger<CustomerController> _logger;
         private readonly ICustomerService _customerService;
-        public CustomerController (ILogger<CustomerController> logger, ICustomerService customerService)
+        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService)
         {
             _logger = logger;
             _customerService = customerService;
@@ -115,7 +115,7 @@ namespace GA360.Server.Controllers
             {
                 About = userViewModel.About,
                 Contact = userViewModel.Contact,
-                   //Country
+                //Country
                 Email = userViewModel.Email,
                 LastName = userViewModel.LastName,
                 FirstName = userViewModel.FirstName,
@@ -123,8 +123,8 @@ namespace GA360.Server.Controllers
                 Role = userViewModel.Role,
                 Description = userViewModel.About,
                 FatherName = userViewModel.FatherName,
-                 Gender = userViewModel.Gender,
-                  
+                Gender = userViewModel.Gender,
+
             };
         }
     }
