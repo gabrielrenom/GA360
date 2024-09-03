@@ -23,5 +23,6 @@
         public DateTime Time { get; set; }
         public string Date { get; set; }
         public int Avatar { get; set; }
+        public int CountryId { get; set; }
     }
 }

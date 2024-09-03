@@ -50,4 +50,9 @@ public class CustomerService : ICustomerService
             _customerRepository.SaveChanges();
         }
     }
+
+    public async Task<List<Customer>> GetAll()
+    { 
+        return await _customerRepository.GetAll(); 
+    }
 }

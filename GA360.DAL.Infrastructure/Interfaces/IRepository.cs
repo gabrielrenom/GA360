@@ -5,6 +5,7 @@ namespace GA360.DAL.Infrastructure.Interfaces;
 public interface IRepository<T> where T : IModel
 {
     T Get(int key);
+    Task<List<T>> GetAll();
     void Add(T entity);
     T Find(Expression<Func<T, bool>> expression);
     IEnumerable<T> FindAll(Expression<Func<T, bool>> expression);

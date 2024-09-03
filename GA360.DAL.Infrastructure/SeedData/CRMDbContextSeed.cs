@@ -475,7 +475,6 @@ namespace GA360.DAL.Infrastructure.SeedData
 
                         new Customer
                         {
-                            Id = 2,
                             FirstName = "John",
                             LastName = "Doe",
                             Gender = "Male",
@@ -491,7 +490,6 @@ namespace GA360.DAL.Infrastructure.SeedData
                         },
     new Customer
     {
-        Id = 3,
         FirstName = "Jane",
         LastName = "Smith",
         Gender = "Female",

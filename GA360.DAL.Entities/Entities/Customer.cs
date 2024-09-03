@@ -17,7 +17,7 @@ public class Customer : Audit, IModel
     public string Gender { get; set; }
     public string Email { get; set; }
     public string Role { get; set; }
-    public string Description { get; set; }
+    public string? Description { get; set; }
     public string Location { get; set; }
     public DealStatus OrderStatus { get; set; }
     public int CountryId { get; set; }

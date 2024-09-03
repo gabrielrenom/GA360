@@ -20,6 +20,7 @@ namespace GA360.DAL.Infrastructure.Repositories
         public void Add(T entity) => _dbContext.Add<T>(entity);
 
         public T Find(Expression<Func<T, bool>> expression) => _dbContext.Set<T>().Where(expression).FirstOrDefault();
+        public async Task<List<T>> GetAll() => await _dbContext.Set<T>().ToListAsync();
 
         public IEnumerable<T> FindAll(Expression<Func<T, bool>> expression) => _dbContext.Set<T>().Where(expression);
 
