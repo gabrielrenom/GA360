@@ -24,4 +24,5 @@ public class Customer : Audit, IModel
     public virtual Country Country { get; set; }
     public Guid? TenantId { get; set; }
     public int Id { get; set; }
+    public List<CustomerSkills> CustomerSkills { get; set; }
 }

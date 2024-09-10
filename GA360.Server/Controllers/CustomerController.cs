@@ -111,6 +111,22 @@ namespace GA360.Server.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
+        {
+            var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomer(contact));
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteContact(int id)
+        {
+            await _customerService.DeleteCustomer(id);
+            return Ok();
+        }
+
         private Customer FromUserViewModelToCustomer(UserViewModel userViewModel)
         {
             return new Customer
@@ -125,7 +141,11 @@ namespace GA360.Server.Controllers
                 Description = userViewModel.About,
                 FatherName = userViewModel.FatherName,
                 Gender = userViewModel.Gender,
-                CountryId = userViewModel.CountryId
+                CountryId = userViewModel.CountryId,
+                Country = new Country
+                {
+                    Name = userViewModel.Country
+                }
             };
         }
 
@@ -143,10 +163,10 @@ namespace GA360.Server.Controllers
                 Role = customer.Role,
                 FatherName = customer.FatherName,
                 Gender = customer.Gender,
-                CountryId = customer.CountryId
+                CountryId = customer.CountryId,
+                Skills = customer.CustomerSkills.Select(x => x.Skill.Name).ToList()
             };
         }
-
     }
 
     public class User

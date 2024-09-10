@@ -28,6 +28,7 @@ export default function CustomerModal({ open, modalToggler, customer }: Props) {
   const { customersLoading: loading } = useGetCustomer();
 
   const closeModal = () => modalToggler(false);
+  console.log("ADDED CUSTOMER")
 
   const customerForm = useMemo(
     () => !loading && <FormCustomerAdd customer={customer || null} closeModal={closeModal} />,

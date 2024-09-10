@@ -65,6 +65,18 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/customer/create': {
+                target,
+                secure: false
+            },
+            '^/api/customer/delete': {
+                target,
+                secure: false
+            },
+            '^/api/customer/update': {
+                target,
+                secure: false
+            },
             '^/signin-oidc': {
                 target,
                 secure: false

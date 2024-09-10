@@ -6,6 +6,7 @@ import { fetcher } from 'utils/axios';
 
 // types
 import { CustomerList, CustomerProps } from 'types/customer';
+import { mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel } from 'types/customerApiModel';
 
 const initialState: CustomerProps = {
   modal: false
@@ -81,19 +82,30 @@ export function useGetCustomer() {
 
 export async function insertCustomer(newCustomer: CustomerList) {
   // to update local state based on key
-  mutate(
-    endpoints.key + endpoints.list,
-    (currentCustomer: any) => {
-      newCustomer.id = currentCustomer.customers.length + 1;
-      const addedCustomer: CustomerList[] = [...currentCustomer.customers, newCustomer];
+  // mutate(
+  //   endpoints.key + endpoints.list,
+  //   (currentCustomer: any) => {
+  //     newCustomer.id = currentCustomer.customers.length + 1;
+  //     const addedCustomer: CustomerList[] = [...currentCustomer.customers, newCustomer];
 
-      return {
-        ...currentCustomer,
-        customers: addedCustomer
-      };
+  //     return {
+  //       ...currentCustomer,
+  //       customers: addedCustomer
+  //     };
+  //   },
+  //   false
+  // );
+  const mappedCustomer = mapCustomerListToCustomerApiModel(newCustomer);
+  console.log(mappedCustomer);
+  const response = await fetch('/api/customer/create',{
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
     },
-    false
-  );
+    body: JSON.stringify(mappedCustomer)
+  });
+  const data = response.json();
+
 
   // to hit server
   // you may need to refetch latest data after server hit and based on your logic
@@ -103,20 +115,35 @@ export async function insertCustomer(newCustomer: CustomerList) {
 
 export async function updateCustomer(customerId: number, updatedCustomer: CustomerList) {
   // to update local state based on key
-  mutate(
-    endpoints.key + endpoints.list,
-    (currentCustomer: any) => {
-      const newCustomer: CustomerList[] = currentCustomer.customers.map((customer: CustomerList) =>
-        customer.id === customerId ? { ...customer, ...updatedCustomer } : customer
-      );
 
-      return {
-        ...currentCustomer,
-        customers: newCustomer
-      };
+  // mutate(
+  //   endpoints.key + endpoints.list,
+  //   (currentCustomer: any) => {
+  //     const newCustomer: CustomerList[] = currentCustomer.customers.map((customer: CustomerList) =>
+  //       customer.id === customerId ? { ...customer, ...updatedCustomer } : customer
+  //     );
+
+  //     return {
+  //       ...currentCustomer,
+  //       customers: newCustomer
+  //     };
+  //   },
+  //   false
+  // );
+
+  const mappedCustomer = mapCustomerListToCustomerApiModel(updatedCustomer);
+  console.log(customerId, "UPDATE", mappedCustomer);
+
+  console.log(mappedCustomer);
+  mappedCustomer.orderStatus = ""
+  const response = await fetch('/api/customer/update/'+customerId,{
+    method: 'PUT',
+    headers: {
+        'Content-Type': 'application/json'
     },
-    false
-  );
+    body: JSON.stringify(mappedCustomer)
+  });
+  const data = response.json();
 
   // to hit server
   // you may need to refetch latest data after server hit and based on your logic
@@ -125,19 +152,26 @@ export async function updateCustomer(customerId: number, updatedCustomer: Custom
 }
 
 export async function deleteCustomer(customerId: number) {
-  // to update local state based on key
-  mutate(
-    endpoints.key + endpoints.list,
-    (currentCustomer: any) => {
-      const nonDeletedCustomer = currentCustomer.customers.filter((customer: CustomerList) => customer.id !== customerId);
-
-      return {
-        ...currentCustomer,
-        customers: nonDeletedCustomer
-      };
+  const response = await fetch('/api/customer/delete/'+customerId,{
+    method: 'DELETE',
+    headers: {
+        'Content-Type': 'application/json'
     },
-    false
-  );
+  });
+
+  // to update local state based on key
+  // mutate(
+  //   endpoints.key + endpoints.list,
+  //   (currentCustomer: any) => {
+  //     const nonDeletedCustomer = currentCustomer.customers.filter((customer: CustomerList) => customer.id !== customerId);
+
+  //     return {
+  //       ...currentCustomer,
+  //       customers: nonDeletedCustomer
+  //     };
+  //   },
+  //   false
+  // );
 
   // to hit server
   // you may need to refetch latest data after server hit and based on your logic
