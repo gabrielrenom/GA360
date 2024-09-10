@@ -4,6 +4,7 @@ using GA360.DAL.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GA360.DAL.Infrastructure.Migrations
 {
     [DbContext(typeof(CRMDbContext))]
-    partial class CRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240905202305_added-skills")]
+    partial class addedskills
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -281,55 +284,6 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("GA360.DAL.Entities.Entities.CustomerSkills", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("DeleterUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModyfiedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SkillId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("SkillId");
-
-                    b.ToTable("CustomerSkills");
-                });
-
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Lead", b =>
                 {
                     b.Property<int>("Id")
@@ -423,6 +377,9 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
                     b.Property<long?>("DeleterUserId")
                         .HasColumnType("bigint");
 
@@ -451,6 +408,8 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
 
                     b.ToTable("Skills");
                 });
@@ -501,25 +460,6 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Navigation("Country");
                 });
 
-            modelBuilder.Entity("GA360.DAL.Entities.Entities.CustomerSkills", b =>
-                {
-                    b.HasOne("GA360.DAL.Entities.Entities.Customer", "Customer")
-                        .WithMany("CustomerSkills")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GA360.DAL.Entities.Entities.Skill", "Skill")
-                        .WithMany("CustomerSkills")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Skill");
-                });
-
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Lead", b =>
                 {
                     b.HasOne("GA360.DAL.Entities.Entities.Country", "Country")
@@ -527,6 +467,17 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .HasForeignKey("CountryId");
 
                     b.Navigation("Country");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.Skill", b =>
+                {
+                    b.HasOne("GA360.DAL.Entities.Entities.Customer", "Customer")
+                        .WithMany("Skills")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("CRM.Entities.Client", b =>
@@ -538,12 +489,7 @@ namespace GA360.DAL.Infrastructure.Migrations
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Customer", b =>
                 {
-                    b.Navigation("CustomerSkills");
-                });
-
-            modelBuilder.Entity("GA360.DAL.Entities.Entities.Skill", b =>
-                {
-                    b.Navigation("CustomerSkills");
+                    b.Navigation("Skills");
                 });
 #pragma warning restore 612, 618
         }

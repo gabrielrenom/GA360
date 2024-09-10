@@ -434,6 +434,27 @@ namespace GA360.DAL.Infrastructure.SeedData
             var us = context.Countries.FirstOrDefault(x => x.Code.ToLower() == "us");
             var thailand = context.Countries.FirstOrDefault(x => x.Code.ToLower() == "th");
 
+            if (!context.Skills.Any())
+            {
+                context.Skills.AddRange(
+                new Skill{
+                     IsDeleted = false,
+                     Name= "Languages",
+                     Description  = "Languages",
+                      
+                },
+                new Skill
+                {
+                    IsDeleted = false,
+                    Name = "Software",
+                    Description = "Software",
+                }
+                );
+
+                context.SaveChanges();
+            }
+
+
             // Check if the Clients table has any data
             if (!context.Clients.Any())
             {
@@ -470,7 +491,8 @@ namespace GA360.DAL.Infrastructure.SeedData
                             Role = "Logistics Manager",
                             About = "Udukaape gozune jig fu foslinan tadka kumu no guw upe or cifdasbej di ige.",
                             OrderStatus = DealStatus.ProjectWin,
-                            CountryId = thailand.Id
+                            CountryId = thailand.Id,
+                            
                         },
 
                         new Customer
@@ -486,7 +508,8 @@ namespace GA360.DAL.Infrastructure.SeedData
                             Role = "Software Engineer",
                             About = "Passionate about coding and technology.",
                             OrderStatus = DealStatus.ProjectFail,
-                            CountryId = us.Id // Assuming you have a CountryId for USA
+                            CountryId = us.Id,
+
                         },
     new Customer
     {
@@ -509,6 +532,7 @@ namespace GA360.DAL.Infrastructure.SeedData
 
             }
 
+
             if (!context.ClientContacts.Any())
             {
                 var contacts = context.Customers.ToList();
@@ -516,6 +540,28 @@ namespace GA360.DAL.Infrastructure.SeedData
                 foreach (var contact in contacts)
                 {
                     context.ClientContacts.Add(new ClientCustomer { ClientId = client.Id, CustomerId = contact.Id });
+                }
+                context.SaveChanges();
+            }
+
+            if (!context.CustomerSkills.Any())
+            {
+                var skills = context.Skills.ToList();
+                var contacts = context.Customers.ToList();
+
+                foreach (var customer in contacts)
+                {
+                    context.CustomerSkills.Add(new CustomerSkills 
+                    { 
+                         SkillId = skills.FirstOrDefault().Id,
+                         CustomerId = customer.Id
+                    });
+
+                    context.CustomerSkills.Add(new CustomerSkills
+                    {
+                        SkillId = skills.LastOrDefault().Id,
+                        CustomerId = customer.Id
+                    });
                 }
                 context.SaveChanges();
             }

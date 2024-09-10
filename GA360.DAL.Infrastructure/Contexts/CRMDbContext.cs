@@ -21,6 +21,7 @@ namespace GA360.DAL.Infrastructure.Contexts
         public DbSet<Country> Countries { get; set; }
         public DbSet<Lead> Leads { get; set; }
         public DbSet<Skill> Skills { get; set; }
+        public DbSet<CustomerSkills> CustomerSkills { get; set; }
         public CRMDbContext(DbContextOptions<CRMDbContext> options, IConfiguration configuration)
        : base(options)
         {

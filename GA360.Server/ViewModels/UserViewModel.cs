@@ -20,7 +20,7 @@
         public int Progress { get; set; }
         public int Status { get; set; }
         public List<string> Skills { get; set; }
-        public DateTime Time { get; set; }
+        public string Time { get; set; }
         public string Date { get; set; }
         public int Avatar { get; set; }
         public int CountryId { get; set; }

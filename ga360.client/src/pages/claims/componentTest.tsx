@@ -12,12 +12,43 @@ import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
 import { ImagePath, getImageUrl } from "../../utils/getImageUrl";
 import { IndeterminateCheckbox } from "../../components/third-party/react-table";
 import { ColumnDef } from "@tanstack/react-table";
+import CustomerModal from "../../sections/apps/customer/CustomerModal";
+import { Gender } from "../../config";
+import {CustomerApiModel, mapCustomerApiModelToCustomerList} from "../../types/customerApiModel"
+import AlertCustomerDelete from "sections/apps/customer/AlertCustomerDelete";
+
 
 
 export default function ComponentTest() {
     const [open, setOpen] = useState<boolean>(false);
     const [allowedCustomers, setAllowedCustomers] = useState<CustomerList[] | undefined>(undefined);
+    const [customerModal, setCustomerModal] = useState<boolean>(false);
+    const [selectedCustomer, setSelectedCustomer] = useState<CustomerList | null>(null);
+    const [customerDeleteId, setCustomerDeleteId] = useState<any>('');
 
+    const demoCustomer = {
+        id: 1,
+        avatar: 123,
+        firstName: "John",
+        lastName: "Doe",
+        fatherName: "Richard Doe",
+        name: "John Doe",
+        email: "john.doe@example.com",
+        age: 30,
+        gender: Gender.MALE,
+        role: "Customer",
+        orders: 5,
+        progress: 75,
+        status: 1,
+        orderStatus: "Completed",
+        contact: "+1234567890",
+        country: "USA",
+        location: "New York",
+        about: "A regular customer.",
+        skills: ["JavaScript", "React"],
+        time: ["09:00 AM", "05:00 PM"],
+        date: new Date(),
+    };
     const handleClose = () => {
         setOpen(!open);
     };
@@ -110,14 +141,12 @@ export default function ComponentTest() {
                 cell: ({ row }) => {
                     const collapseIcon =
                         row.getCanExpand() && row.getIsExpanded() ? <PlusOutlined style={{ transform: 'rotate(45deg)' }} /> : <EyeOutlined />;
-                    function setCustomerDeleteId(arg0: number) {
-                        throw new Error("Function not implemented.");
-                    }
 
                     return (
                         <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
                             <Tooltip title="View">
-                                <IconButton color={row.getIsExpanded() ? 'error' : 'secondary'} onClick={row.getToggleExpandedHandler()}>
+                                <IconButton color={row.getIsExpanded() ? 'error' : 'secondary'} 
+                                onClick={row.getToggleExpandedHandler()}>
                                     {collapseIcon}
                                 </IconButton>
                             </Tooltip>
@@ -126,6 +155,7 @@ export default function ComponentTest() {
                                     color="primary"
                                     onClick={(e: MouseEvent<HTMLButtonElement>) => {
                                         e.stopPropagation();
+                                        console.log("ORIGINAL",row.original);
                                         setSelectedCustomer(row.original);
                                         setCustomerModal(true);
                                     }}
@@ -157,8 +187,9 @@ export default function ComponentTest() {
         const fetchCustomerData = async () => {
             try {
                 const customers = await fetchCustomerList();
-                setAllowedCustomers(customers);
+                const mappedCustomers = customers.map((customer: CustomerApiModel) => mapCustomerApiModelToCustomerList(customer));
                 console.log(customers)
+                setAllowedCustomers(mappedCustomers);
 
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -166,23 +197,28 @@ export default function ComponentTest() {
         };
 
         fetchCustomerData();
-    }, []);
+    }, [customerModal,open]);
 
-    function setCustomerModal(arg0: boolean) {
-        throw new Error("Function not implemented.");
-    }
+    // function setCustomerModal(arg0: boolean) {
+    //     throw new Error("Function not implemented.");
+    // }
 
-    function setSelectedCustomer(arg0: null) {
-        throw new Error("Function not implemented.");
-    }
+    // function setSelectedCustomer(arg0: null) {
+    //     throw new Error("Function not implemented.");
+    // }
 
     return (
         <Grid>
-            {allowedCustomers === undefined ? <>Loading...</> :
-                <CustomerTable data={allowedCustomers} columns={columns} modalToggler={() => {
+            {allowedCustomers === undefined ? <>Loading...</> : <>
+                <CustomerTable 
+                    data={allowedCustomers} 
+                    columns={columns} modalToggler={() => {
                     setCustomerModal(true);
                     setSelectedCustomer(null);
-                }} />
+                    }} />
+                <AlertCustomerDelete id={Number(customerDeleteId)} title={customerDeleteId} open={open} handleClose={handleClose} />
+                <CustomerModal open={customerModal} modalToggler={setCustomerModal} customer={selectedCustomer} />
+            </>
             }
         </Grid>
     )

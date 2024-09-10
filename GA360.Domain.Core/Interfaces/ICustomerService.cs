@@ -10,11 +10,11 @@ namespace GA360.Domain.Core.Interfaces
     public interface ICustomerService
     {
         Task<Customer> AddCustomer(Customer customer);
-        void DeleteCustomer(int id);
+        Task DeleteCustomer(int id);
         Task<List<Customer>> GetAll();
         Customer GetCustomerByEmail(string email);
         Customer GetCustomerById(int id);
         IEnumerable<Customer> GetCustomersByCountry(int countryId);
-        void UpdateCustomer(Customer customer);
+        Task<Customer> UpdateCustomer(int id, Customer customer);
     }
 }
