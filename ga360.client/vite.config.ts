@@ -77,6 +77,14 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/trainingcentre/list': {
+                target,
+                secure: false
+            },
+            '^/api/ethnicity/list': {
+                target,
+                secure: false
+            },
             '^/signin-oidc': {
                 target,
                 secure: false

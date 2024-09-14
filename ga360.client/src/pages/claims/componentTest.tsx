@@ -187,6 +187,7 @@ export default function ComponentTest() {
         const fetchCustomerData = async () => {
             try {
                 const customers = await fetchCustomerList();
+                // const s = await fetchCustomerList1();
                 const mappedCustomers = customers.map((customer: CustomerApiModel) => mapCustomerApiModelToCustomerList(customer));
                 console.log(customers)
                 setAllowedCustomers(mappedCustomers);
@@ -224,6 +225,7 @@ export default function ComponentTest() {
     )
 
     async function fetchCustomerList() {
+
         const response = await fetch("/api/customer/list", {
             headers: {
                 "X-CSRF": "Dog",

@@ -22,6 +22,7 @@ public class Client : Audit, IModel
     public int? CountryId { get; set; }
     public Country Country { get; set; }
     public int? ParentClientId { get; set; }
+    public int AddressId {  get; set; }
     public virtual ICollection<ClientCustomer> ClientContacts { get; set; }
     public virtual Client ParentClient { get; set; }
     public virtual ICollection<Client> ChildClients { get; set; }

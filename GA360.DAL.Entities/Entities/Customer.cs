@@ -24,5 +24,16 @@ public class Customer : Audit, IModel
     public virtual Country Country { get; set; }
     public Guid? TenantId { get; set; }
     public int Id { get; set; }
-    public List<CustomerSkills> CustomerSkills { get; set; }
+    public int AddressId { get; set; }
+    public string DOB {  get; set; }
+    public string NI { get; set; }
+    public string Disability { get; set; }
+    public string EmploymentStatus { get; set; }
+    public string Employer { get; set; }
+    public string ePortfolio { get; set; }
+    public int EthnicOriginId {  get; set; }
+    public virtual EthnicOrigin EthnicOrigin { get; set; }
+    public virtual List<CustomerSkills> CustomerSkills { get; set; }
+    public virtual List<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
+
 }

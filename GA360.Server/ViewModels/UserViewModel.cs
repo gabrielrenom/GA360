@@ -24,5 +24,12 @@
         public string Date { get; set; }
         public int Avatar { get; set; }
         public int CountryId { get; set; }
+        public string Portfolio {  get; set; }
+        public string DOB { get; set; }
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string Number { get; set; }
+        public string Postcode { get; set; }
+        public string EthnicOriginId { get; set; }
     }
 }

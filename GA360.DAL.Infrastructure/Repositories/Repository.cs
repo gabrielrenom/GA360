@@ -8,7 +8,7 @@ namespace GA360.DAL.Infrastructure.Repositories
     public abstract class Repository<T> : IRepository<T>
         where T : class, IModel
     {
-        private readonly DbContext _dbContext;
+        public readonly DbContext _dbContext;
         public Repository(DbContext dbContext)
         {
             this._dbContext = dbContext;
