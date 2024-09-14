@@ -57,6 +57,8 @@ import { SnackbarProps } from "types/snackbar";
 import { CustomerList } from "types/customer";
 import { TrainingCentre } from "types/trainingcentre";
 import { getTrainingCentres } from "api/trainingcentre";
+import { getEthnicities } from "api/ethnicity";
+import { Ethnicity } from "types/ethnicity";
 
 interface StatusProps {
   value: number;
@@ -166,6 +168,7 @@ export default function FormCustomerAdd({
   );
   const [trainingCentres, setTrainingCentres] = useState<TrainingCentre[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [ethnicities, setEthnicities] = useState<Ethnicity[]>([]);
 
   useEffect(() => {
     if (selectedImage) {
@@ -189,6 +192,19 @@ export default function FormCustomerAdd({
     };
 
     fetchTrainingCentres();
+  }, []);
+
+  useEffect(() => {
+    async function fetchEthnicities() {
+      try {
+        const data = await getEthnicities();
+        setEthnicities(data);
+      } catch (error) {
+        console.error('Error fetching ethnicities:', error);
+      }
+    }
+
+    fetchEthnicities();
   }, []);
 
   const CustomerSchema = Yup.object().shape({
@@ -428,25 +444,25 @@ export default function FormCustomerAdd({
 
     />
   </Stack>   
-
 </Grid>
 <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-ethnicity">
-                          Ethnicity
-                        </InputLabel>
-                        <Select
-                          fullWidth
-                          id="customer-ethnicity"
-                          {...getFieldProps("ethnicity")}
-                        >
-                          {/* Add options for ethnicity */}
-                          <MenuItem value="option1">Option 1</MenuItem>
-                          <MenuItem value="option2">Option 2</MenuItem>
-                          {/* ... more options */}
-                        </Select>
-                      </Stack>
-                    </Grid>
+      <Stack spacing={1}>
+        <InputLabel htmlFor="customer-ethnicity">Ethnicity</InputLabel>
+        <Select
+          fullWidth
+          id="customer-ethnicity"
+          {...getFieldProps('ethnicity')}
+        >
+          {ethnicities.map((ethnicity) => (
+            <MenuItem key={ethnicity.id} value={ethnicity.name}>
+              {ethnicity.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </Stack>
+    </Grid>
+
+
 <Grid item xs={12}>
   <Stack spacing={1}>
     <InputLabel htmlFor="customer-disability">Disability</InputLabel>
@@ -507,7 +523,7 @@ export default function FormCustomerAdd({
         </Select>
       </Stack>
     </Grid>
-    
+
 <Grid item xs={12} sm={6}>
   <Stack spacing={1}>
     <InputLabel htmlFor="customer-nationalInsurance">UK National Insurance</InputLabel>

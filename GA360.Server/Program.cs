@@ -21,6 +21,8 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ITrainingCentreService, TrainingCentreService>();
 builder.Services.AddScoped<ITrainingCentreRepository, TrainingCentreRepository>();
+builder.Services.AddScoped<IEthnicityService, EthnicityService>();
+builder.Services.AddScoped<IEthnicityRepository, EthnicityRepository>();
 
 builder.Services.AddBff(x =>
 {

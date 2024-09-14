@@ -1,11 +1,11 @@
-import { TrainingCentre } from 'types/trainingcentre';
+import { Ethnicity } from 'types/ethnicity';
 
 export const endpoints = {
-  key: 'api/trainingcentre',
+  key: 'api/ethnicity',
   list: '/list',
 };
 
-export async function getTrainingCentres(): Promise<TrainingCentre[]> {
+export async function getEthnicities(): Promise<Ethnicity[]> {
   const response = await fetch(endpoints.key + endpoints.list, {
     method: 'GET',
     headers: {
@@ -15,9 +15,9 @@ export async function getTrainingCentres(): Promise<TrainingCentre[]> {
   });
 
   if (!response.ok) {
-    throw new Error('Network response was not ok');
+    throw new Error('Network response for getEthnicities was not ok');
   }
 
-  const data: TrainingCentre[] = await response.json();
+  const data: Ethnicity[] = await response.json();
   return data;
 }
