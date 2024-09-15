@@ -1,4 +1,5 @@
 ﻿using GA360.Domain.Core.Interfaces;
+using GA360.Domain.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,21 +7,22 @@ namespace GA360.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class EthnicityController : ControllerBase
+    public class CountryController : ControllerBase
     {
         private readonly ILogger<EthnicityController> _logger;
-        private readonly IEthnicityService _ethnicityService;
-        public EthnicityController(ILogger<EthnicityController> logger, IEthnicityService ethnicityService)
+        private readonly ICountryService _countryService;
+
+        public CountryController(ILogger<EthnicityController> logger, ICountryService countryService)
         {
             _logger = logger;
-            _ethnicityService = ethnicityService;
+            _countryService = countryService;
         }
 
         [AllowAnonymous]
         [HttpGet("list")]
-        public async Task<IActionResult> GetEthnicities()
+        public async Task<IActionResult> GetCountries()
         {
-            var result = await _ethnicityService.GetAll();
+            var result = await _countryService.GetCountries();
 
             return Ok(result);
         }

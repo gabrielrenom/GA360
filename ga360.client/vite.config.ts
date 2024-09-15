@@ -85,6 +85,14 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/skill/list': {
+                target,
+                secure: false
+            },
+            '^/api/country/list': {
+                target,
+                secure: false
+            },
             '^/signin-oidc': {
                 target,
                 secure: false

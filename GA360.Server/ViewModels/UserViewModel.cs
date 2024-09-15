@@ -30,6 +30,13 @@
         public string City { get; set; }
         public string Number { get; set; }
         public string Postcode { get; set; }
-        public string EthnicOriginId { get; set; }
+        public string? AvatarImage { get; set; }
+        public string DateOfBirth { get; set; }
+        public string Ethnicity { get; set; }
+        public string Disability { get; set; }
+        public string EmployeeStatus { get; set; }
+        public string Employer { get; set; }
+        public int TrainingCentre { get; set; }
+        public string NationalInsurance { get; set; }
     }
 }

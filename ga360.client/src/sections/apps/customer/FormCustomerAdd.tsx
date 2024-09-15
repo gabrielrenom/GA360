@@ -54,11 +54,15 @@ import DeleteFilled from "@ant-design/icons/DeleteFilled";
 
 // types
 import { SnackbarProps } from "types/snackbar";
-import { CustomerList } from "types/customer";
+import { CustomerList, CustomerListExtended } from "types/customer";
 import { TrainingCentre } from "types/trainingcentre";
 import { getTrainingCentres } from "api/trainingcentre";
 import { getEthnicities } from "api/ethnicity";
 import { Ethnicity } from "types/ethnicity";
+import { getSkills } from "api/skillservice";
+import { Skill } from "types/skill";
+import { getCountries } from "api/countryService";
+import { Country } from "types/country";
 
 interface StatusProps {
   value: number;
@@ -108,7 +112,7 @@ const skills = [
 ];
 
 // constant
-const getInitialValues = (customer: CustomerList | null) => {
+const getInitialValues = (customer: CustomerListExtended | null) => {
   const newCustomer = {
     firstName: "",
     lastName: "",
@@ -130,6 +134,20 @@ const getInitialValues = (customer: CustomerList | null) => {
     skills: [],
     time: ["just now"],
     date: "",
+    avatarImage:"",
+    dateOfBirth: "",
+    ethnicity: "",
+    disability: "",
+    employeeStatus: "",
+    employer: "",
+    trainingCentre: "",
+    nationalInsurance: "",
+    portfolio: "",
+    dob:  "",
+    street: "",
+    city: "",
+    number:  "",
+    postcode:  ""
   };
 
   if (customer) {
@@ -151,7 +169,7 @@ export default function FormCustomerAdd({
   customer,
   closeModal,
 }: {
-  customer: CustomerList | null;
+  customer: CustomerListExtended | null;
   closeModal: () => void;
 }) {
   const theme = useTheme();
@@ -169,6 +187,9 @@ export default function FormCustomerAdd({
   const [trainingCentres, setTrainingCentres] = useState<TrainingCentre[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [ethnicities, setEthnicities] = useState<Ethnicity[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
+  const [countries, setCountries] = useState<Country[]>([]);
 
   useEffect(() => {
     if (selectedImage) {
@@ -186,7 +207,7 @@ export default function FormCustomerAdd({
         const data = await getTrainingCentres();
         setTrainingCentres(data);
       } catch (error) {
-        setError('Failed to fetch training centres');
+        setError("Failed to fetch training centres");
         console.error(error);
       }
     };
@@ -200,12 +221,49 @@ export default function FormCustomerAdd({
         const data = await getEthnicities();
         setEthnicities(data);
       } catch (error) {
-        console.error('Error fetching ethnicities:', error);
+        console.error("Error fetching ethnicities:", error);
       }
     }
 
     fetchEthnicities();
   }, []);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      const skillsData = await getSkills();
+      setSkills(skillsData);
+    };
+    fetchSkills();
+  }, []);
+  
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await getCountries();
+        setCountries(response);
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(e.target.files?.[0])
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const fileBase64= reader.result as string
+        setAvatarBase64(fileBase64);
+      };
+      reader.readAsDataURL(file);
+
+    }
+  };
+  
 
   const CustomerSchema = Yup.object().shape({
     firstName: Yup.string().max(255).required("First Name is required"),
@@ -232,9 +290,10 @@ export default function FormCustomerAdd({
     enableReinitialize: true,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        let newCustomer: CustomerList = values;
+        console.log("VALUES TO SUBMIT:",values);
+        let newCustomer: CustomerListExtended = values;
         newCustomer.name = newCustomer.firstName + " " + newCustomer.lastName;
-
+        newCustomer.avatarImage = avatarBase64;
         if (customer) {
           updateCustomer(newCustomer.id!, newCustomer).then(() => {
             openSnackbar({
@@ -292,7 +351,7 @@ export default function FormCustomerAdd({
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
             <DialogTitle>
-              {customer ? "Edit Customer" : "New Customer"}
+              {customer ? "Edit Candidate" : "New Candidate"}
             </DialogTitle>
             <Divider />
             <DialogContent sx={{ p: 2.5 }}>
@@ -350,9 +409,10 @@ export default function FormCustomerAdd({
                       placeholder="Outlined"
                       variant="outlined"
                       sx={{ display: "none" }}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setSelectedImage(e.target.files?.[0])
-                      }
+                      // onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      //   setSelectedImage(e.target.files?.[0])
+                      // }
+                      onChange={handleFileChange}
                     />
                   </Stack>
                 </Grid>
@@ -401,20 +461,6 @@ export default function FormCustomerAdd({
                         />
                       </Stack>
                     </Grid>
-                    {/* <Grid item xs={3}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-age">Age</InputLabel>
-                        <TextField
-                          type="number"
-                          fullWidth
-                          id="customer-age"
-                          placeholder="Enter Age"
-                          {...getFieldProps("age")}
-                          error={Boolean(touched.age && errors.age)}
-                          helperText={touched.age && errors.age}
-                        />
-                      </Stack>
-                    </Grid> */}
                     <Grid item xs={12} sm={6}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-fatherName">
@@ -433,108 +479,120 @@ export default function FormCustomerAdd({
                       </Stack>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-  <Stack spacing={1}>
-    <InputLabel htmlFor="customer-dateOfBirth">Date of Birth</InputLabel>
-    <TextField
-      fullWidth
-      id="customer-dateOfBirth"
-      type="date"
-      {...getFieldProps('dateOfBirth')}
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-dateOfBirth">
+                          Date of Birth
+                        </InputLabel>
+                        <TextField
+                          fullWidth
+                          id="customer-dateOfBirth"
+                          type="date"
+                          {...getFieldProps("dateOfBirth")}
+                        />
+                      </Stack>{" "}
+                       
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-ethnicity">
+                          Ethnicity
+                        </InputLabel>
+                        <Select
+                          fullWidth
+                          id="customer-ethnicity"
+                          {...getFieldProps("ethnicity")}
+                        >
+                          {ethnicities.map((ethnicity) => (
+                            <MenuItem key={ethnicity.id} value={ethnicity.name}>
+                              {ethnicity.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Stack>
+                    </Grid>
 
+                    <Grid item xs={12}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-disability">
+                          Disability
+                        </InputLabel>
+                        <TextField
+                          fullWidth
+                          id="customer-disability"
+                          multiline
+                          rows={2}
+                          {...getFieldProps("disability")}
+                        />
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-employeeStatus">
+                          Employee Status
+                        </InputLabel>
+                        <Select
+                          fullWidth
+                          id="customer-employeeStatus"
+                          {...getFieldProps("employeeStatus")}
+                        >
+                          {/* Add options for employee status */}
+                          <MenuItem value="employed">Employed</MenuItem>
+                          <MenuItem value="selfEmployed">
+                            Self-Employed
+                          </MenuItem>
+                          <MenuItem value="unemployed">Unemployed</MenuItem>  
+                        </Select>
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-employer">
+                          Employer
+                        </InputLabel>
+                        <TextField
+                          fullWidth
+                          id="customer-employer"
+                          {...getFieldProps("employer")}
+                        />
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-trainingCentre">
+                          Training Centre
+                        </InputLabel>
+                        <Select
+                          fullWidth
+                          id="customer-trainingCentre"
+                          {...getFieldProps("trainingCentre")}
+                        >
+                          {trainingCentres.length > 0 ? (
+                            trainingCentres.map((centre) => (
+                              <MenuItem key={centre.id} value={centre.id}>
+                                {centre.name}
+                              </MenuItem>
+                            ))
+                          ) : (
+                            <MenuItem value="" disabled>
+                              No training centres available
+                            </MenuItem>
+                          )}
+                        </Select>
+                      </Stack>
+                    </Grid>
 
-    />
-  </Stack>   
-</Grid>
-<Grid item xs={12} sm={6}>
-      <Stack spacing={1}>
-        <InputLabel htmlFor="customer-ethnicity">Ethnicity</InputLabel>
-        <Select
-          fullWidth
-          id="customer-ethnicity"
-          {...getFieldProps('ethnicity')}
-        >
-          {ethnicities.map((ethnicity) => (
-            <MenuItem key={ethnicity.id} value={ethnicity.name}>
-              {ethnicity.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </Stack>
-    </Grid>
-
-
-<Grid item xs={12}>
-  <Stack spacing={1}>
-    <InputLabel htmlFor="customer-disability">Disability</InputLabel>
-    <TextField
-      fullWidth
-      id="customer-disability"
-      multiline
-      rows={2}
-      {...getFieldProps('disability')}
-    />
-  </Stack>
-</Grid>
-<Grid item xs={12} sm={6}>
-  <Stack spacing={1}>
-    <InputLabel htmlFor="customer-employeeStatus">Employee Status</InputLabel>
-    <Select
-      fullWidth
-      id="customer-employeeStatus"
-      {...getFieldProps('employeeStatus')}
-    >
-      {/* Add options for employee status */}
-      <MenuItem value="employed">Employed</MenuItem>
-      <MenuItem value="selfEmployed">Self-Employed</MenuItem>
-      <MenuItem value="unemployed">Unemployed</MenuItem>   
-
-    </Select>
-  </Stack>
-</Grid>
-<Grid item xs={12} sm={6}>
-  <Stack spacing={1}>
-    <InputLabel htmlFor="customer-employer">Employer</InputLabel>
-    <TextField
-      fullWidth
-      id="customer-employer"
-      {...getFieldProps('employer')}
-    />
-  </Stack>
-</Grid>
-<Grid item xs={12}>
-      <Stack spacing={1}>
-        <InputLabel htmlFor="customer-trainingCentre">Training Centre</InputLabel>
-        <Select
-          fullWidth
-          id="customer-trainingCentre"
-          {...getFieldProps('trainingCentre')}
-        >
-          {trainingCentres.length > 0 ? (
-            trainingCentres.map((centre) => (
-              <MenuItem key={centre.id} value={centre.id}>
-                {centre.name}
-              </MenuItem>
-            ))
-          ) : (
-            <MenuItem value="" disabled>
-              No training centres available
-            </MenuItem>
-          )}
-        </Select>
-      </Stack>
-    </Grid>
-
-<Grid item xs={12} sm={6}>
-  <Stack spacing={1}>
-    <InputLabel htmlFor="customer-nationalInsurance">UK National Insurance</InputLabel>
-    <TextField
-      fullWidth
-      id="customer-nationalInsurance"
-      {...getFieldProps('nationalInsurance')}
-
-    />
-  </Stack>
-</Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-nationalInsurance">
+                          UK National Insurance
+                        </InputLabel>
+                        <TextField
+                          fullWidth
+                          id="customer-nationalInsurance"
+                          {...getFieldProps("nationalInsurance")}
+                        />
+                      </Stack>
+                    </Grid>
                     <Grid item xs={12} sm={6}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-role">
@@ -648,20 +706,32 @@ export default function FormCustomerAdd({
                       </Stack>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-country">
-                          Country
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-country"
-                          placeholder="Enter Country"
-                          {...getFieldProps("country")}
-                          error={Boolean(touched.country && errors.country)}
-                          helperText={touched.country && errors.country}
-                        />
-                      </Stack>
-                    </Grid>
+      <Stack spacing={1}>
+        <InputLabel htmlFor="customer-country">Country</InputLabel>
+        <FormControl fullWidth error={Boolean(formik.touched.country && formik.errors.country)}>
+          <Select
+            id="customer-country"
+            value={formik.values.country}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            name="country"
+            displayEmpty
+          >
+            <MenuItem value="" disabled>
+              Select Country
+            </MenuItem>
+            {countries.map((country) => (
+              <MenuItem key={country.id} value={country.name}>
+                {country.name}
+              </MenuItem>
+            ))}
+          </Select>
+          {formik.touched.country && formik.errors.country && (
+            <FormHelperText>{formik.errors.country}</FormHelperText>
+          )}
+        </FormControl>
+      </Stack>
+    </Grid>
                     <Grid item xs={12}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-location">
@@ -697,6 +767,43 @@ export default function FormCustomerAdd({
                       </Stack>
                     </Grid>
                     <Grid item xs={12}>
+      <Stack spacing={1}>
+        <InputLabel htmlFor="customer-skills">Skills</InputLabel>
+        <Autocomplete
+          multiple
+          fullWidth
+          id="customer-skills"
+          options={skills.map(skill => skill.name)}
+          {...getFieldProps("skills")}
+          getOptionLabel={(label) => label}
+          onChange={(event, newValue) => {
+            setFieldValue("skills", newValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              name="skill"
+              placeholder="Add Skills"
+            />
+          )}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Chip
+                {...getTagProps({ index })}
+                variant="combined"
+                key={index}
+                label={option}
+                deleteIcon={
+                  <CloseOutlined style={{ fontSize: "0.75rem" }} />
+                }
+                sx={{ color: "text.primary" }}
+              />
+            ))
+          }
+        />
+      </Stack>
+    </Grid>
+                    {/* <Grid item xs={12}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-skills">
                           Skills
@@ -736,64 +843,20 @@ export default function FormCustomerAdd({
                           }
                         />
                       </Stack>
-                    </Grid>
-
-
+                    </Grid> */}
                     <Grid item xs={12} sm={6}>
-  <Stack spacing={1}>
-    <InputLabel htmlFor="customer-portfolio">Portfolio</InputLabel>
-    <Select
-      fullWidth
-      id="customer-portfolio"
-      {...getFieldProps('portfolio')}
-    >
-      {/* Add options for portfolio */}
-      <MenuItem value="original">Original</MenuItem>
-      <MenuItem value="renewal">Renewal</MenuItem>
-    </Select>
-  </Stack>
-</Grid>
-                    <Grid item xs={12}>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="flex-start"
-                      >
-                        <Stack spacing={0.5}>
-                          <Typography variant="subtitle1">
-                            Make Contact Info Public
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Means that anyone viewing your profile will be able
-                            to see your contacts details
-                          </Typography>
-                        </Stack>
-                        <FormControlLabel
-                          control={<Switch defaultChecked sx={{ mt: 0 }} />}
-                          label=""
-                          labelPlacement="start"
-                        />
-                      </Stack>
-                      <Divider sx={{ my: 2 }} />
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="flex-start"
-                      >
-                        <Stack spacing={0.5}>
-                          <Typography variant="subtitle1">
-                            Available to hire
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Toggling this will let your teammates know that you
-                            are available for acquiring new projects
-                          </Typography>
-                        </Stack>
-                        <FormControlLabel
-                          control={<Switch sx={{ mt: 0 }} />}
-                          label=""
-                          labelPlacement="start"
-                        />
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-portfolio">
+                          Portfolio
+                        </InputLabel>
+                        <Select
+                          fullWidth
+                          id="customer-portfolio"
+                          {...getFieldProps("portfolio")}
+                        >
+                          <MenuItem value="original">Original</MenuItem>
+                          <MenuItem value="renewal">Renewal</MenuItem>
+                        </Select>
                       </Stack>
                     </Grid>
                   </Grid>

@@ -1,4 +1,5 @@
 import { Gender } from 'config';
+import { extend } from 'lodash';
 
 export interface CustomerProps {
   modal: boolean;
@@ -26,4 +27,21 @@ export interface CustomerList {
   skills: string[];
   time: string[];
   date: Date | string | number;
+}
+
+export interface CustomerListExtended extends CustomerList {
+  avatarImage: string | null;
+  dateOfBirth: string;
+  ethnicity: string;
+  disability: string;
+  employeeStatus: string;
+  employer: string;
+  trainingCentre: string;
+  nationalInsurance: string;
+  portfolio: string;
+  dob: string;
+  street: string;
+  city: string;
+  number: string;
+  postcode: string;
 }

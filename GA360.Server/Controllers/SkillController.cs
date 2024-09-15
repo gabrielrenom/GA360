@@ -6,21 +6,21 @@ namespace GA360.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class EthnicityController : ControllerBase
+    public class SkillController : ControllerBase
     {
         private readonly ILogger<EthnicityController> _logger;
-        private readonly IEthnicityService _ethnicityService;
-        public EthnicityController(ILogger<EthnicityController> logger, IEthnicityService ethnicityService)
+        private readonly ISkillService _skillService;
+        public SkillController(ILogger<EthnicityController> logger, ISkillService skillService)
         {
             _logger = logger;
-            _ethnicityService = ethnicityService;
+            _skillService = skillService;
         }
 
         [AllowAnonymous]
         [HttpGet("list")]
-        public async Task<IActionResult> GetEthnicities()
+        public async Task<IActionResult> GetSkills()
         {
-            var result = await _ethnicityService.GetAll();
+            var result = await _skillService.GetSkills();
 
             return Ok(result);
         }

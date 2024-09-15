@@ -5,8 +5,8 @@ import { useMemo } from 'react';
 import { fetcher } from 'utils/axios';
 
 // types
-import { CustomerList, CustomerProps } from 'types/customer';
-import { mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel } from 'types/customerApiModel';
+import { CustomerList, CustomerListExtended, CustomerProps } from 'types/customer';
+import { mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel, mapCustomerListToCustomerApiModelExtended } from 'types/customerApiModel';
 
 const initialState: CustomerProps = {
   modal: false
@@ -80,7 +80,7 @@ export function useGetCustomer() {
 //    return memoizedValue;
 //}
 
-export async function insertCustomer(newCustomer: CustomerList) {
+export async function insertCustomer(newCustomer: CustomerListExtended) {
   // to update local state based on key
   // mutate(
   //   endpoints.key + endpoints.list,
@@ -95,7 +95,8 @@ export async function insertCustomer(newCustomer: CustomerList) {
   //   },
   //   false
   // );
-  const mappedCustomer = mapCustomerListToCustomerApiModel(newCustomer);
+  console.log("Insert New customer:",newCustomer);
+  const mappedCustomer = mapCustomerListToCustomerApiModelExtended(newCustomer);
   console.log(mappedCustomer);
   const response = await fetch('/api/customer/create',{
     method: 'POST',

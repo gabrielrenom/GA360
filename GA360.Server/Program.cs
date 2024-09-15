@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 // Add services to the container.
 builder.Services.AddDbContext<CRMDbContext>(options =>
 options
@@ -23,6 +24,10 @@ builder.Services.AddScoped<ITrainingCentreService, TrainingCentreService>();
 builder.Services.AddScoped<ITrainingCentreRepository, TrainingCentreRepository>();
 builder.Services.AddScoped<IEthnicityService, EthnicityService>();
 builder.Services.AddScoped<IEthnicityRepository, EthnicityRepository>();
+builder.Services.AddScoped<ISkillRepository, SkillRepository>();
+builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<ICountryRepository, CountryRepository>();
+builder.Services.AddScoped<ICountryService, CountryService>();
 
 builder.Services.AddBff(x =>
 {
