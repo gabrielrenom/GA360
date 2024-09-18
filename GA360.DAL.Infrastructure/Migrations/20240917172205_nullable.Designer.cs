@@ -4,6 +4,7 @@ using GA360.DAL.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GA360.DAL.Infrastructure.Migrations
 {
     [DbContext(typeof(CRMDbContext))]
-    partial class CRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240917172205_nullable")]
+    partial class nullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -373,6 +376,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("AvatarImage")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contact")
@@ -465,9 +469,6 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TrainingCentreId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ePortfolio")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -479,8 +480,6 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.HasIndex("CountryId");
 
                     b.HasIndex("EthnicOriginId");
-
-                    b.HasIndex("TrainingCentreId");
 
                     b.ToTable("Customers");
                 });
@@ -1089,17 +1088,11 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GA360.DAL.Entities.Entities.TrainingCentre", "TrainingCentre")
-                        .WithMany("Customers")
-                        .HasForeignKey("TrainingCentreId");
-
                     b.Navigation("Address");
 
                     b.Navigation("Country");
 
                     b.Navigation("EthnicOrigin");
-
-                    b.Navigation("TrainingCentre");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.CustomerSkills", b =>
@@ -1149,7 +1142,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("GA360.DAL.Entities.Entities.TrainingCentre", "TrainingCentre")
-                        .WithMany()
+                        .WithMany("DocumentTrainingCentres")
                         .HasForeignKey("TrainingCentreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1249,7 +1242,7 @@ namespace GA360.DAL.Infrastructure.Migrations
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.TrainingCentre", b =>
                 {
-                    b.Navigation("Customers");
+                    b.Navigation("DocumentTrainingCentres");
                 });
 #pragma warning restore 612, 618
         }

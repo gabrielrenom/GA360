@@ -69,48 +69,6 @@ interface StatusProps {
   label: string;
 }
 
-const skills = [
-  "Adobe XD",
-  "After Effect",
-  "Angular",
-  "Animation",
-  "ASP.Net",
-  "Bootstrap",
-  "C#",
-  "CC",
-  "Corel Draw",
-  "CSS",
-  "DIV",
-  "Dreamweaver",
-  "Figma",
-  "Graphics",
-  "HTML",
-  "Illustrator",
-  "J2Ee",
-  "Java",
-  "Javascript",
-  "JQuery",
-  "Logo Design",
-  "Material UI",
-  "Motion",
-  "MVC",
-  "MySQL",
-  "NodeJS",
-  "npm",
-  "Photoshop",
-  "PHP",
-  "React",
-  "Redux",
-  "Reduxjs & tooltit",
-  "SASS",
-  "SCSS",
-  "SQL Server",
-  "SVG",
-  "UI/UX",
-  "User Interface Designing",
-  "Wordpress",
-];
-
 // constant
 const getInitialValues = (customer: CustomerListExtended | null) => {
   const newCustomer = {
@@ -290,7 +248,6 @@ export default function FormCustomerAdd({
     enableReinitialize: true,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        console.log("VALUES TO SUBMIT:",values);
         let newCustomer: CustomerListExtended = values;
         newCustomer.name = newCustomer.firstName + " " + newCustomer.lastName;
         newCustomer.avatarImage = avatarBase64;
@@ -690,7 +647,7 @@ export default function FormCustomerAdd({
                         )}
                       </Stack>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={12}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-contact">
                           Contact
@@ -702,6 +659,66 @@ export default function FormCustomerAdd({
                           {...getFieldProps("contact")}
                           error={Boolean(touched.contact && errors.contact)}
                           helperText={touched.contact && errors.contact}
+                        />
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-street">
+                          Street
+                        </InputLabel>
+                        <TextField
+                          fullWidth
+                          id="customer-street"
+                          placeholder="Enter Street"
+                          {...getFieldProps("street")}
+                          error={Boolean(touched.street && errors.street)}
+                          helperText={touched.street && errors.street}
+                        />
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-number">
+                          House Number
+                        </InputLabel>
+                        <TextField
+                          fullWidth
+                          id="customer-number"
+                          placeholder="Enter Number"
+                          {...getFieldProps("number")}
+                          error={Boolean(touched.number && errors.number)}
+                          helperText={touched.number && errors.number}
+                        />
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-postcode">
+                          Postcode
+                        </InputLabel>
+                        <TextField
+                          fullWidth
+                          id="customer-postcode"
+                          placeholder="Enter Postcode"
+                          {...getFieldProps("postcode")}
+                          error={Boolean(touched.postcode && errors.postcode)}
+                          helperText={touched.postcode && errors.postcode}
+                        />
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-city">
+                          City
+                        </InputLabel>
+                        <TextField
+                          fullWidth
+                          id="customer-city"
+                          placeholder="Enter City"
+                          {...getFieldProps("city")}
+                          error={Boolean(touched.city && errors.city)}
+                          helperText={touched.city && errors.city}
                         />
                       </Stack>
                     </Grid>

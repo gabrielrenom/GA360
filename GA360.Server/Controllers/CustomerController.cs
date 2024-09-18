@@ -1,5 +1,6 @@
 ﻿using GA360.DAL.Entities.Entities;
 using GA360.Domain.Core.Interfaces;
+using GA360.Domain.Core.Models;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,15 +23,16 @@ namespace GA360.Server.Controllers
         [HttpGet("list")]
         public async Task<IActionResult> GetAllContacts()
         {
-            var result = await _customerService.GetAll();
-            return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromCustomerToUserViewModel(x)).ToList());
+            var result = await _customerService.GetAllCustomersWithEntities(null, null, c => c.Email, true);
+
+            return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromUserModelToViewModel(x)).ToList());
         }
 
         [AllowAnonymous]
         [HttpPost("create")]
         public async Task<IActionResult> AddContact([FromBody] UserViewModel contact)
         {
-            var result = await _customerService.AddCustomer(FromUserViewModelToCustomer(contact));
+            var result = await _customerService.AddCustomer(FromUserViewModelToCustomerModel(contact));
             return Ok(result);
         }
 
@@ -48,6 +50,102 @@ namespace GA360.Server.Controllers
         {
             await _customerService.DeleteCustomer(id);
             return Ok();
+        }
+
+        private UserViewModel FromUserModelToViewModel(CustomerModel source)
+        {
+            var destination = new UserViewModel();
+
+            destination.Id = source.Id;
+            destination.FirstName = source.FirstName;
+            destination.LastName = source.LastName;
+            destination.Name = $"{source.FirstName} {source.LastName}";
+            destination.Gender = source.Gender;
+            destination.Contact = source.Contact;
+            destination.Email = source.Email;
+            destination.Country = source.Country;
+            destination.Location = source.Location;
+            destination.FatherName = source.FatherName;
+            destination.Role = source.Role;
+            destination.About = source.About;
+            destination.OrderStatus = source.OrderStatus;
+            destination.CountryId = source.CountryId;
+            destination.Portfolio = source.Portfolio;
+            destination.DOB = source.DOB;
+            destination.Street = source.Street;
+            destination.City = source.City;
+            destination.Number = source.Number;
+            destination.Postcode = source.Postcode;
+            destination.AvatarImage = source.AvatarImage;
+            destination.DateOfBirth = source.DateOfBirth;
+            destination.Ethnicity = source.Ethnicity;
+            destination.Disability = source.Disability;
+            destination.EmployeeStatus = source.EmployeeStatus;
+            destination.Employer = source.Employer;
+            destination.TrainingCentre = source.TrainingCentre ?? 0;
+            destination.NationalInsurance = source.NationalInsurance;
+            destination.Skills = source.Skills?.ToList();
+
+            // Additional properties that need to be calculated or set
+            destination.Age = CalculateAge(source.DOB); // Assuming you have a method to calculate age
+            destination.Orders = 0; // Set default or calculate based on your logic
+            destination.Progress = 0; // Set default or calculate based on your logic
+            destination.Status = 0; // Set default or calculate based on your logic
+            destination.Time = DateTime.Now.ToString("HH:mm"); // Set current time
+            destination.Date = DateTime.Now.ToString("yyyy-MM-dd"); // Set current date
+            destination.Avatar = 0; // Set default or calculate based on your logic
+
+            return destination;
+        }
+
+        private static int CalculateAge(string dob)
+        {
+            if (DateTime.TryParse(dob, out DateTime dateOfBirth))
+            {
+                int age = DateTime.Now.Year - dateOfBirth.Year;
+                if (DateTime.Now.DayOfYear < dateOfBirth.DayOfYear)
+                    age--;
+                return age;
+            }
+            return 0;
+        }
+
+        private CustomerModel FromUserViewModelToCustomerModel(UserViewModel userViewModel)
+        {
+            return new CustomerModel
+            {
+                About = userViewModel.About,
+                Contact = userViewModel.Contact,
+                Email = userViewModel.Email,
+                LastName = userViewModel.LastName,
+                FirstName = userViewModel.FirstName,
+                Location = userViewModel.Location,
+                Role = userViewModel.Role,
+                Description = userViewModel.About,
+                FatherName = userViewModel.FatherName,
+                Gender = userViewModel.Gender,
+                CountryId = userViewModel.CountryId,
+                Country = userViewModel.Country,
+                AvatarImage = userViewModel.AvatarImage,
+                City = userViewModel.City,
+                DateOfBirth = userViewModel.DateOfBirth,
+                DOB = userViewModel.DOB,
+                Disability = userViewModel.Disability,
+                Employer = userViewModel.Employer,
+                EmployeeStatus = userViewModel.EmployeeStatus,
+                EmploymentStatus = userViewModel.EmployeeStatus,
+                ePortfolio = userViewModel.Portfolio,
+                Number = userViewModel.Number,
+                Portfolio = userViewModel.Portfolio,
+                NationalInsurance = userViewModel.NationalInsurance,
+                NI = userViewModel.NationalInsurance,
+                OrderStatus = userViewModel.OrderStatus,
+                Skills = userViewModel.Skills.ToArray(),
+                Postcode = userViewModel.Postcode,
+                Street = userViewModel.Street,
+                TrainingCentre = userViewModel.TrainingCentre,
+                Ethnicity = userViewModel.Ethnicity
+            };
         }
 
         private Customer FromUserViewModelToCustomer(UserViewModel userViewModel)

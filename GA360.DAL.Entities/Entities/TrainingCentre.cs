@@ -8,5 +8,5 @@ public class TrainingCentre : Audit, IModel
     public string Name { get; set; }
     public int AddressId { get; set; }
     public virtual Address Address { get; set; }
-    public virtual List<DocumentTrainingCentre> DocumentTrainingCentres { get; set; }
+    public virtual List<Customer> Customers { get; set; }
 }

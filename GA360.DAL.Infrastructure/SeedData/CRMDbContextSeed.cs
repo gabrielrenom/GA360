@@ -16,14 +16,14 @@ namespace GA360.DAL.Infrastructure.SeedData
             if (!context.EthnicOrigins.Any())
             {
                 var ethnicOrigins = new List<EthnicOrigin>
-    {
-        new EthnicOrigin { Name = "Asian" },
-        new EthnicOrigin { Name = "Black" },
-        new EthnicOrigin { Name = "Hispanic" },
-        new EthnicOrigin { Name = "White" },
-        new EthnicOrigin { Name = "Mixed" },
-        new EthnicOrigin { Name = "Other" }
-    };
+                {
+                    new EthnicOrigin { Name = "Asian" },
+                    new EthnicOrigin { Name = "Black" },
+                    new EthnicOrigin { Name = "Hispanic" },
+                    new EthnicOrigin { Name = "White" },
+                    new EthnicOrigin { Name = "Mixed" },
+                    new EthnicOrigin { Name = "Other" }
+                };
 
                 context.EthnicOrigins.AddRange(ethnicOrigins);
                 context.SaveChanges();
@@ -472,11 +472,12 @@ namespace GA360.DAL.Infrastructure.SeedData
             if (!context.Skills.Any())
             {
                 context.Skills.AddRange(
-                new Skill{
-                     IsDeleted = false,
-                     Name= "Languages",
-                     Description  = "Languages",
-                      
+                new Skill
+                {
+                    IsDeleted = false,
+                    Name = "Languages",
+                    Description = "Languages",
+
                 },
                 new Skill
                 {
@@ -508,7 +509,7 @@ namespace GA360.DAL.Infrastructure.SeedData
                         Type = Entities.Enums.StatusEnum.ClientType.Partner,
                         Website = "https://globalalliance360.com",
                         AddressId = manchesteruni.Id,
-                       
+
                     }
                 );
                 context.SaveChanges();
@@ -533,12 +534,12 @@ namespace GA360.DAL.Infrastructure.SeedData
                             OrderStatus = DealStatus.ProjectWin,
                             CountryId = thailand.Id,
                             AddressId = manchesteruni.Id,
-                            NI= "AB 12 34 56 C",
+                            NI = "AB 12 34 56 C",
                             DOB = "1/4/2000",
                             Employer = "Microsoft",
-                             Disability = "No",
-                             ePortfolio = "Renewal",
-                              EthnicOriginId = ethnic.Id,
+                            Disability = "No",
+                            ePortfolio = "Renewal",
+                            EthnicOriginId = ethnic.Id,
                             EmploymentStatus = "Employed"
 
                         },
@@ -557,7 +558,7 @@ namespace GA360.DAL.Infrastructure.SeedData
                             About = "Passionate about coding and technology.",
                             OrderStatus = DealStatus.ProjectFail,
                             CountryId = us.Id,
-                            AddressId= manchesteruni.Id,
+                            AddressId = manchesteruni.Id,
                             NI = "AB 12 34 56 A",
                             DOB = "1/3/2000",
                             Employer = "Coca Cola",
@@ -582,10 +583,10 @@ namespace GA360.DAL.Infrastructure.SeedData
         CountryId = us.Id,
         AddressId = manchesteruni.Id,
         NI = "AB 12 34 56 A",
-         DOB = "1/1/2000",
+        DOB = "1/1/2000",
         Employer = "Amazon",
         Disability = " A disability is a physical or mental condition that significantly limits a person’s abilities to perform certain activities or interact with the world around them. Disabilities can be visible or invisible, temporary or permanent, and can affect people in various ways.",
-         ePortfolio = "Renewal",
+        ePortfolio = "Renewal",
         EthnicOriginId = ethnic.Id,
         EmploymentStatus = "Self Employed"
 
@@ -615,10 +616,10 @@ namespace GA360.DAL.Infrastructure.SeedData
 
                 foreach (var customer in contacts)
                 {
-                    context.CustomerSkills.Add(new CustomerSkills 
-                    { 
-                         SkillId = skills.FirstOrDefault().Id,
-                         CustomerId = customer.Id
+                    context.CustomerSkills.Add(new CustomerSkills
+                    {
+                        SkillId = skills.FirstOrDefault().Id,
+                        CustomerId = customer.Id
                     });
 
                     context.CustomerSkills.Add(new CustomerSkills
