@@ -2,7 +2,7 @@ import { Avatar, Chip, Grid, IconButton, Paper, Stack, Tooltip, Typography } fro
 import Box from "@mui/system/Box";
 import { useEffect, useMemo, useState } from "react";
 import { styled } from '@mui/material/styles';
-import { CustomerList } from "../../types/customer";
+import { CustomerList, CustomerListExtended } from "../../types/customer";
 import CustomerTable from "../../sections/apps/customer/CustomerTable";
 import { PatternFormat } from "react-number-format";
 import EditOutlined from "@ant-design/icons/EditOutlined";
@@ -14,46 +14,23 @@ import { IndeterminateCheckbox } from "../../components/third-party/react-table"
 import { ColumnDef } from "@tanstack/react-table";
 import CustomerModal from "../../sections/apps/customer/CustomerModal";
 import { Gender } from "../../config";
-import {CustomerApiModel, mapCustomerApiModelToCustomerList} from "../../types/customerApiModel"
+import {CustomerApiModel, CustomerApiModelExtended, mapCustomerApiModelToCustomerList, mapCustomerApiModelToCustomerListExtended} from "../../types/customerApiModel"
 import AlertCustomerDelete from "sections/apps/customer/AlertCustomerDelete";
 
 
 
 export default function ComponentTest() {
     const [open, setOpen] = useState<boolean>(false);
-    const [allowedCustomers, setAllowedCustomers] = useState<CustomerList[] | undefined>(undefined);
+    const [allowedCustomers, setAllowedCustomers] = useState<CustomerListExtended[] | undefined>(undefined);
     const [customerModal, setCustomerModal] = useState<boolean>(false);
-    const [selectedCustomer, setSelectedCustomer] = useState<CustomerList | null>(null);
+    const [selectedCustomer, setSelectedCustomer] = useState<CustomerListExtended | null>(null);
     const [customerDeleteId, setCustomerDeleteId] = useState<any>('');
 
-    const demoCustomer = {
-        id: 1,
-        avatar: 123,
-        firstName: "John",
-        lastName: "Doe",
-        fatherName: "Richard Doe",
-        name: "John Doe",
-        email: "john.doe@example.com",
-        age: 30,
-        gender: Gender.MALE,
-        role: "Customer",
-        orders: 5,
-        progress: 75,
-        status: 1,
-        orderStatus: "Completed",
-        contact: "+1234567890",
-        country: "USA",
-        location: "New York",
-        about: "A regular customer.",
-        skills: ["JavaScript", "React"],
-        time: ["09:00 AM", "05:00 PM"],
-        date: new Date(),
-    };
     const handleClose = () => {
         setOpen(!open);
     };
 
-    const columns = useMemo<ColumnDef<CustomerList>[]>(
+    const columns = useMemo<ColumnDef<CustomerListExtended>[]>(
         () => [
             {
                 id: 'select',
@@ -188,7 +165,7 @@ export default function ComponentTest() {
             try {
                 const customers = await fetchCustomerList();
                 // const s = await fetchCustomerList1();
-                const mappedCustomers = customers.map((customer: CustomerApiModel) => mapCustomerApiModelToCustomerList(customer));
+                const mappedCustomers = customers.map((customer: CustomerApiModelExtended) => mapCustomerApiModelToCustomerListExtended(customer));
                 console.log(customers)
                 setAllowedCustomers(mappedCustomers);
 

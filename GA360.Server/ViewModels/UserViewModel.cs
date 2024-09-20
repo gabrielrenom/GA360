@@ -15,7 +15,6 @@
         public string FatherName { get; set; }
         public string Role { get; set; }
         public string About { get; set; }
-        public string OrderStatus { get; set; }
         public int Orders { get; set; }
         public int Progress { get; set; }
         public int Status { get; set; }

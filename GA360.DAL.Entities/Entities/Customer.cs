@@ -19,7 +19,7 @@ public class Customer : Audit, IModel
     public string Role { get; set; }
     public string? Description { get; set; }
     public string Location { get; set; }
-    public DealStatus OrderStatus { get; set; }
+    public Status Status { get; set; }
     public int CountryId { get; set; }
     public virtual Country Country { get; set; }
     public Guid? TenantId { get; set; }

@@ -583,6 +583,14 @@ export default function FormCustomerAdd({
                             control={<Radio value={Gender.MALE} />}
                             label={Gender.MALE}
                           />
+                          <FormControlLabel
+                            control={<Radio value={Gender.NONBINARY} />}
+                            label={Gender.NONBINARY}
+                          />
+                          <FormControlLabel
+                            control={<Radio value={Gender.PREFERNOTTOSAY} />}
+                            label={Gender.PREFERNOTTOSAY}
+                          />
                         </RadioGroup>
                       </Stack>
                     </Grid>

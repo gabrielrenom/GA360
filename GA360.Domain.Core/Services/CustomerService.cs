@@ -12,16 +12,16 @@ public class CustomerService : ICustomerService
     private readonly ICustomerRepository _customerRepository;
     private readonly ICountryRepository _countryrepository;
     private readonly ITrainingCentreRepository _trainingCentreRepository;
-    private readonly ISkillService _skillService;
+    private readonly ISkillRepository _skillRepository;
     private readonly IEthnicityRepository _ethnicityRepository;
     private readonly ILogger<CustomerService> _logger;
 
-    public CustomerService(ICustomerRepository customerRepository, ILogger<CustomerService> logger, ICountryRepository countryrepository, ISkillService skillservice, IEthnicityRepository ethnicityRepository, ITrainingCentreRepository trainingCentreRepository)
+    public CustomerService(ICustomerRepository customerRepository, ILogger<CustomerService> logger, ICountryRepository countryrepository, ISkillRepository skillRepository, IEthnicityRepository ethnicityRepository, ITrainingCentreRepository trainingCentreRepository)
     {
         _customerRepository = customerRepository;
         _logger = logger;
         _countryrepository = countryrepository;
-        _skillService = skillservice;
+        _skillRepository = skillRepository;
         _ethnicityRepository = ethnicityRepository;
         _trainingCentreRepository = trainingCentreRepository;
     }
@@ -104,7 +104,7 @@ public class CustomerService : ICustomerService
                 Gender = customerModel.Gender,
                 Location = customerModel.Location,
                 NI = customerModel.NI,
-                OrderStatus = DAL.Entities.Enums.StatusEnum.DealStatus.ProcessingRequest,
+                Status = DAL.Entities.Enums.StatusEnum.Status.ProcessingRequest,
                 Role = customerModel.Role,
                 AvatarImage = customerModel.AvatarImage,
             };
@@ -114,8 +114,11 @@ public class CustomerService : ICustomerService
                 customer.TrainingCentreId = customerModel.TrainingCentre;
             }
 
+            _customerRepository.Add(customer);
+            await _customerRepository.SaveChangesAsync();
+
             var skills = new List<CustomerSkills>();
-            var dbSkills = await _skillService.GetSkills();
+            var dbSkills = await _skillRepository.GetAll();
 
             foreach (var skill in customerModel.Skills)
             {
@@ -123,16 +126,14 @@ public class CustomerService : ICustomerService
                 {
                     skills.Add(new CustomerSkills
                     {
-                        Customer = customer,
-                        Skill = dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower())
+                        CustomerId = customer.Id,
+                        SkillId = dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()).Id
                     });
                 }
             }
 
+            var result = await _skillRepository.AddCustomerSkills(skills);
 
-
-            _customerRepository.Add(customer);
-            await _customerRepository.SaveChangesAsync();
             return customer;
         }
         catch (Exception ex)
@@ -218,14 +219,16 @@ public class CustomerService : ICustomerService
         destination.AddressId = source.AddressId;
         destination.DOB = source.DOB;
         destination.NI = source.NI;
+        destination.NationalInsurance = source.NI;
         destination.Disability = source.Disability;
         destination.EmploymentStatus = source.EmploymentStatus;
         destination.Employer = source.Employer;
         destination.ePortfolio = source.ePortfolio;
+        destination.Portfolio = source.ePortfolio;
         destination.EthnicOriginId = source.EthnicOriginId;
         destination.EthnicOrigin = source.EthnicOrigin?.Name;
         destination.AvatarImage = source.AvatarImage;
-        destination.OrderStatus = source.OrderStatus.ToString();
+        destination.Status = (int)source.Status;
         destination.TrainingCentre = source.TrainingCentreId;
         destination.Street = source.Address?.Street;
         destination.City = source.Address?.City;

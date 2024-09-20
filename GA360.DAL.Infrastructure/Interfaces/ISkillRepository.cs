@@ -4,4 +4,5 @@ namespace GA360.DAL.Infrastructure.Interfaces;
 
 public interface ISkillRepository : IRepository<Skill>
 {
+    Task<List<CustomerSkills>> AddCustomerSkills(List<CustomerSkills> customerSkills);
 }

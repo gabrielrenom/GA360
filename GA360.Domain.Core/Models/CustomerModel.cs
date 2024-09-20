@@ -43,7 +43,7 @@ namespace GA360.Domain.Core.Models
         public string DateOfBirth { get; set; }
         public string Ethnicity { get; set; }
         public string EmployeeStatus { get; set; }
-        public string OrderStatus { get; set; }
+        public int Status { get; set; }
         public int? TrainingCentre { get; set; }
         public string NationalInsurance { get; set; }
         public string[] Skills { get;set; }

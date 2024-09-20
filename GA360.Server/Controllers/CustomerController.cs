@@ -60,7 +60,7 @@ namespace GA360.Server.Controllers
             destination.FirstName = source.FirstName;
             destination.LastName = source.LastName;
             destination.Name = $"{source.FirstName} {source.LastName}";
-            destination.Gender = source.Gender;
+            destination.Gender = source.Gender.Replace("Gender.", string.Empty); ;
             destination.Contact = source.Contact;
             destination.Email = source.Email;
             destination.Country = source.Country;
@@ -68,7 +68,7 @@ namespace GA360.Server.Controllers
             destination.FatherName = source.FatherName;
             destination.Role = source.Role;
             destination.About = source.About;
-            destination.OrderStatus = source.OrderStatus;
+            destination.Status = source.Status;
             destination.CountryId = source.CountryId;
             destination.Portfolio = source.Portfolio;
             destination.DOB = source.DOB;
@@ -78,9 +78,9 @@ namespace GA360.Server.Controllers
             destination.Postcode = source.Postcode;
             destination.AvatarImage = source.AvatarImage;
             destination.DateOfBirth = source.DateOfBirth;
-            destination.Ethnicity = source.Ethnicity;
+            destination.Ethnicity = source.EthnicOrigin;
             destination.Disability = source.Disability;
-            destination.EmployeeStatus = source.EmployeeStatus;
+            destination.EmployeeStatus = source.EmploymentStatus;
             destination.Employer = source.Employer;
             destination.TrainingCentre = source.TrainingCentre ?? 0;
             destination.NationalInsurance = source.NationalInsurance;
@@ -90,7 +90,7 @@ namespace GA360.Server.Controllers
             destination.Age = CalculateAge(source.DOB); // Assuming you have a method to calculate age
             destination.Orders = 0; // Set default or calculate based on your logic
             destination.Progress = 0; // Set default or calculate based on your logic
-            destination.Status = 0; // Set default or calculate based on your logic
+            destination.Status = source.Status; // Set default or calculate based on your logic
             destination.Time = DateTime.Now.ToString("HH:mm"); // Set current time
             destination.Date = DateTime.Now.ToString("yyyy-MM-dd"); // Set current date
             destination.Avatar = 0; // Set default or calculate based on your logic
@@ -123,7 +123,7 @@ namespace GA360.Server.Controllers
                 Role = userViewModel.Role,
                 Description = userViewModel.About,
                 FatherName = userViewModel.FatherName,
-                Gender = userViewModel.Gender,
+                Gender = userViewModel.Gender.Replace("Gender.", string.Empty),
                 CountryId = userViewModel.CountryId,
                 Country = userViewModel.Country,
                 AvatarImage = userViewModel.AvatarImage,
@@ -139,7 +139,7 @@ namespace GA360.Server.Controllers
                 Portfolio = userViewModel.Portfolio,
                 NationalInsurance = userViewModel.NationalInsurance,
                 NI = userViewModel.NationalInsurance,
-                OrderStatus = userViewModel.OrderStatus,
+                Status = userViewModel.Status,
                 Skills = userViewModel.Skills.ToArray(),
                 Postcode = userViewModel.Postcode,
                 Street = userViewModel.Street,

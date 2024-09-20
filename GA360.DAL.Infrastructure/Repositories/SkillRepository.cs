@@ -2,12 +2,19 @@
 using GA360.DAL.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace GA360.DAL.Infrastructure.Repositories;
 
 public class SkillRepository : Repository<Skill>, ISkillRepository
 {
     public SkillRepository(DbContext dbContext) : base(dbContext)
     {
+    }
+
+    public async Task<List<CustomerSkills>> AddCustomerSkills(List<CustomerSkills> customerSkills)
+    {
+        GetDbContext().AddRange(customerSkills);
+        await GetDbContext().SaveChangesAsync();
+
+        return customerSkills;
     }
 }
