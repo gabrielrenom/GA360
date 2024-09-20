@@ -11,6 +11,7 @@ import ClaimsDashboard from '../pages/claims/claims'
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
 import ComponentTest from '../pages/claims/componentTest';
+import CandidateProfile from 'pages/apps/profiles/candidate';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -51,6 +52,8 @@ const AccountTabAccount = Loadable(lazy(() => import('sections/apps/profiles/acc
 const AccountTabPassword = Loadable(lazy(() => import('sections/apps/profiles/account/TabPassword')));
 const AccountTabRole = Loadable(lazy(() => import('sections/apps/profiles/account/TabRole')));
 const AccountTabSettings = Loadable(lazy(() => import('sections/apps/profiles/account/TabSettings')));
+
+const CandidateTabCandidateProfile = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateProfile')));
 
 const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
 const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
@@ -228,6 +231,36 @@ const MainRoutes = {
             {
               path: 'profiles',
               children: [
+                {
+                  path: 'candidate',
+                  element: <CandidateProfile />,
+                  children: [
+                    {
+                      path: 'profile',
+                      element: <CandidateTabCandidateProfile />
+                    },
+                    {
+                      path: 'qualifications',
+                      element: <AccountTabPersonal />
+                    },
+                    {
+                      path: 'courses',
+                      element: <AccountTabAccount />
+                    },
+                    {
+                      path: 'documents',
+                      element: <AccountTabPassword />
+                    },
+                    {
+                      path: 'certificates',
+                      element: <AccountTabRole />
+                    },
+                    {
+                      path: 'notes',
+                      element: <AccountTabSettings />
+                    }
+                  ]
+                },
                 {
                   path: 'account',
                   element: <AccountProfile />,
