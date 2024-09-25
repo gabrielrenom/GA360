@@ -22,6 +22,16 @@ namespace GA360.DAL.Infrastructure.Contexts
         public DbSet<Lead> Leads { get; set; }
         public DbSet<Skill> Skills { get; set; }
         public DbSet<CustomerSkills> CustomerSkills { get; set; }
+        public DbSet<TrainingCentre> TrainingCentres { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<Certificate> Certificates { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentCertificate> DocumentCertificates { get; set; }
+        public DbSet<DocumentTrainingCentre> DocumentTrainingCentres { get; set; }
+        public DbSet<EthnicOrigin> EthnicOrigins { get; set; }
+        public DbSet<Qualification> Qualifications { get; set; }
+        public DbSet<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
         public CRMDbContext(DbContextOptions<CRMDbContext> options, IConfiguration configuration)
        : base(options)
         {
@@ -32,6 +42,7 @@ namespace GA360.DAL.Infrastructure.Contexts
         {
             if (!optionsBuilder.IsConfigured)
             {
+                optionsBuilder.EnableSensitiveDataLogging();
                 var connectionString = _configuration.GetConnectionString("CRM");
                 optionsBuilder.UseSqlServer(connectionString);
             }
@@ -44,6 +55,11 @@ namespace GA360.DAL.Infrastructure.Contexts
             .WithMany(c => c.ChildClients)
             .HasForeignKey(c => c.ParentClientId)
             .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TrainingCentre>()
+            .HasOne(tc => tc.Address)
+            .WithMany()
+            .HasForeignKey(tc => tc.AddressId);
 
             base.OnModelCreating(modelBuilder);
         }

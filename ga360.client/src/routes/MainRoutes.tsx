@@ -10,7 +10,8 @@ import ClaimsDashboard from '../pages/claims/claims'
 
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
-import ComponentTest from '../pages/claims/componentTest';
+import Candidates from '../pages/backoffice/candidates';
+import CandidateProfile from 'pages/apps/profiles/candidate';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -51,6 +52,11 @@ const AccountTabAccount = Loadable(lazy(() => import('sections/apps/profiles/acc
 const AccountTabPassword = Loadable(lazy(() => import('sections/apps/profiles/account/TabPassword')));
 const AccountTabRole = Loadable(lazy(() => import('sections/apps/profiles/account/TabRole')));
 const AccountTabSettings = Loadable(lazy(() => import('sections/apps/profiles/account/TabSettings')));
+
+const CandidateTabCandidateProfile = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateProfile')));
+const CandidateTabQualifications = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateQualification')));
+const CandidateTabCandidateCourses = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateCourses')));
+const CandidateTabCandidateDocuments = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateDocuments')));
 
 const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
 const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
@@ -146,6 +152,15 @@ const MainRoutes = {
           ]
         },
         {
+          path: 'backoffice',
+          children: [
+            {
+              path: 'candidates',
+              element: <Candidates />
+            }
+          ]
+        },
+        {
           path: 'widget',
           children: [
             {
@@ -228,6 +243,36 @@ const MainRoutes = {
             {
               path: 'profiles',
               children: [
+                {
+                  path: 'candidate',
+                  element: <CandidateProfile />,
+                  children: [
+                    {
+                      path: 'profile',
+                      element: <CandidateTabCandidateProfile />
+                    },
+                    {
+                      path: 'qualifications',
+                      element: <CandidateTabQualifications />
+                    },
+                    {
+                      path: 'courses',
+                      element: <CandidateTabCandidateCourses />
+                    },
+                    {
+                      path: 'documents',
+                      element: <CandidateTabCandidateDocuments />
+                    },
+                    {
+                      path: 'certificates',
+                      element: <CandidateTabCandidateProfile />
+                    },
+                    {
+                      path: 'notes',
+                      element: <AccountTabSettings />
+                    }
+                  ]
+                },
                 {
                   path: 'account',
                   element: <AccountProfile />,
@@ -504,7 +549,7 @@ const MainRoutes = {
           },
           {
               path: 'componenttest',
-              element: <ComponentTest />
+              element: <Candidates />
           },
         {
           path: 'sample-page',

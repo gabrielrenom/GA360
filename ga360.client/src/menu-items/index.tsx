@@ -9,11 +9,14 @@ import pages from './pages';
 
 // types
 import { NavItemType } from 'types/menu';
+import backOffice from './back-office';
+import mainDashboard from './main-dashboard';
 
 // ==============================|| MENU ITEMS ||============================== //
 
-const menuItems: { items: NavItemType[] } = {
-  items: [widget, applications, formsTables, chartsMap, samplePage, pages, other]
+const menuItems: { items: NavItemType[] } = {  
+  items: [mainDashboard, backOffice,widget, applications, formsTables, chartsMap, samplePage, pages, other]
+
 };
 
 export default menuItems;

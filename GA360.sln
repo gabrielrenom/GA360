@@ -9,6 +9,8 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "ga360.client", "ga360.clien
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0- Solution Items", "0- Solution Items", "{CCF3EBBB-8834-4C76-B049-D97ADA41A178}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\Users\Gabriel\OneDrive\Documents\GA360Logo_Dark.png = ..\..\Users\Gabriel\OneDrive\Documents\GA360Logo_Dark.png
+		..\..\Users\Gabriel\OneDrive\Documents\GA360Logo_White.png = ..\..\Users\Gabriel\OneDrive\Documents\GA360Logo_White.png
 		vite_tricks.txt = vite_tricks.txt
 	EndProjectSection
 EndProject
@@ -16,7 +18,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.DAL.Entities", "GA360
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.DAL.Infrastructure", "GA360.DAL.Infrastructure\GA360.DAL.Infrastructure.csproj", "{9CEDD67F-4850-419D-BADC-B8C7B566AD96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GA360.Domain.Core", "GA360.Domain.Core\GA360.Domain.Core.csproj", "{F63CC020-3E2C-48EB-8203-0A170B1BBE37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.Domain.Core", "GA360.Domain.Core\GA360.Domain.Core.csproj", "{F63CC020-3E2C-48EB-8203-0A170B1BBE37}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1- Presentation Layer", "1- Presentation Layer", "{42114946-1950-4DAC-9991-C82E19C86090}"
 EndProject
@@ -24,7 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2- Domain Layer", "2- Domai
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3- DAL", "3- DAL", "{06E146B2-FE19-4318-B358-4D54FA4E5000}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GA360.DAL.Migrations", "GA360.DAL.Migrations\GA360.DAL.Migrations.csproj", "{63D83D0A-03CD-4BC6-8867-891911EAAC1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.DAL.Migrations", "GA360.DAL.Migrations\GA360.DAL.Migrations.csproj", "{63D83D0A-03CD-4BC6-8867-891911EAAC1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

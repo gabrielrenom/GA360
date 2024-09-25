@@ -21,6 +21,8 @@ import { useGetMenu, useGetMenuMaster } from 'api/menu';
 // types
 import { NavItemType } from 'types/menu';
 
+
+
 // ==============================|| DRAWER CONTENT - NAVIGATION ||============================== //
 
 export default function Navigation() {
@@ -35,25 +37,50 @@ export default function Navigation() {
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
   const [menuItems, setMenuItems] = useState<{ items: NavItemType[] }>({ items: [] });
 
-  let dashboardMenu = MenuFromAPI();
+  //let dashboardMenu = MenuFromAPI();
+
+// const dashboardMenu: NavItemType = {
+//   id: 'group-dashboards',
+//   title: <FormattedMessage id="Dashboards" />,
+//   icon: icons.PieChartOutlined,
+//   type: 'group',
+//   children: [
+//     {
+//       id: 'group-dashboards-collapse',
+//       title: <FormattedMessage id="Principal" />,
+//       type: 'collapse',
+//       icon: icons.PieChartOutlined,
+//       children: [
+//         {
+//           id: 'group-dashboards-backoffice',
+//           title: <FormattedMessage id="Back Office" />,
+//           type: 'item',
+//           url: '/charts/apexchart'
+//         },
+//       ]
+//     },
+//   ]
+// };
 
   useLayoutEffect(() => {
-    const isFound = menuItem.items.some((element) => {
-      if (element.id === 'group-dashboard') {
-        return true;
-      }
-      return false;
-    });
+    // const isFound = menuItem.items.some((element) => {
+    //   if (element.id === 'group-dashboard') {
+    //     return true;
+    //   }
+    //   return false;
+    // });
 
-    if (menuLoading) {
-      menuItem.items.splice(0, 0, dashboardMenu);
-      setMenuItems({ items: [...menuItem.items] });
-    } else if (!menuLoading && dashboardMenu?.id !== undefined && !isFound) {
-      menuItem.items.splice(0, 1, dashboardMenu);
-      setMenuItems({ items: [...menuItem.items] });
-    } else {
-      setMenuItems({ items: [...menuItem.items] });
-    }
+    // if (menuLoading) {
+    //   menuItem.items.splice(0, 0, dashboardMenu);
+    //   setMenuItems({ items: [...menuItem.items] });
+    // } else if (!menuLoading && dashboardMenu?.id !== undefined && !isFound) {
+    //   menuItem.items.splice(0, 1, dashboardMenu);
+    //   setMenuItems({ items: [...menuItem.items] });
+    // } else {
+    //   setMenuItems({ items: [...menuItem.items] });
+    // }
+    setMenuItems({ items: [...menuItem.items] });
+
     // eslint-disable-next-line
   }, [menuLoading]);
 

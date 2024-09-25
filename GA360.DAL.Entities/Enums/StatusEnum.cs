@@ -110,7 +110,7 @@ public class StatusEnum
         Contact
     }
 
-    public enum DealStatus
+    public enum Status
     {
         RequestCome = 0,
         ProcessingRequest = 1,

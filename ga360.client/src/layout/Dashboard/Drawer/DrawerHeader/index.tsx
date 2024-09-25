@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -22,7 +24,7 @@ export default function DrawerHeader({ open }: Props) {
   const { menuOrientation } = useConfig();
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downLG;
 
-  return (
+    return (
     <DrawerHeaderStyled
       theme={theme}
       open={open}

@@ -1,5 +1,6 @@
 ﻿using GA360.DAL.Entities.Entities;
 using GA360.Domain.Core.Interfaces;
+using GA360.Domain.Core.Models;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,92 +23,16 @@ namespace GA360.Server.Controllers
         [HttpGet("list")]
         public async Task<IActionResult> GetAllContacts()
         {
-            var result = await _customerService.GetAll();
-            return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromCustomerToUserViewModel(x)).ToList());
-            var users = new List<User>
-            {
-                new User
-                {
-                    Id = 1,
-                    FirstName = "Phoebe",
-                    LastName = "Venturi",
-                    Name = "Phoebe Venturi",
-                    Gender = "Female",
-                    Age = 52,
-                    Contact = "(887) 744-6950",
-                    Email = "ke@gmail.com",
-                    Country = "Thailand",
-                    Location = "1804 Ahedi Trail, Owottug, Bolivia - 47403",
-                    FatherName = "Helen Stewart",
-                    Role = "Logistics Manager",
-                    About = "Udukaape gozune jig fu foslinan tadka kumu no guw upe or cifdasbej di ige.",
-                    OrderStatus = "Delivered",
-                    Orders = 7174,
-                    Progress = 84,
-                    Status = 1,
-                    Skills = new List<string> { "React", "Mobile App", "Prototyping", "UX", "Figma" },
-                    Time = new List<string> { "1 day ago" },
-                    Date = "14.07.2023",
-                    Avatar = 8
-                },
-                new User
-                {
-                    Id = 2,
-                    FirstName = "John",
-                    LastName = "Doe",
-                    Name = "John Doe",
-                    Gender = "Male",
-                    Age = 34,
-                    Contact = "(123) 456-7890",
-                    Email = "john.doe@example.com",
-                    Country = "USA",
-                    Location = "123 Main St, Springfield, USA - 12345",
-                    FatherName = "Robert Doe",
-                    Role = "Software Engineer",
-                    About = "Passionate about coding and technology.",
-                    OrderStatus = "Pending",
-                    Orders = 1234,
-                    Progress = 75,
-                    Status = 1,
-                    Skills = new List<string> { "C#", "ASP.NET", "SQL", "Azure", "JavaScript" },
-                    Time = new List<string> { "2 days ago" },
-                    Date = "01.08.2023",
-                    Avatar = 5
-                },
-                new User
-                {
-                    Id = 3,
-                    FirstName = "Jane",
-                    LastName = "Smith",
-                    Name = "Jane Smith",
-                    Gender = "Female",
-                    Age = 28,
-                    Contact = "(987) 654-3210",
-                    Email = "jane.smith@example.com",
-                    Country = "Canada",
-                    Location = "456 Elm St, Toronto, Canada - 67890",
-                    FatherName = "Michael Smith",
-                    Role = "Product Manager",
-                    About = "Experienced in managing product lifecycles.",
-                    OrderStatus = "Shipped",
-                    Orders = 5678,
-                    Progress = 90,
-                    Status = 1,
-                    Skills = new List<string> { "Product Management", "Agile", "Scrum", "JIRA", "Confluence" },
-                    Time = new List<string> { "3 days ago" },
-                    Date = "15.07.2023",
-                    Avatar = 3
-                }
-            };
+            var result = await _customerService.GetAllCustomersWithEntities(null, null, c => c.Email, true);
 
-            return Ok(users);
+            return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromUserModelToViewModel(x)).ToList());
         }
 
         [AllowAnonymous]
         [HttpPost("create")]
         public async Task<IActionResult> AddContact([FromBody] UserViewModel contact)
         {
-            var result = await _customerService.AddCustomer(FromUserViewModelToCustomer(contact));
+            var result = await _customerService.AddCustomer(FromUserViewModelToCustomerModel(contact));
             return Ok(result);
         }
 
@@ -115,7 +40,7 @@ namespace GA360.Server.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
         {
-            var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomer(contact));
+            var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
             return Ok(result);
         }
 
@@ -125,6 +50,102 @@ namespace GA360.Server.Controllers
         {
             await _customerService.DeleteCustomer(id);
             return Ok();
+        }
+
+        private UserViewModel FromUserModelToViewModel(CustomerModel source)
+        {
+            var destination = new UserViewModel();
+
+            destination.Id = source.Id;
+            destination.FirstName = source.FirstName;
+            destination.LastName = source.LastName;
+            destination.Name = $"{source.FirstName} {source.LastName}";
+            destination.Gender = source.Gender.Replace("Gender.", string.Empty); ;
+            destination.Contact = source.Contact;
+            destination.Email = source.Email;
+            destination.Country = source.Country;
+            destination.Location = source.Location;
+            destination.FatherName = source.FatherName;
+            destination.Role = source.Role;
+            destination.About = source.About;
+            destination.Status = source.Status;
+            destination.CountryId = source.CountryId;
+            destination.Portfolio = source.Portfolio;
+            destination.DOB = source.DOB;
+            destination.Street = source.Street;
+            destination.City = source.City;
+            destination.Number = source.Number;
+            destination.Postcode = source.Postcode;
+            destination.AvatarImage = source.AvatarImage;
+            destination.DateOfBirth = source.DOB;
+            destination.Ethnicity = source.EthnicOrigin;
+            destination.Disability = source.Disability;
+            destination.EmployeeStatus = source.EmploymentStatus;
+            destination.Employer = source.Employer;
+            destination.TrainingCentre = source.TrainingCentre ?? 0;
+            destination.NationalInsurance = source.NationalInsurance;
+            destination.Skills = source.Skills?.ToList();
+
+            // Additional properties that need to be calculated or set
+            destination.Age = CalculateAge(source.DOB); // Assuming you have a method to calculate age
+            destination.Orders = 0; // Set default or calculate based on your logic
+            destination.Progress = 0; // Set default or calculate based on your logic
+            destination.Status = source.Status; // Set default or calculate based on your logic
+            destination.Time = DateTime.Now.ToString("HH:mm"); // Set current time
+            destination.Date = DateTime.Now.ToString("yyyy-MM-dd"); // Set current date
+            destination.Avatar = 0; // Set default or calculate based on your logic
+
+            return destination;
+        }
+
+        private static int CalculateAge(string dob)
+        {
+            if (DateTime.TryParse(dob, out DateTime dateOfBirth))
+            {
+                int age = DateTime.Now.Year - dateOfBirth.Year;
+                if (DateTime.Now.DayOfYear < dateOfBirth.DayOfYear)
+                    age--;
+                return age;
+            }
+            return 0;
+        }
+
+        private CustomerModel FromUserViewModelToCustomerModel(UserViewModel userViewModel)
+        {
+            return new CustomerModel
+            {
+                About = userViewModel.About,
+                Contact = userViewModel.Contact,
+                Email = userViewModel.Email,
+                LastName = userViewModel.LastName,
+                FirstName = userViewModel.FirstName,
+                Location = userViewModel.Location,
+                Role = userViewModel.Role,
+                Description = userViewModel.About,
+                FatherName = userViewModel.FatherName,
+                Gender = userViewModel.Gender.Replace("Gender.", string.Empty),
+                CountryId = userViewModel.CountryId,
+                Country = userViewModel.Country,
+                AvatarImage = userViewModel.AvatarImage,
+                City = userViewModel.City,
+                DateOfBirth = userViewModel.DateOfBirth,
+                DOB = userViewModel.DateOfBirth,
+                Disability = userViewModel.Disability,
+                Employer = userViewModel.Employer,
+                EmployeeStatus = userViewModel.EmployeeStatus,
+                EmploymentStatus = userViewModel.EmployeeStatus,
+                ePortfolio = userViewModel.Portfolio,
+                Number = userViewModel.Number,
+                Portfolio = userViewModel.Portfolio,
+                NationalInsurance = userViewModel.NationalInsurance,
+                NI = userViewModel.NationalInsurance,
+                Status = userViewModel.Status,
+                Skills = userViewModel.Skills.ToArray(),
+                Postcode = userViewModel.Postcode,
+                Street = userViewModel.Street,
+                TrainingCentre = userViewModel.TrainingCentre,
+                Ethnicity = userViewModel.Ethnicity
+            };
         }
 
         private Customer FromUserViewModelToCustomer(UserViewModel userViewModel)
@@ -167,30 +188,5 @@ namespace GA360.Server.Controllers
                 Skills = customer.CustomerSkills.Select(x => x.Skill.Name).ToList()
             };
         }
-    }
-
-    public class User
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Name { get; set; }
-        public string Gender { get; set; }
-        public int Age { get; set; }
-        public string Contact { get; set; }
-        public string Email { get; set; }
-        public string Country { get; set; }
-        public string Location { get; set; }
-        public string FatherName { get; set; }
-        public string Role { get; set; }
-        public string About { get; set; }
-        public string OrderStatus { get; set; }
-        public int Orders { get; set; }
-        public int Progress { get; set; }
-        public int Status { get; set; }
-        public List<string> Skills { get; set; }
-        public List<string> Time { get; set; }
-        public string Date { get; set; }
-        public int Avatar { get; set; }
     }
 }

@@ -13,6 +13,41 @@ namespace GA360.DAL.Infrastructure.SeedData
         public static void Initialize(CRMDbContext context)
         {
 
+            if (!context.EthnicOrigins.Any())
+            {
+                var ethnicOrigins = new List<EthnicOrigin>
+                {
+                    new EthnicOrigin { Name = "Asian" },
+                    new EthnicOrigin { Name = "Black" },
+                    new EthnicOrigin { Name = "Hispanic" },
+                    new EthnicOrigin { Name = "White" },
+                    new EthnicOrigin { Name = "Mixed" },
+                    new EthnicOrigin { Name = "Other" }
+                };
+
+                context.EthnicOrigins.AddRange(ethnicOrigins);
+                context.SaveChanges();
+            }
+
+
+            if (!context.TrainingCentres.Any() || !context.Addresses.Any())
+            {
+                var manchesterAddress = new Address { City = "Manchester", Postcode = "M13 9PL", Street = "Oxford Road", Number = "176" };
+                var salfordAddress = new Address { City = "Salford", Postcode = "M5 4WT", Street = "The Crescent", Number = "43" };
+                var imperialCollegeAddress = new Address { City = "London", Postcode = "SW7 2AZ", Street = "Exhibition Road", Number = "1" };
+
+                context.Addresses.AddRange(manchesterAddress, salfordAddress, imperialCollegeAddress);
+                context.SaveChanges();
+
+                context.TrainingCentres.AddRange(
+                    new TrainingCentre { AddressId = manchesterAddress.Id, Name = "Imperial College" },
+                    new TrainingCentre { AddressId = salfordAddress.Id, Name = "Manchester University" },
+                    new TrainingCentre { AddressId = imperialCollegeAddress.Id, Name = "Imperial College" }
+                );
+                context.SaveChanges();
+            }
+
+
             // Check if the Countries table has any data
             if (!context.Countries.Any())
             {
@@ -437,11 +472,12 @@ namespace GA360.DAL.Infrastructure.SeedData
             if (!context.Skills.Any())
             {
                 context.Skills.AddRange(
-                new Skill{
-                     IsDeleted = false,
-                     Name= "Languages",
-                     Description  = "Languages",
-                      
+                new Skill
+                {
+                    IsDeleted = false,
+                    Name = "Languages",
+                    Description = "Languages",
+
                 },
                 new Skill
                 {
@@ -456,6 +492,8 @@ namespace GA360.DAL.Infrastructure.SeedData
 
 
             // Check if the Clients table has any data
+            var manchesteruni = context.Addresses.FirstOrDefault();
+
             if (!context.Clients.Any())
             {
                 context.Clients.AddRange(
@@ -469,11 +507,14 @@ namespace GA360.DAL.Infrastructure.SeedData
                         Mail = "gabrielrenom@gmail.com",
                         Phone = "07855185075",
                         Type = Entities.Enums.StatusEnum.ClientType.Partner,
-                        Website = "https://globalalliance360.com"
+                        Website = "https://globalalliance360.com",
+                        AddressId = manchesteruni.Id,
+
                     }
                 );
                 context.SaveChanges();
             }
+            var ethnic = context.EthnicOrigins.FirstOrDefault();
 
             if (!context.Customers.Any())
             {
@@ -490,9 +531,17 @@ namespace GA360.DAL.Infrastructure.SeedData
                             FatherName = "Helen Stewart",
                             Role = "Logistics Manager",
                             About = "Udukaape gozune jig fu foslinan tadka kumu no guw upe or cifdasbej di ige.",
-                            OrderStatus = DealStatus.ProjectWin,
+                            Status = Status.ProjectWin,
                             CountryId = thailand.Id,
-                            
+                            AddressId = manchesteruni.Id,
+                            NI = "AB 12 34 56 C",
+                            DOB = "1/4/2000",
+                            Employer = "Microsoft",
+                            Disability = "No",
+                            ePortfolio = "Renewal",
+                            EthnicOriginId = ethnic.Id,
+                            EmploymentStatus = "Employed"
+
                         },
 
                         new Customer
@@ -507,9 +556,16 @@ namespace GA360.DAL.Infrastructure.SeedData
                             FatherName = "Robert Doe",
                             Role = "Software Engineer",
                             About = "Passionate about coding and technology.",
-                            OrderStatus = DealStatus.ProjectFail,
+                            Status = Status.ProjectFail,
                             CountryId = us.Id,
-
+                            AddressId = manchesteruni.Id,
+                            NI = "AB 12 34 56 A",
+                            DOB = "1/3/2000",
+                            Employer = "Coca Cola",
+                            Disability = "No",
+                            ePortfolio = "Original",
+                            EthnicOriginId = ethnic.Id,
+                            EmploymentStatus = "Employed"
                         },
     new Customer
     {
@@ -523,8 +579,17 @@ namespace GA360.DAL.Infrastructure.SeedData
         FatherName = "Michael Smith",
         Role = "Product Manager",
         About = "Experienced in managing product lifecycles.",
-        OrderStatus = DealStatus.RequestCome,
-        CountryId = us.Id // Assuming you have a CountryId for Canada
+        Status = Status.RequestCome,
+        CountryId = us.Id,
+        AddressId = manchesteruni.Id,
+        NI = "AB 12 34 56 A",
+        DOB = "1/1/2000",
+        Employer = "Amazon",
+        Disability = " A disability is a physical or mental condition that significantly limits a person’s abilities to perform certain activities or interact with the world around them. Disabilities can be visible or invisible, temporary or permanent, and can affect people in various ways.",
+        ePortfolio = "Renewal",
+        EthnicOriginId = ethnic.Id,
+        EmploymentStatus = "Self Employed"
+
     }
     );
 
@@ -551,10 +616,10 @@ namespace GA360.DAL.Infrastructure.SeedData
 
                 foreach (var customer in contacts)
                 {
-                    context.CustomerSkills.Add(new CustomerSkills 
-                    { 
-                         SkillId = skills.FirstOrDefault().Id,
-                         CustomerId = customer.Id
+                    context.CustomerSkills.Add(new CustomerSkills
+                    {
+                        SkillId = skills.FirstOrDefault().Id,
+                        CustomerId = customer.Id
                     });
 
                     context.CustomerSkills.Add(new CustomerSkills

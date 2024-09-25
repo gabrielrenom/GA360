@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useState, useCallback, useMemo, memo, CSSProperties } from 'react';
 
 // third-party

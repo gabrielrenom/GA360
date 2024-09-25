@@ -19,10 +19,25 @@ public class Customer : Audit, IModel
     public string Role { get; set; }
     public string? Description { get; set; }
     public string Location { get; set; }
-    public DealStatus OrderStatus { get; set; }
+    public Status Status { get; set; }
     public int CountryId { get; set; }
     public virtual Country Country { get; set; }
     public Guid? TenantId { get; set; }
     public int Id { get; set; }
-    public List<CustomerSkills> CustomerSkills { get; set; }
+    public int AddressId { get; set; }
+    public string DOB {  get; set; }
+    public string NI { get; set; }
+    public string Disability { get; set; }
+    public string EmploymentStatus { get; set; }
+    public string Employer { get; set; }
+    public string ePortfolio { get; set; }
+    public int EthnicOriginId {  get; set; }
+    public string? AvatarImage { get; set; }
+    public int? TrainingCentreId { get; set; }
+    public virtual Address Address { get; set; }
+    public virtual EthnicOrigin EthnicOrigin { get; set; }
+    public virtual List<CustomerSkills> CustomerSkills { get; set; }
+    public virtual List<QualificationCustomerCourseCertificate>? QualificationCustomerCourseCertificates { get; set; }
+    public virtual TrainingCentre TrainingCentre { get; set; }
+
 }
