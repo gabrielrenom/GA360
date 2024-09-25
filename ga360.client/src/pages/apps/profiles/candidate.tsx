@@ -28,35 +28,39 @@ export default function CandidateProfile() {
   let breadcrumbTitle = '';
   let breadcrumbHeading = '';
   switch (pathname) {
-    case '/apps/profiles/account/personal':
-      breadcrumbTitle = 'Personal';
-      breadcrumbHeading = 'Personal';
+    case '/apps/profiles/candidate/profile':
+      breadcrumbTitle = 'Profile';
+      breadcrumbHeading = 'Profile';
+      selectedTab = 0;
+      break;
+    case '/apps/profiles/candidate/qualifications':
+      breadcrumbTitle = 'Qualifications';
+      breadcrumbHeading = 'Qualifications';
       selectedTab = 1;
       break;
-    case '/apps/profiles/account/my-account':
-      breadcrumbTitle = 'My Account';
-      breadcrumbHeading = 'My Account';
+    case '/apps/profiles/candidate/courses':
+      breadcrumbTitle = 'Courses';
+      breadcrumbHeading = 'Courses';
       selectedTab = 2;
       break;
-    case '/apps/profiles/account/password':
-      breadcrumbTitle = 'Change Password';
-      breadcrumbHeading = 'Change Password';
+    case '/apps/profiles/candidate/documents':
+      breadcrumbTitle = 'Documents';
+      breadcrumbHeading = 'Documents';
       selectedTab = 3;
       break;
-    case '/apps/profiles/account/role':
-      breadcrumbTitle = 'Role';
-      breadcrumbHeading = 'Accountant';
+    case '/apps/profiles/candidate/certificates':
+      breadcrumbTitle = 'Cards & Certs';
+      breadcrumbHeading = 'Cards & Certs';
       selectedTab = 4;
       break;
-    case '/apps/profiles/account/settings':
-      breadcrumbTitle = 'Settings';
-      breadcrumbHeading = 'Account Settings';
+    case '/apps/profiles/candidate/notes':
+      breadcrumbTitle = 'Notes';
+      breadcrumbHeading = 'Notes';
       selectedTab = 5;
       break;
-    case '/apps/profiles/account/basic':
     default:
-      breadcrumbTitle = 'Basic';
-      breadcrumbHeading = 'Basic Account';
+      breadcrumbTitle = 'Profile';
+      breadcrumbHeading = 'Profile';
       selectedTab = 0;
   }
 
@@ -68,7 +72,7 @@ export default function CandidateProfile() {
 
   let breadcrumbLinks = [
     { title: 'Home', to: APP_DEFAULT_PATH },
-    { title: 'Account Profile', to: '/apps/profiles/account/basic' },
+    { title: 'Account Profile', to: '/apps/profiles/candidate/profile' },
     { title: breadcrumbTitle }
   ];
   if (selectedTab === 0) {
@@ -76,7 +80,7 @@ export default function CandidateProfile() {
   }
 
   useEffect(() => {
-    if (pathname === '/apps/profiles/account/basic') {
+    if (pathname === '/apps/profiles/candidate/profile') {
       setValue(0);
     }
   }, [pathname]);
@@ -87,24 +91,24 @@ export default function CandidateProfile() {
       <MainCard border={false} boxShadow>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', width: '100%' }}>
           <Tabs value={value} onChange={handleChange} variant="scrollable" scrollButtons="auto" aria-label="account profile tab">
-            <Tab label="Profile" component={Link} to="/apps/profiles/account/basic" icon={<UserOutlined />} iconPosition="start" />
-            <Tab label="Personal" component={Link} to="/apps/profiles/account/personal" icon={<FileTextOutlined />} iconPosition="start" />
+            <Tab label="Profile" component={Link} to="/apps/profiles/candidate/profile" icon={<UserOutlined />} iconPosition="start" />
+            <Tab label="Qualifications" component={Link} to="/apps/profiles/candidate/qualifications" icon={<FileTextOutlined />} iconPosition="start" />
             <Tab
-              label="My Account"
+              label="Courses"
               component={Link}
-              to="/apps/profiles/account/my-account"
+              to="/apps/profiles/candidate/courses"
               icon={<ContainerOutlined />}
               iconPosition="start"
             />
             <Tab
-              label="Change Password"
+              label="Documents"
               component={Link}
-              to="/apps/profiles/account/password"
+              to="/apps/profiles/candidate/documents"
               icon={<LockOutlined />}
               iconPosition="start"
             />
-            <Tab label="Role" component={Link} to="/apps/profiles/account/role" icon={<TeamOutlined />} iconPosition="start" />
-            <Tab label="Settings" component={Link} to="/apps/profiles/account/settings" icon={<SettingOutlined />} iconPosition="start" />
+            <Tab label="Cards & Certs" component={Link} to="/apps/profiles/candidate/profile" icon={<TeamOutlined />} iconPosition="start" />
+            <Tab label="Notes" component={Link} to="/apps/profiles/account/settings" icon={<SettingOutlined />} iconPosition="start" />
           </Tabs>
         </Box>
         <Box sx={{ mt: 2.5 }}>

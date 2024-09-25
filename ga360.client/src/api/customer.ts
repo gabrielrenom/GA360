@@ -114,7 +114,7 @@ export async function insertCustomer(newCustomer: CustomerListExtended) {
   //   await axios.post(endpoints.key + endpoints.insert, data);
 }
 
-export async function updateCustomer(customerId: number, updatedCustomer: CustomerList) {
+export async function updateCustomer(customerId: number, updatedCustomer: CustomerListExtended) {
   // to update local state based on key
 
   // mutate(
@@ -132,7 +132,7 @@ export async function updateCustomer(customerId: number, updatedCustomer: Custom
   //   false
   // );
 
-  const mappedCustomer = mapCustomerListToCustomerApiModel(updatedCustomer);
+  const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
   console.log(customerId, "UPDATE", mappedCustomer);
 
   console.log(mappedCustomer);

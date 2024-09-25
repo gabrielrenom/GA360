@@ -44,33 +44,43 @@ interface ReactTableProps {
   columns: ColumnDef<TableDataProps>[];
   data: TableDataProps[];
 }
-export default function TabCandidateProfile() {
+export default function TabCandidateCourses() {
   const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   const data: TableDataProps[] = makeData(1000);
   const columns = useMemo<ColumnDef<TableDataProps>[]>(
     () => [
       {
-        header: 'Card/cert name',
-        footer: 'Card/cert name',
+        header: 'Course Name',
+        footer: 'Course Name',
         accessorKey: 'fullName',
         enableSorting: false
       },
       {
-        header: 'Type',
-        footer: 'Type',
-        accessorKey: 'email'
-      },
-      {
-        header: 'Date/Time',
-        footer: 'Date/Time',
+        header: 'Date',
+        footer: 'Date',
         accessorKey: 'age',
         meta: {
           className: 'cell-right'
         }
       },
       {
-        header: 'Change',
-        footer: 'Change',
+        header: 'Duration',
+        footer: 'Duration',
+        accessorKey: 'role'
+      },
+      {
+        header: 'Assesor',
+        footer: 'Assesor',
+        accessorKey: 'role'
+      },
+      {
+        header: 'Card/cert',
+        footer: 'Card/cert',
+        accessorKey: 'role'
+      },
+      {
+        header: 'Certification',
+        footer: 'Certification',
         accessorKey: 'role'
       }
     ],
@@ -110,7 +120,7 @@ export default function TabCandidateProfile() {
   
     return (
       <MainCard
-        title={matchDownSM ? 'Sorting' : 'Cards and Certifications'}
+        title={matchDownSM ? 'Sorting' : 'Courses'}
         content={false}
         secondary={
           <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
@@ -131,7 +141,6 @@ export default function TabCandidateProfile() {
                           className: header.column.columnDef.meta.className + ' cursor-pointer prevent-select'
                         });
                       }
-  
                       return (
                         <TableCell
                           key={header.id}

@@ -2,19 +2,20 @@
 using System.Linq.Expressions;
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.DAL.Entities.BaseEntities;
+using GA360.DAL.Infrastructure.Contexts;
 
 namespace GA360.DAL.Infrastructure.Repositories
 {
     public abstract class Repository<T> : IRepository<T>
         where T : class, IModel
     {
-        public readonly DbContext _dbContext;
-        public Repository(DbContext dbContext)
+        public readonly CRMDbContext _dbContext;
+        public Repository(CRMDbContext dbContext)
         {
             this._dbContext = dbContext;
         }
 
-        protected DbContext GetDbContext() { return _dbContext; }
+        protected CRMDbContext GetDbContext() { return _dbContext; }
         public T Get(int key) => _dbContext.Set<T>().Where(p => p.Id == key).Single();
         public async Task<T> Get<T>(Expression<Func<T, bool>> predicate) where T : class
         {

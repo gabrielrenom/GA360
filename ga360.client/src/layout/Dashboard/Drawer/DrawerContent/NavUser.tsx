@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useState, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -81,7 +83,7 @@ export default function NavUser() {
       <List disablePadding>
         <ListItem
           disablePadding
-          secondaryAction={
+                  secondaryAction={
             <ExpandMore
               theme={theme}
               expand={open}

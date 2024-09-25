@@ -164,6 +164,78 @@ public class CustomerService : ICustomerService
         return customerdb;
     }
 
+    public async Task<Customer> UpdateCustomer(int id, CustomerModel customer)
+    {
+        var ethnicOrigin = await _ethnicityRepository.Get<EthnicOrigin>(x => x.Name.ToLower() == customer.Ethnicity.ToLower());
+
+        var customerdb = await _customerRepository.GetWithAllEntitiesById(id);
+
+
+        if (customer.TrainingCentre != null || customer.TrainingCentre > 0)
+        {
+            customerdb.TrainingCentre = null;
+            customerdb.TrainingCentreId = customer.TrainingCentre;
+        }
+
+        if (customer.Country != null)
+        {
+            var country = await _customerRepository.Get<Country>(x => x.Name.ToLower() == customer.Country.ToLower());
+            customerdb.Country = null;
+            customerdb.CountryId = country.Id;
+        }
+
+        customerdb.About = customer.About;
+        customerdb.Contact = customer.Contact;
+        customerdb.Description = customer.Description;
+        customerdb.Location = customer.Location;
+        customerdb.Email = customer.Email;
+        customerdb.FatherName = customer.FatherName;
+        customerdb.FirstName = customer.FirstName;
+        customerdb.LastName = customer.LastName;
+        customerdb.Role = customer.Role;
+        customerdb.DOB = customer.DOB;
+        customerdb.EthnicOriginId = ethnicOrigin.Id;
+        customerdb.Disability = customer.Disability;
+        customerdb.Employer = customer.Employer;
+        customerdb.EmploymentStatus = customer.EmploymentStatus;
+        customerdb.Employer = customerdb.Employer;
+        customerdb.NI = customer.NI;
+        customerdb.NI = customer.NationalInsurance;
+        customerdb.Role = customer.Role;
+        customerdb.Gender = customer.Gender;
+        customerdb.Status = (DAL.Entities.Enums.StatusEnum.Status)Enum.ToObject(typeof(DAL.Entities.Enums.StatusEnum.Status), customer.Status); ;
+        customerdb.Contact = customer.Contact;
+        customerdb.Address.City = customer.City;
+        customerdb.Address.Street = customer.Street;
+        customerdb.Address.Number = customer.Number;
+        customerdb.Address.Postcode = customer.Postcode;
+        customerdb.Location = customer.Location;
+        customerdb.ePortfolio = customer.ePortfolio;
+        customerdb.EthnicOrigin = ethnicOrigin;
+
+        _customerRepository.Update(customerdb);
+        await _customerRepository.SaveChangesAsync();
+
+        var skills = new List<CustomerSkills>();
+        await _skillRepository.Remove(customerdb.Id);
+        var dbSkills = await _skillRepository.GetAll();
+        foreach (var skill in customer.Skills)
+        {
+            if (dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()) != null)
+            {
+                skills.Add(new CustomerSkills
+                {
+                    CustomerId = customerdb.Id,
+                    SkillId = dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()).Id
+                });
+            }
+        }
+
+        var result = await _skillRepository.AddCustomerSkills(skills);
+
+        return customerdb;
+    }
+
     public async Task DeleteCustomer(int id)
     {
         var customer = _customerRepository.Get(id);

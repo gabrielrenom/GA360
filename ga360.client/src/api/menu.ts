@@ -19,23 +19,31 @@ export const endpoints = {
 };
 
 export function useGetMenu() {
-  const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.dashboard, fetcher, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  });
+  //UNCOMMENT TO COME TO THE ORIGINAL
 
-  const memoizedValue = useMemo(
-    () => ({
-      menu: data?.dashboard as NavItemType,
-      menuLoading: isLoading,
-      menuError: error,
-      menuValidating: isValidating,
-      menuEmpty: !isLoading && !data?.length
-    }),
-    [data, error, isLoading, isValidating]
-  );
+  // const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.dashboard, fetcher, {
+  //   revalidateIfStale: false,
+  //   revalidateOnFocus: false,
+  //   revalidateOnReconnect: false
+  // });
 
+  // const memoizedValue = useMemo(
+  //   () => ({
+  //     menu: data?.dashboard as NavItemType,
+  //     menuLoading: isLoading,
+  //     menuError: error,
+  //     menuValidating: isValidating,
+  //     menuEmpty: !isLoading && !data?.length
+  //   }),
+  //   [data, error, isLoading, isValidating]
+  // );
+  // console.log("MEMORIZE")
+  // console.log(memoizedValue)
+  const memoizedValue = {
+    menuLoading: true,
+    menuValidating: false,
+    menuEmpty: false
+};
   return memoizedValue;
 }
 

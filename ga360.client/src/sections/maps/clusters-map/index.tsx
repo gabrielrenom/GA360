@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useRef, memo } from 'react';
 
 // third-party

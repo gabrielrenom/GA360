@@ -54,6 +54,9 @@ const AccountTabRole = Loadable(lazy(() => import('sections/apps/profiles/accoun
 const AccountTabSettings = Loadable(lazy(() => import('sections/apps/profiles/account/TabSettings')));
 
 const CandidateTabCandidateProfile = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateProfile')));
+const CandidateTabQualifications = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateQualification')));
+const CandidateTabCandidateCourses = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateCourses')));
+const CandidateTabCandidateDocuments = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateDocuments')));
 
 const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
 const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
@@ -241,19 +244,19 @@ const MainRoutes = {
                     },
                     {
                       path: 'qualifications',
-                      element: <AccountTabPersonal />
+                      element: <CandidateTabQualifications />
                     },
                     {
                       path: 'courses',
-                      element: <AccountTabAccount />
+                      element: <CandidateTabCandidateCourses />
                     },
                     {
                       path: 'documents',
-                      element: <AccountTabPassword />
+                      element: <CandidateTabCandidateDocuments />
                     },
                     {
                       path: 'certificates',
-                      element: <AccountTabRole />
+                      element: <CandidateTabCandidateProfile />
                     },
                     {
                       path: 'notes',

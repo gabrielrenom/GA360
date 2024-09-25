@@ -155,6 +155,7 @@ export interface Props extends IconButtonProps {
   children: ReactNode;
 }
 
+// @ts-ignore
 function IconButton({ variant = 'text', shape = 'square', children, color = 'primary', ...others }: Props, ref: Ref<HTMLButtonElement>) {
   const theme = useTheme();
 

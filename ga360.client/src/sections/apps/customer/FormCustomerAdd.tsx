@@ -137,10 +137,12 @@ export default function FormCustomerAdd({
     undefined
   );
   const [avatar, setAvatar] = useState<string | undefined>(
-    getImageUrl(
-      `avatar-${customer && customer !== null && customer?.avatar ? customer.avatar : 1}.png`,
-      ImagePath.USERS
-    )
+    customer?.avatarImage 
+      ? customer.avatarImage 
+      : getImageUrl(
+          `avatar-${customer && customer !== null && customer?.avatar ? customer.avatar : 1}.png`,
+          ImagePath.USERS
+        )
   );
   const [trainingCentres, setTrainingCentres] = useState<TrainingCentre[]>([]);
   const [error, setError] = useState<string | null>(null);

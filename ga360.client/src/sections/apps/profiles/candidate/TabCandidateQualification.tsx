@@ -44,33 +44,33 @@ interface ReactTableProps {
   columns: ColumnDef<TableDataProps>[];
   data: TableDataProps[];
 }
-export default function TabCandidateProfile() {
+export default function TabCandidateQualification() {
   const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   const data: TableDataProps[] = makeData(1000);
   const columns = useMemo<ColumnDef<TableDataProps>[]>(
     () => [
       {
-        header: 'Card/cert name',
-        footer: 'Card/cert name',
+        header: 'Qualification Name',
+        footer: 'Qualification Name',
         accessorKey: 'fullName',
         enableSorting: false
       },
       {
-        header: 'Type',
-        footer: 'Type',
-        accessorKey: 'email'
-      },
-      {
-        header: 'Date/Time',
-        footer: 'Date/Time',
+        header: 'Reg Date',
+        footer: 'Reg Date',
         accessorKey: 'age',
         meta: {
           className: 'cell-right'
         }
       },
       {
-        header: 'Change',
-        footer: 'Change',
+        header: 'Status',
+        footer: 'Status',
+        accessorKey: 'role'
+      },
+      {
+        header: 'Progress',
+        footer: 'Progress',
         accessorKey: 'role'
       }
     ],
@@ -110,7 +110,7 @@ export default function TabCandidateProfile() {
   
     return (
       <MainCard
-        title={matchDownSM ? 'Sorting' : 'Cards and Certifications'}
+        title={matchDownSM ? 'Sorting' : 'Qualifications'}
         content={false}
         secondary={
           <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>

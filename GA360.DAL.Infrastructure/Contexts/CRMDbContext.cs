@@ -42,6 +42,7 @@ namespace GA360.DAL.Infrastructure.Contexts
         {
             if (!optionsBuilder.IsConfigured)
             {
+                optionsBuilder.EnableSensitiveDataLogging();
                 var connectionString = _configuration.GetConnectionString("CRM");
                 optionsBuilder.UseSqlServer(connectionString);
             }

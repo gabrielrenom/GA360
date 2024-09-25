@@ -40,7 +40,7 @@ namespace GA360.Server.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
         {
-            var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomer(contact));
+            var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
             return Ok(result);
         }
 
@@ -77,7 +77,7 @@ namespace GA360.Server.Controllers
             destination.Number = source.Number;
             destination.Postcode = source.Postcode;
             destination.AvatarImage = source.AvatarImage;
-            destination.DateOfBirth = source.DateOfBirth;
+            destination.DateOfBirth = source.DOB;
             destination.Ethnicity = source.EthnicOrigin;
             destination.Disability = source.Disability;
             destination.EmployeeStatus = source.EmploymentStatus;
@@ -129,7 +129,7 @@ namespace GA360.Server.Controllers
                 AvatarImage = userViewModel.AvatarImage,
                 City = userViewModel.City,
                 DateOfBirth = userViewModel.DateOfBirth,
-                DOB = userViewModel.DOB,
+                DOB = userViewModel.DateOfBirth,
                 Disability = userViewModel.Disability,
                 Employer = userViewModel.Employer,
                 EmployeeStatus = userViewModel.EmployeeStatus,

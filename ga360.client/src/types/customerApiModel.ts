@@ -67,16 +67,16 @@ export const mapCustomerApiModelToCustomerListExtended = (
 ): CustomerListExtended => {
     let genderEnum;
     switch (source.gender) {
-      case "MALE":
+      case "Male":
         genderEnum = Gender.MALE;
         break;
-      case "FEMALE":
+      case "Female":
         genderEnum = Gender.FEMALE;
         break;
-      case "NONBINARY":
+      case "Nonbinary":
         genderEnum = Gender.NONBINARY;
         break;
-      case "PREFERNOTTOSAY":
+      case "Prefer not to say":
         genderEnum = Gender.PREFERNOTTOSAY;
         break;
       default:
@@ -181,18 +181,18 @@ export const mapCustomerListToCustomerApiModel = (
 export const mapCustomerListToCustomerApiModelExtended = (
   user: CustomerListExtended
 ): CustomerApiModelExtended => {
-    let genderEnum;
+  let genderEnum;
   switch (user.gender.toString()) {
-    case "MALE":
+    case "Male":
       genderEnum = Gender.MALE;
       break;
-    case "FEMALE":
+    case "Female":
       genderEnum = Gender.FEMALE;
       break;
-    case "NONBINARY":
+    case "Nonbinary":
       genderEnum = Gender.NONBINARY;
       break;
-    case "PREFERNOTTOSAY":
+    case "Prefer not to say":
       genderEnum = Gender.PREFERNOTTOSAY;
       break;
     default:

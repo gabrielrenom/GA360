@@ -14,5 +14,6 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Customer GetCustomerByEmail(string email);
         IEnumerable<Customer> GetCustomersByCountry(int countryId);
         Task<List<Customer>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        Task<Customer> GetWithAllEntitiesById(int id);
     }
 }
