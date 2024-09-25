@@ -20,7 +20,7 @@ import AlertCustomerDelete from "sections/apps/customer/AlertCustomerDelete";
 
 
 
-export default function ComponentTest() {
+export default function Candidates() {
     const [open, setOpen] = useState<boolean>(false);
     const [allowedCustomers, setAllowedCustomers] = useState<CustomerListExtended[] | undefined>(undefined);
     const [customerModal, setCustomerModal] = useState<boolean>(false);

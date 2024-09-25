@@ -10,7 +10,7 @@ import ClaimsDashboard from '../pages/claims/claims'
 
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
-import ComponentTest from '../pages/claims/componentTest';
+import Candidates from '../pages/backoffice/candidates';
 import CandidateProfile from 'pages/apps/profiles/candidate';
 
 // render - dashboard
@@ -148,6 +148,15 @@ const MainRoutes = {
             {
               path: 'analytics',
               element: <DashboardAnalytics />
+            }
+          ]
+        },
+        {
+          path: 'backoffice',
+          children: [
+            {
+              path: 'candidates',
+              element: <Candidates />
             }
           ]
         },
@@ -540,7 +549,7 @@ const MainRoutes = {
           },
           {
               path: 'componenttest',
-              element: <ComponentTest />
+              element: <Candidates />
           },
         {
           path: 'sample-page',

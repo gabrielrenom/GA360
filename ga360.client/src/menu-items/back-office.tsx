@@ -29,7 +29,7 @@ const backOffice: NavItemType = {
           id: 'group-back-office-candidates',
           title: <FormattedMessage id="Candidate Details" />,
           type: 'item',
-          url: '/charts/apexchart'
+          url: '/backoffice/candidates'
         },
       ]
     },

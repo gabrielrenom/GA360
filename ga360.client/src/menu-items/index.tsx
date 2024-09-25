@@ -10,12 +10,12 @@ import pages from './pages';
 // types
 import { NavItemType } from 'types/menu';
 import backOffice from './back-office';
+import mainDashboard from './main-dashboard';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems: { items: NavItemType[] } = {  
-  items: [backOffice,widget, applications, formsTables, chartsMap, samplePage, pages, other]
-
+  items: [mainDashboard, backOffice,widget, applications, formsTables, chartsMap, samplePage, pages, other]
 
 };
 

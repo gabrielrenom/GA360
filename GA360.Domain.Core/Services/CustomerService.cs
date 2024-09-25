@@ -212,6 +212,7 @@ public class CustomerService : ICustomerService
         customerdb.Location = customer.Location;
         customerdb.ePortfolio = customer.ePortfolio;
         customerdb.EthnicOrigin = ethnicOrigin;
+        customerdb.AvatarImage = customer.AvatarImage;
 
         _customerRepository.Update(customerdb);
         await _customerRepository.SaveChangesAsync();
