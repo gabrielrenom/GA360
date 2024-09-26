@@ -44,4 +44,5 @@ export interface CustomerListExtended extends CustomerList {
   city: string;
   number: string;
   postcode: string;
+  documents: string[];
 }

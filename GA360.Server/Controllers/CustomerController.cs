@@ -4,6 +4,7 @@ using GA360.Domain.Core.Models;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace GA360.Server.Controllers
 {
@@ -36,12 +37,36 @@ namespace GA360.Server.Controllers
             return Ok(result);
         }
 
+        //[AllowAnonymous]
+        //[HttpPut("update/{id}")]
+        //public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
+        //{
+        //    var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
+        //    return Ok(result);
+        //}
+        
         [AllowAnonymous]
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
+        [HttpPut("updatewithdocuments/{id}")]
+        public async Task<IActionResult> UpdateCustomerWithDocuments([FromForm] CustomerUploadViewModel contact, int id)
         {
-            var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
-            return Ok(result);
+            // Process the JSON payload
+            var customer = JsonSerializer.Deserialize<UserViewModel>(contact.Customer);
+
+            // Process the uploaded files
+            foreach (var file in contact.Files)
+            {
+                if (file.Length > 0)
+                {
+                    var filePath = Path.Combine("uploads", file.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                }
+            }
+            return Ok();
+            //var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
+            //return Ok(result);
         }
 
         [AllowAnonymous]

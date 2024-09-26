@@ -114,24 +114,33 @@ export async function insertCustomer(newCustomer: CustomerListExtended) {
   //   await axios.post(endpoints.key + endpoints.insert, data);
 }
 
+export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]) {
+
+  const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
+
+  const formData = new FormData();
+  formData.append('Customer', JSON.stringify(mappedCustomer));
+  documents.forEach((file) => formData.append('Files', file));
+
+  //formData.append('Files', new File([''], '133694255036516995.jpg', { type: 'image/jpeg' }));
+
+const options: RequestInit = {
+  method: 'PUT',
+  headers: {
+    'accept': '*/*',
+    // 'Content-Type' should not be set when sending FormData
+  },
+  body: formData,
+};
+
+fetch('/api/customer/updatewithdocuments/'+customerId, options)
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));
+ 
+}
+
 export async function updateCustomer(customerId: number, updatedCustomer: CustomerListExtended) {
-  // to update local state based on key
-
-  // mutate(
-  //   endpoints.key + endpoints.list,
-  //   (currentCustomer: any) => {
-  //     const newCustomer: CustomerList[] = currentCustomer.customers.map((customer: CustomerList) =>
-  //       customer.id === customerId ? { ...customer, ...updatedCustomer } : customer
-  //     );
-
-  //     return {
-  //       ...currentCustomer,
-  //       customers: newCustomer
-  //     };
-  //   },
-  //   false
-  // );
-
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
   console.log(customerId, "UPDATE", mappedCustomer);
 
@@ -145,11 +154,6 @@ export async function updateCustomer(customerId: number, updatedCustomer: Custom
     body: JSON.stringify(mappedCustomer)
   });
   const data = response.json();
-
-  // to hit server
-  // you may need to refetch latest data after server hit and based on your logic
-  //   const data = { list: updatedCustomer };
-  //   await axios.post(endpoints.key + endpoints.update, data);
 }
 
 export async function deleteCustomer(customerId: number) {

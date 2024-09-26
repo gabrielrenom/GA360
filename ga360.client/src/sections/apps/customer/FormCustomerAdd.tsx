@@ -44,7 +44,7 @@ import CircularWithPath from "components/@extended/progress/CircularWithPath";
 
 import { ThemeMode, Gender } from "config";
 import { openSnackbar } from "api/snackbar";
-import { insertCustomer, updateCustomer } from "api/customer";
+import { insertCustomer, updateCustomer, updateCustomerWithDocuments } from "api/customer";
 import { getImageUrl, ImagePath } from "utils/getImageUrl";
 
 // assets
@@ -63,6 +63,8 @@ import { getSkills } from "api/skillservice";
 import { Skill } from "types/skill";
 import { getCountries } from "api/countryService";
 import { Country } from "types/country";
+import MultiFileUpload from "components/third-party/dropzone/MultiFile";
+import MultipleFileUploader from "components/MultipleFileUploader";
 
 interface StatusProps {
   value: number;
@@ -92,7 +94,7 @@ const getInitialValues = (customer: CustomerListExtended | null) => {
     skills: [],
     time: ["just now"],
     date: "",
-    avatarImage:"",
+    avatarImage: "",
     dateOfBirth: "",
     ethnicity: "",
     disability: "",
@@ -101,11 +103,12 @@ const getInitialValues = (customer: CustomerListExtended | null) => {
     trainingCentre: "",
     nationalInsurance: "",
     portfolio: "",
-    dob:  "",
+    dob: "",
     street: "",
     city: "",
-    number:  "",
-    postcode:  ""
+    number: "",
+    postcode: "",
+    documents:[]
   };
 
   if (customer) {
@@ -137,8 +140,8 @@ export default function FormCustomerAdd({
     undefined
   );
   const [avatar, setAvatar] = useState<string | undefined>(
-    customer?.avatarImage 
-      ? customer.avatarImage 
+    customer?.avatarImage
+      ? customer.avatarImage
       : getImageUrl(
           `avatar-${customer && customer !== null && customer?.avatar ? customer.avatar : 1}.png`,
           ImagePath.USERS
@@ -150,6 +153,8 @@ export default function FormCustomerAdd({
   const [skills, setSkills] = useState<Skill[]>([]);
   const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
   const [countries, setCountries] = useState<Country[]>([]);
+  const [documents, setDocuments] = useState<File[]>([]);
+
 
   useEffect(() => {
     if (selectedImage) {
@@ -195,35 +200,38 @@ export default function FormCustomerAdd({
     };
     fetchSkills();
   }, []);
-  
+
   useEffect(() => {
     const fetchCountries = async () => {
       try {
         const response = await getCountries();
         setCountries(response);
       } catch (error) {
-        console.error('Error fetching countries:', error);
+        console.error("Error fetching countries:", error);
       }
     };
 
     fetchCountries();
   }, []);
 
-
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedImage(e.target.files?.[0])
+      setSelectedImage(e.target.files?.[0]);
       const reader = new FileReader();
       reader.onloadend = () => {
-        const fileBase64= reader.result as string
+        const fileBase64 = reader.result as string;
         setAvatarBase64(fileBase64);
       };
       reader.readAsDataURL(file);
-
     }
   };
-  
+
+  const handleFilesUpload = (files: File[]) => {
+    console.log('Files received from child:', files);
+    setDocuments(files)
+    // Handle the files as needed
+  };
 
   const CustomerSchema = Yup.object().shape({
     firstName: Yup.string().max(255).required("First Name is required"),
@@ -254,7 +262,7 @@ export default function FormCustomerAdd({
         newCustomer.name = newCustomer.firstName + " " + newCustomer.lastName;
         newCustomer.avatarImage = avatarBase64;
         if (customer) {
-          updateCustomer(newCustomer.id!, newCustomer).then(() => {
+          updateCustomerWithDocuments(newCustomer.id!, newCustomer,documents).then(() => {
             openSnackbar({
               open: true,
               message: "Customer update successfully.",
@@ -449,7 +457,6 @@ export default function FormCustomerAdd({
                           {...getFieldProps("dateOfBirth")}
                         />
                       </Stack>{" "}
-                       
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Stack spacing={1}>
@@ -719,9 +726,7 @@ export default function FormCustomerAdd({
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-city">
-                          City
-                        </InputLabel>
+                        <InputLabel htmlFor="customer-city">City</InputLabel>
                         <TextField
                           fullWidth
                           id="customer-city"
@@ -733,32 +738,41 @@ export default function FormCustomerAdd({
                       </Stack>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-      <Stack spacing={1}>
-        <InputLabel htmlFor="customer-country">Country</InputLabel>
-        <FormControl fullWidth error={Boolean(formik.touched.country && formik.errors.country)}>
-          <Select
-            id="customer-country"
-            value={formik.values.country}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            name="country"
-            displayEmpty
-          >
-            <MenuItem value="" disabled>
-              Select Country
-            </MenuItem>
-            {countries.map((country) => (
-              <MenuItem key={country.id} value={country.name}>
-                {country.name}
-              </MenuItem>
-            ))}
-          </Select>
-          {formik.touched.country && formik.errors.country && (
-            <FormHelperText>{formik.errors.country}</FormHelperText>
-          )}
-        </FormControl>
-      </Stack>
-    </Grid>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-country">
+                          Country
+                        </InputLabel>
+                        <FormControl
+                          fullWidth
+                          error={Boolean(
+                            formik.touched.country && formik.errors.country
+                          )}
+                        >
+                          <Select
+                            id="customer-country"
+                            value={formik.values.country}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            name="country"
+                            displayEmpty
+                          >
+                            <MenuItem value="" disabled>
+                              Select Country
+                            </MenuItem>
+                            {countries.map((country) => (
+                              <MenuItem key={country.id} value={country.name}>
+                                {country.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          {formik.touched.country && formik.errors.country && (
+                            <FormHelperText>
+                              {formik.errors.country}
+                            </FormHelperText>
+                          )}
+                        </FormControl>
+                      </Stack>
+                    </Grid>
                     <Grid item xs={12}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-location">
@@ -794,41 +808,51 @@ export default function FormCustomerAdd({
                       </Stack>
                     </Grid>
                     <Grid item xs={12}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="customer-skills">
+                          Skills
+                        </InputLabel>
+                        <Autocomplete
+                          multiple
+                          fullWidth
+                          id="customer-skills"
+                          options={skills.map((skill) => skill.name)}
+                          {...getFieldProps("skills")}
+                          getOptionLabel={(label) => label}
+                          onChange={(event, newValue) => {
+                            setFieldValue("skills", newValue);
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              name="skill"
+                              placeholder="Add Skills"
+                            />
+                          )}
+                          renderTags={(value, getTagProps) =>
+                            value.map((option, index) => (
+                              <Chip
+                                {...getTagProps({ index })}
+                                variant="combined"
+                                key={index}
+                                label={option}
+                                deleteIcon={
+                                  <CloseOutlined
+                                    style={{ fontSize: "0.75rem" }}
+                                  />
+                                }
+                                sx={{ color: "text.primary" }}
+                              />
+                            ))
+                          }
+                        />
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={12}>
       <Stack spacing={1}>
-        <InputLabel htmlFor="customer-skills">Skills</InputLabel>
-        <Autocomplete
-          multiple
-          fullWidth
-          id="customer-skills"
-          options={skills.map(skill => skill.name)}
-          {...getFieldProps("skills")}
-          getOptionLabel={(label) => label}
-          onChange={(event, newValue) => {
-            setFieldValue("skills", newValue);
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              name="skill"
-              placeholder="Add Skills"
-            />
-          )}
-          renderTags={(value, getTagProps) =>
-            value.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                variant="combined"
-                key={index}
-                label={option}
-                deleteIcon={
-                  <CloseOutlined style={{ fontSize: "0.75rem" }} />
-                }
-                sx={{ color: "text.primary" }}
-              />
-            ))
-          }
-        />
-      </Stack>
+        <InputLabel htmlFor="customer-documents">Documents</InputLabel>
+        <MultipleFileUploader onFilesUpload={handleFilesUpload} />
+              </Stack>
     </Grid>
                     {/* <Grid item xs={12}>
                       <Stack spacing={1}>
