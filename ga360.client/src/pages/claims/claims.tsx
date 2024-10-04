@@ -34,7 +34,7 @@ export default function ClaimsDashboard() {
               const customers = await fetchCustomerList();
               setAllowedMenu(result);
 
-              setAllowedCustomers(customers);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            s(customers);
+              setAllowedCustomers(customers);
           } catch (error) {
             console.error('Error fetching data:', error);
           }

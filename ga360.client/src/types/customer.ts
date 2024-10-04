@@ -1,5 +1,6 @@
 import { Gender } from 'config';
 import { extend } from 'lodash';
+import { DocumentFileModel } from './customerApiModel';
 
 export interface CustomerProps {
   modal: boolean;
@@ -45,4 +46,6 @@ export interface CustomerListExtended extends CustomerList {
   number: string;
   postcode: string;
   documents: string[];
+  fileDocuments: DocumentFileModel[]
+
 }

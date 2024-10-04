@@ -1,10 +1,13 @@
 ﻿using GA360.DAL.Entities.Entities;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
+using GA360.Domain.Core.Services;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using static GA360.Commons.Helpers.JsonHelper;
 
 namespace GA360.Server.Controllers
 {
@@ -14,10 +17,12 @@ namespace GA360.Server.Controllers
     {
         private readonly ILogger<CustomerController> _logger;
         private readonly ICustomerService _customerService;
-        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService)
+        private readonly IConfiguration _configuration;
+        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService, IConfiguration configuration)
         {
             _logger = logger;
             _customerService = customerService;
+            _configuration = configuration;
         }
 
         [AllowAnonymous]
@@ -37,36 +42,36 @@ namespace GA360.Server.Controllers
             return Ok(result);
         }
 
-        //[AllowAnonymous]
-        //[HttpPut("update/{id}")]
-        //public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
-        //{
-        //    var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
-        //    return Ok(result);
-        //}
-        
+        [AllowAnonymous]
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
+        {
+            var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
+            return Ok(result);
+        }
+
         [AllowAnonymous]
         [HttpPut("updatewithdocuments/{id}")]
         public async Task<IActionResult> UpdateCustomerWithDocuments([FromForm] CustomerUploadViewModel contact, int id)
         {
-            // Process the JSON payload
-            var customer = JsonSerializer.Deserialize<UserViewModel>(contact.Customer);
-
-            // Process the uploaded files
-            foreach (var file in contact.Files)
+            var customer = JsonSerializer.Deserialize<UserViewModel>(contact.Customer, new JsonSerializerOptions
             {
-                if (file.Length > 0)
-                {
-                    var filePath = Path.Combine("uploads", file.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-                }
-            }
-            return Ok();
-            //var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
-            //return Ok(result);
+                PropertyNamingPolicy = new UpperCaseNamingPolicy()
+            });
+
+            var files = await FileService.ExtractFiles(contact.Files);
+
+            var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(customer, files));
+
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
+
+            var jsonResult = JsonSerializer.Serialize(result, options);
+
+            return Ok(jsonResult);
         }
 
         [AllowAnonymous]
@@ -120,6 +125,13 @@ namespace GA360.Server.Controllers
             destination.Date = DateTime.Now.ToString("yyyy-MM-dd"); // Set current date
             destination.Avatar = 0; // Set default or calculate based on your logic
 
+            destination.FileDocuments = source.Files != null ? source.Files.Select(x => new FileModel
+            {
+                BlobId = x.BlobId,
+                Content = x.Content,
+                Name = x.Name,
+                Url = $"{x.Url}?{_configuration.GetSection("BlobStorageSettings:SharedAccessSignature").Value}"
+            }).ToList() : new List<FileModel>();
             return destination;
         }
 
@@ -135,7 +147,7 @@ namespace GA360.Server.Controllers
             return 0;
         }
 
-        private CustomerModel FromUserViewModelToCustomerModel(UserViewModel userViewModel)
+        private CustomerModel FromUserViewModelToCustomerModel(UserViewModel userViewModel, IList<FileModel> files = null)
         {
             return new CustomerModel
             {
@@ -169,7 +181,8 @@ namespace GA360.Server.Controllers
                 Postcode = userViewModel.Postcode,
                 Street = userViewModel.Street,
                 TrainingCentre = userViewModel.TrainingCentre,
-                Ethnicity = userViewModel.Ethnicity
+                Ethnicity = userViewModel.Ethnicity,
+                Files = files 
             };
         }
 

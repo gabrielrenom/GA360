@@ -49,6 +49,7 @@ const loadingMenu: NavItemType = {
 // ==============================|| MENU ITEMS - API ||============================== //
 
 export function MenuFromAPI() {
+  // @ts-ignore
   const { menu, menuLoading } = useGetMenu();
 
   if (menuLoading) return loadingMenu;

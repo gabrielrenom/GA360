@@ -15,8 +15,10 @@ public class CustomerService : ICustomerService
     private readonly ISkillRepository _skillRepository;
     private readonly IEthnicityRepository _ethnicityRepository;
     private readonly ILogger<CustomerService> _logger;
+    private readonly IFileService _fileService;
+    private readonly IDocumentRepository _documentRepository;
 
-    public CustomerService(ICustomerRepository customerRepository, ILogger<CustomerService> logger, ICountryRepository countryrepository, ISkillRepository skillRepository, IEthnicityRepository ethnicityRepository, ITrainingCentreRepository trainingCentreRepository)
+    public CustomerService(ICustomerRepository customerRepository, ILogger<CustomerService> logger, ICountryRepository countryrepository, ISkillRepository skillRepository, IEthnicityRepository ethnicityRepository, ITrainingCentreRepository trainingCentreRepository, IFileService fileService, IDocumentRepository documentRepository)
     {
         _customerRepository = customerRepository;
         _logger = logger;
@@ -24,6 +26,8 @@ public class CustomerService : ICustomerService
         _skillRepository = skillRepository;
         _ethnicityRepository = ethnicityRepository;
         _trainingCentreRepository = trainingCentreRepository;
+        _fileService = fileService;
+        _documentRepository = documentRepository;
     }
 
     public Customer GetCustomerById(int id)
@@ -170,7 +174,6 @@ public class CustomerService : ICustomerService
 
         var customerdb = await _customerRepository.GetWithAllEntitiesById(id);
 
-
         if (customer.TrainingCentre != null || customer.TrainingCentre > 0)
         {
             customerdb.TrainingCentre = null;
@@ -217,6 +220,7 @@ public class CustomerService : ICustomerService
         _customerRepository.Update(customerdb);
         await _customerRepository.SaveChangesAsync();
 
+
         var skills = new List<CustomerSkills>();
         await _skillRepository.Remove(customerdb.Id);
         var dbSkills = await _skillRepository.GetAll();
@@ -233,6 +237,27 @@ public class CustomerService : ICustomerService
         }
 
         var result = await _skillRepository.AddCustomerSkills(skills);
+
+        var fileResult = await _fileService.UploadDocumentsAsync(customer.Files, customerdb.Id.ToString());
+
+        //if (fileResult?.Where(x=>x.BlobId != string.Empty)?.ToList()?.Count == customer.Files.Count) 
+        //{
+
+        //}
+
+        var documents = new List<DocumentCustomer>();
+        var documentEntities = fileResult.Select(x => new Document
+        {
+            BlobId = x.BlobId,
+            Title = x.Name,
+            Path = x.Url,
+            FileSize = x.ByteArrayContent !=null ? x.ByteArrayContent.Length.ToString():null,
+        }).ToList();
+
+        await _documentRepository.UpsertDocuments(customerdb.Id, documentEntities);
+
+        var docOrphansRemoved = await _fileService.CleanOrphans(customer.Files, customerdb.Id.ToString());
+        var haveOrphansRemovedFromDb = await _documentRepository.CleanOrphans(customerdb.Id, documentEntities);
 
         return customerdb;
     }
@@ -308,5 +333,11 @@ public class CustomerService : ICustomerService
         destination.Number = source.Address?.Number;
         destination.Postcode = source.Address?.Postcode;
         destination.Skills = source.CustomerSkills?.Select(cs => cs.Skill.Name).ToArray();
+        destination.Files = source.DocumentCustomers?.Select(x => new FileModel
+        {
+            BlobId = x.Document.BlobId,
+            Url = x.Document.Path,
+            Name = x.Document.Title
+        }).ToList();
     }
 }

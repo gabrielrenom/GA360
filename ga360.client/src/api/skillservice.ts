@@ -1,7 +1,7 @@
 import { Skill } from 'types/skill';
 
 export const endpoints = {
-  key: 'api/skill',
+  key: '/api/skill',
   list: '/list',
 };
 

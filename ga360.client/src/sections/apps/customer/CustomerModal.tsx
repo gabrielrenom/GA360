@@ -14,7 +14,7 @@ import CircularWithPath from 'components/@extended/progress/CircularWithPath';
 import { useGetCustomer } from 'api/customer';
 
 // types
-import { CustomerList } from 'types/customer';
+import { CustomerList, CustomerListExtended } from 'types/customer';
 
 interface Props {
   open: boolean;
@@ -31,7 +31,7 @@ export default function CustomerModal({ open, modalToggler, customer }: Props) {
   console.log("OPENING MODAL")
 
   const customerForm = useMemo(
-    () => !loading && <FormCustomerAdd customer={customer || null} closeModal={closeModal} />,
+    () => !loading && <FormCustomerAdd customer={customer as CustomerListExtended|| null} closeModal={closeModal} />,
     // eslint-disable-next-line
     [customer, loading]
   );

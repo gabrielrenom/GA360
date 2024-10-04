@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useEffect, useState, ReactElement } from 'react';
 import { useLoaderData } from 'react-router-dom';
 

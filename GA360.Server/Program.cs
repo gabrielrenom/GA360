@@ -1,11 +1,13 @@
 using Duende.Bff;
 using Duende.Bff.Yarp;
+using GA360.Commons.Settings;
 using GA360.DAL.Infrastructure.Contexts;
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.DAL.Infrastructure.Repositories;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,9 @@ builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<ICountryRepository, CountryRepository>();
 builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+builder.Services.Configure<BlobStorageSettings>(builder.Configuration.GetSection("BlobStorageSettings"));
 
 builder.Services.AddBff(x =>
 {
@@ -49,6 +54,7 @@ builder.Services.AddAuthentication(options =>
     options.Authority = "https://www.auth.signos.io";
     //options.Authority = "https://demo.duendesoftware.com";
     //options.ClientId = "interactive";
+    //options.ClientId = "interactive.bff.lms.portal.prod";
     options.ClientId = "interactive.bff.lms.portal";
     //options.ClientId = "IgnacioTest2";
     options.ClientSecret = "J6atmybilSHWwL9RRLakEA==";
@@ -106,7 +112,7 @@ app.MapControllers();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapRemoteBffApiEndpoint("/menu", "https://localhost:7030/menu").AllowAnonymous();
+    //endpoints.MapRemoteBffApiEndpoint("/menu", "https://localhost:7030/menu").AllowAnonymous();
     //.RequireAccessToken(TokenType.User);
 });
 app.MapFallbackToFile("/index.html");

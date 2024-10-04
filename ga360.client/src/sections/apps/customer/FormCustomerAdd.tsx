@@ -4,6 +4,7 @@ import { useEffect, useState, ChangeEvent } from "react";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import CircularProgress from '@mui/material/CircularProgress';
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -44,7 +45,11 @@ import CircularWithPath from "components/@extended/progress/CircularWithPath";
 
 import { ThemeMode, Gender } from "config";
 import { openSnackbar } from "api/snackbar";
-import { insertCustomer, updateCustomer, updateCustomerWithDocuments } from "api/customer";
+import {
+  insertCustomer,
+  updateCustomer,
+  updateCustomerWithDocuments,
+} from "api/customer";
 import { getImageUrl, ImagePath } from "utils/getImageUrl";
 
 // assets
@@ -65,6 +70,7 @@ import { getCountries } from "api/countryService";
 import { Country } from "types/country";
 import MultiFileUpload from "components/third-party/dropzone/MultiFile";
 import MultipleFileUploader from "components/MultipleFileUploader";
+import { DocumentFileModel } from "types/customerApiModel";
 
 interface StatusProps {
   value: number;
@@ -108,7 +114,8 @@ const getInitialValues = (customer: CustomerListExtended | null) => {
     city: "",
     number: "",
     postcode: "",
-    documents:[]
+    documents: [],
+    fileDocuments: [],
   };
 
   if (customer) {
@@ -136,6 +143,8 @@ export default function FormCustomerAdd({
   const theme = useTheme();
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [hasBeenSubmitted, SetHasBeenSubmitted] = useState<boolean>(false);
+  
   const [selectedImage, setSelectedImage] = useState<File | undefined>(
     undefined
   );
@@ -155,6 +164,12 @@ export default function FormCustomerAdd({
   const [countries, setCountries] = useState<Country[]>([]);
   const [documents, setDocuments] = useState<File[]>([]);
 
+  useEffect(() => {
+    const files: File[] = customer.fileDocuments.map(
+      (doc) => new File([], doc.name)
+    );
+    setDocuments(files);
+  }, [customer.documents]);
 
   useEffect(() => {
     if (selectedImage) {
@@ -228,8 +243,8 @@ export default function FormCustomerAdd({
   };
 
   const handleFilesUpload = (files: File[]) => {
-    console.log('Files received from child:', files);
-    setDocuments(files)
+    console.log("Files received from child:", files);
+    setDocuments(files);
     // Handle the files as needed
   };
 
@@ -257,22 +272,44 @@ export default function FormCustomerAdd({
     validationSchema: CustomerSchema,
     enableReinitialize: true,
     onSubmit: async (values, { setSubmitting }) => {
+      SetHasBeenSubmitted(true);
+
       try {
         let newCustomer: CustomerListExtended = values;
         newCustomer.name = newCustomer.firstName + " " + newCustomer.lastName;
         newCustomer.avatarImage = avatarBase64;
         if (customer) {
-          updateCustomerWithDocuments(newCustomer.id!, newCustomer,documents).then(() => {
-            openSnackbar({
-              open: true,
-              message: "Customer update successfully.",
-              variant: "alert",
-              alert: {
-                color: "success",
-              },
-            } as SnackbarProps);
+          setSubmitting(true); // Set submitting state to true
+          updateCustomerWithDocuments(
+            newCustomer.id!,
+            newCustomer,
+            documents
+          ).then((success) => {
+            console.log("SUCCESSSS" , success)
+            if (success) {
+              openSnackbar({
+                open: true,
+                message: "Customer update successfully.",
+                variant: "alert",
+                alert: {
+                  color: "success",
+                },
+              } as SnackbarProps);
+            } else {
+              openSnackbar({
+                open: true,
+                message: "Failed to update customer.",
+                variant: "alert",
+                alert: {
+                  color: "error",
+                },
+              } as SnackbarProps);
+            }
             setSubmitting(false);
             closeModal();
+          }).catch((error) => {
+            console.error('Error:', error);
+            setSubmitting(false);
           });
         } else {
           await insertCustomer(newCustomer).then(() => {
@@ -291,8 +328,72 @@ export default function FormCustomerAdd({
       } catch (error) {
         console.error(error);
       }
+
+      SetHasBeenSubmitted(false);
+
     },
   });
+
+  // const formik = useFormik({
+  //   initialValues: getInitialValues(customer!),
+  //   validationSchema: CustomerSchema,
+  //   enableReinitialize: true,
+  //   onSubmit: async (values, { setSubmitting }) => {
+  //     try {
+  //       let newCustomer: CustomerListExtended = values;
+  //       newCustomer.name = newCustomer.firstName + " " + newCustomer.lastName;
+  //       newCustomer.avatarImage = avatarBase64;
+  //       if (customer) {
+  //         setSubmitting(true); // Set submitting state to true
+  //         updateCustomerWithDocuments(
+  //           newCustomer.id!,
+  //           newCustomer,
+  //           documents
+  //         ).then((success) => {
+  //           if (success) {
+  //             openSnackbar({
+  //               open: true,
+  //               message: "Customer update successfully.",
+  //               variant: "alert",
+  //               alert: {
+  //                 color: "success",
+  //               },
+  //             } as SnackbarProps);
+  //           } else {
+  //             openSnackbar({
+  //               open: true,
+  //               message: "Failed to update customer.",
+  //               variant: "alert",
+  //               alert: {
+  //                 color: "error",
+  //               },
+  //             } as SnackbarProps);
+  //           }
+  //           setSubmitting(false);
+  //           closeModal();
+  //         }).catch((error) => {
+  //           console.error('Error:', error);
+  //           setSubmitting(false);
+  //         });
+  //       } else {
+  //         await insertCustomer(newCustomer).then(() => {
+  //           openSnackbar({
+  //             open: true,
+  //             message: "Customer added successfully.",
+  //             variant: "alert",
+  //             alert: {
+  //               color: "success",
+  //             },
+  //           } as SnackbarProps);
+  //           setSubmitting(false);
+  //           closeModal();
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   },
+  // });
 
   const {
     errors,
@@ -316,6 +417,7 @@ export default function FormCustomerAdd({
     <>
       <FormikProvider value={formik}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
+
           <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
             <DialogTitle>
               {customer ? "Edit Candidate" : "New Candidate"}
@@ -748,23 +850,27 @@ export default function FormCustomerAdd({
                             formik.touched.country && formik.errors.country
                           )}
                         >
-                          <Select
-                            id="customer-country"
-                            value={formik.values.country}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            name="country"
-                            displayEmpty
-                          >
-                            <MenuItem value="" disabled>
-                              Select Country
-                            </MenuItem>
-                            {countries.map((country) => (
-                              <MenuItem key={country.id} value={country.name}>
-                                {country.name}
+                          {countries.length > 0 ? (
+                            <Select
+                              id="customer-country"
+                              value={formik.values.country}
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              name="country"
+                              displayEmpty
+                            >
+                              <MenuItem value="" disabled>
+                                Select Country
                               </MenuItem>
-                            ))}
-                          </Select>
+                              {countries.map((country) => (
+                                <MenuItem key={country.id} value={country.name}>
+                                  {country.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          ) : (
+                            <>Loading...</>
+                          )}
                           {formik.touched.country && formik.errors.country && (
                             <FormHelperText>
                               {formik.errors.country}
@@ -849,52 +955,17 @@ export default function FormCustomerAdd({
                       </Stack>
                     </Grid>
                     <Grid item xs={12}>
-      <Stack spacing={1}>
-        <InputLabel htmlFor="customer-documents">Documents</InputLabel>
-        <MultipleFileUploader onFilesUpload={handleFilesUpload} />
-              </Stack>
-    </Grid>
-                    {/* <Grid item xs={12}>
                       <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-skills">
-                          Skills
+                        <InputLabel htmlFor="customer-documents">
+                          Documents
                         </InputLabel>
-                        <Autocomplete
-                          multiple
-                          fullWidth
-                          id="customer-skills"
-                          options={skills}
-                          {...getFieldProps("skills")}
-                          getOptionLabel={(label) => label}
-                          onChange={(event, newValue) => {
-                            setFieldValue("skills", newValue);
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              name="skill"
-                              placeholder="Add Skills"
-                            />
-                          )}
-                          renderTags={(value, getTagProps) =>
-                            value.map((option, index) => (
-                              <Chip
-                                {...getTagProps({ index })}
-                                variant="combined"
-                                key={index}
-                                label={option}
-                                deleteIcon={
-                                  <CloseOutlined
-                                    style={{ fontSize: "0.75rem" }}
-                                  />
-                                }
-                                sx={{ color: "text.primary" }}
-                              />
-                            ))
-                          }
+                        <MultipleFileUploader
+                          onFilesUpload={handleFilesUpload}
+                          detailedFiles = {customer.fileDocuments}
+                          initialFiles={documents}
                         />
                       </Stack>
-                    </Grid> */}
+                    </Grid>
                     <Grid item xs={12} sm={6}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-portfolio">
@@ -939,6 +1010,7 @@ export default function FormCustomerAdd({
                     <Button color="error" onClick={closeModal}>
                       Cancel
                     </Button>
+                    {hasBeenSubmitted===false?
                     <Button
                       type="submit"
                       variant="contained"
@@ -946,11 +1018,17 @@ export default function FormCustomerAdd({
                     >
                       {customer ? "Edit" : "Add"}
                     </Button>
+                    :<CircularProgress size={44} />}
+
                   </Stack>
                 </Grid>
               </Grid>
             </DialogActions>
+            <Divider />
+
+
           </Form>
+          
         </LocalizationProvider>
       </FormikProvider>
       {customer && (

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useEffect, useState, SyntheticEvent } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 

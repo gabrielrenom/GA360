@@ -13,4 +13,7 @@ public class Document: Audit, IModel
     public string FileType { get; set; }
     public string FileSize { get; set; }
     public string Path { get; set; }
+    public string BlobId { get; set; }
+    public virtual List<DocumentCustomer>? DocumentCustomers { get; set; }
+
 }

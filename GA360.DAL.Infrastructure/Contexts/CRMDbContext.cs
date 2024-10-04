@@ -32,6 +32,7 @@ namespace GA360.DAL.Infrastructure.Contexts
         public DbSet<EthnicOrigin> EthnicOrigins { get; set; }
         public DbSet<Qualification> Qualifications { get; set; }
         public DbSet<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
+        public DbSet<DocumentCustomer> DocumentCustomer { get; set; }
         public CRMDbContext(DbContextOptions<CRMDbContext> options, IConfiguration configuration)
        : base(options)
         {

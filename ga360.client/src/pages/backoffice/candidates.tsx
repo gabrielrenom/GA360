@@ -69,7 +69,7 @@ export default function Candidates() {
                     <Stack direction="row" spacing={1.5} alignItems="center">
                         <Avatar
                             alt="Avatar 1"
-                            size="sm"
+                        //    size="sm"
                             src={getImageUrl(`avatar-${!row.original.avatar ? 1 : row.original.avatar}.png`, ImagePath.USERS)}
                         />
                         <Stack spacing={0}>
@@ -129,22 +129,22 @@ export default function Candidates() {
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Edit">
-                                <IconButton
-                                    color="primary"
-                                    onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                                        e.stopPropagation();
-                                        console.log("ORIGINAL",row.original);
-                                        setSelectedCustomer(row.original);
-                                        setCustomerModal(true);
-                                    }}
-                                >
+                                    <IconButton
+                                        color="primary"
+                                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                                            e.stopPropagation();
+                                            setSelectedCustomer(row.original);
+                                            setCustomerModal(true);
+                                        }}
+                                    >
                                     <EditOutlined />
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Delete">
                                 <IconButton
                                     color="error"
-                                    onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                                    // @ts-ignore
+                                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                                         e.stopPropagation();
                                         setOpen(true);
                                         setCustomerDeleteId(Number(row.original.id));

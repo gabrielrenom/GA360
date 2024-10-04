@@ -1,5 +1,6 @@
 import { Gender } from "config";
 import { CustomerList, CustomerListExtended } from "./customer";
+import { i } from "vite/dist/node/types.d-aGj9QkWt";
 
 export interface CustomerApiModel {
   id?: number;
@@ -23,6 +24,14 @@ export interface CustomerApiModel {
   time: string;
   date: string;
   avatar: number;
+}
+
+export interface DocumentFileModel
+{
+    name: string;
+    content: Blob | null;
+    url: string;
+    blobId: string;
 }
 
 export interface CustomerApiModelExtended {
@@ -60,6 +69,7 @@ export interface CustomerApiModelExtended {
   number: string;
   postcode: string;
   street: string;
+  fileDocuments: DocumentFileModel[]
 }
 
 export const mapCustomerApiModelToCustomerListExtended = (
@@ -118,6 +128,8 @@ export const mapCustomerApiModelToCustomerListExtended = (
     city: source.city,
     number: source.number,
     postcode: source.postcode,
+    documents: [],
+    fileDocuments: source.fileDocuments
   };
 };
 
@@ -229,7 +241,6 @@ export const mapCustomerListToCustomerApiModelExtended = (
     trainingCentre: user.trainingCentre || "",
     nationalInsurance: user.nationalInsurance || "",
     portfolio: user.portfolio || "",
-    dob: user.dob || "",
     street: user.street || "",
     city: user.city || "",
     number: user.number || "",

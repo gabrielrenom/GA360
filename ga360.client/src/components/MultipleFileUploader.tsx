@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Button, Typography, Box, IconButton } from '@mui/material';
+// export default MultipleFileUploader;
+import React, { useState, useEffect } from 'react';
+import { Button, Typography, Box, IconButton, LinearProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import FileProtectOutlined from '@ant-design/icons/FileProtectOutlined';
 import CloseCircleOutlined from '@ant-design/icons/CloseCircleOutlined';
+import { DocumentFileModel } from 'types/customerApiModel';
 
 const Input = styled('input')({
   display: 'none',
@@ -13,11 +15,20 @@ const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application
 
 interface MultipleFileUploaderProps {
   onFilesUpload: (files: File[]) => void;
+  detailedFiles?: DocumentFileModel[];
+  initialFiles?: File[]; // Add initialFiles prop
 }
 
-const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUpload }) => {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUpload,detailedFiles = [], initialFiles = [] }) => {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>(initialFiles);
   const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  function getUrlByFileName(documents: DocumentFileModel[], fileName: string): string | null {
+    const document = documents.find(doc => doc.name === fileName);
+    return document ? document.url : null;
+  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -37,14 +48,29 @@ const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUplo
     if (errorMessage) {
       setError(errorMessage);
     } else {
-      setSelectedFiles(validFiles);
+      setSelectedFiles((prevFiles) => [...prevFiles, ...validFiles]);
       setError(null);
     }
   };
 
   const handleUpload = () => {
     if (selectedFiles.length > 0) {
-      onFilesUpload(selectedFiles);
+      setIsUploading(true);
+      const totalFiles = selectedFiles.length;
+      let uploadedFiles = 0;
+
+      selectedFiles.forEach((file, index) => {
+        // Simulate file upload with a timeout
+        setTimeout(() => {
+          uploadedFiles += 1;
+          setUploadProgress((uploadedFiles / totalFiles) * 100);
+
+          if (uploadedFiles === totalFiles) {
+            setIsUploading(false);
+            onFilesUpload(selectedFiles);
+          }
+        }, 1000 * (index + 1)); // Simulate different upload times for each file
+      });
     } else {
       console.error('No files selected');
     }
@@ -77,15 +103,27 @@ const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUplo
               <span key={index}>
                 <Box display="flex" alignItems="center" justifyContent="center">
                   <FileProtectOutlined />
-                  <Typography variant="body2" ml={1}>{file.name}</Typography>
-                  <IconButton onClick={() => handleRemoveFile(index)} size="small">
+                  <Typography variant="body2" ml={1}>
+                    <a style={{ textDecoration: 'none', color:'#3b3b3b' }} href={getUrlByFileName(detailedFiles, file.name)} download={file.name} target="_blank" rel="noopener noreferrer">
+                      {file.name}
+                    </a>
+                </Typography>
+                  <IconButton style={{color:'red' }}  onClick={() => handleRemoveFile(index)} size="small">
                     <CloseCircleOutlined/>
                   </IconButton>
                 </Box>
               </span>
             ))}
           </ul>
-          <Button variant="contained" color="primary" onClick={handleUpload} mt={2}>
+          {isUploading && (
+            <Box mt={2} width="100%">
+              <LinearProgress variant="determinate" value={uploadProgress} />
+              <Typography variant="body2" mt={1}>
+                Uploading... {Math.round(uploadProgress)}%
+              </Typography>
+            </Box>
+          )}
+          <Button variant="contained" color="primary" onClick={handleUpload} sx={{ mt: 2 }} disabled={isUploading}>
             Upload
           </Button>
         </div>

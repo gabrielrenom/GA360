@@ -51,6 +51,8 @@ namespace GA360.DAL.Infrastructure.Repositories
                 .Include(x => x.QualificationCustomerCourseCertificates)
                 .Include(x => x.CustomerSkills)
                 .ThenInclude(x => x.Skill)
+                .Include(x=> x.DocumentCustomers)
+                .ThenInclude(x=> x.Document)
                 .AsQueryable();
 
             // Apply sorting

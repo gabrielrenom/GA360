@@ -114,31 +114,76 @@ export async function insertCustomer(newCustomer: CustomerListExtended) {
   //   await axios.post(endpoints.key + endpoints.insert, data);
 }
 
-export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]) {
+// export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]) {
 
+//   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
+
+//   const formData = new FormData();
+//   formData.append('Customer', JSON.stringify(mappedCustomer));
+//   documents.forEach((file) => formData.append('Files', file));
+
+//   //formData.append('Files', new File([''], '133694255036516995.jpg', { type: 'image/jpeg' }));
+
+// const options: RequestInit = {
+//   method: 'PUT',
+//   headers: {
+//     'accept': '*/*',
+//     // 'Content-Type' should not be set when sending FormData
+//   },
+//   body: formData,
+// };
+
+// // fetch('/api/customer/updatewithdocuments/'+customerId, options)
+// //   .then(response => response.json())
+// //   .then(data => console.log(data))
+// //   .catch(error => console.error('Error:', error));
+ 
+// }
+
+export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
 
   const formData = new FormData();
   formData.append('Customer', JSON.stringify(mappedCustomer));
   documents.forEach((file) => formData.append('Files', file));
 
-  //formData.append('Files', new File([''], '133694255036516995.jpg', { type: 'image/jpeg' }));
+  const options: RequestInit = {
+    method: 'PUT',
+    headers: {
+      'accept': '*/*',
+      // 'Content-Type' should not be set when sending FormData
+    },
+    body: formData,
+  };
 
-const options: RequestInit = {
-  method: 'PUT',
-  headers: {
-    'accept': '*/*',
-    // 'Content-Type' should not be set when sending FormData
-  },
-  body: formData,
-};
+  try {
+    const response = await fetch(`/api/customer/updatewithdocuments/${customerId}`, options);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    console.log(data);
+    return true; // Return true if the operation was successful
+  } catch (error) {
+    console.error('Error:', error);
+    return false; // Return false if there was an error
+  }
 
-fetch('/api/customer/updatewithdocuments/'+customerId, options)
-  .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error('Error:', error));
- 
+  return true;
 }
+
+  // try {
+  //   const response = await fetch(`/api/customer/updatewithdocuments/${customerId}`, options);
+  //   if (!response.ok) {
+  //     throw new Error('Network response was not ok');
+  //   }
+  //   const data = await response.json();
+  //   console.log(data);
+  // } catch (error) {
+  //   console.error('Error:', error);
+  //   throw error; // Re-throw the error to be caught in the calling function
+  // }
+
 
 export async function updateCustomer(customerId: number, updatedCustomer: CustomerListExtended) {
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);

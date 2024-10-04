@@ -1,4 +1,6 @@
-﻿namespace GA360.Server.ViewModels
+﻿using GA360.Domain.Core.Models;
+
+namespace GA360.Server.ViewModels
 {
     public class UserViewModel
     {
@@ -37,5 +39,6 @@
         public string Employer { get; set; }
         public int TrainingCentre { get; set; }
         public string NationalInsurance { get; set; }
+        public List<FileModel>? FileDocuments { get; internal set; }
     }
 }

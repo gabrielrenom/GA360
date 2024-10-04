@@ -1,7 +1,7 @@
 import { TrainingCentre } from 'types/trainingcentre';
 
 export const endpoints = {
-  key: 'api/trainingcentre',
+  key: '/api/trainingcentre',
   list: '/list',
 };
 
