@@ -29,7 +29,7 @@ import PhoneOutlined from '@ant-design/icons/PhoneOutlined';
 import defaultImages from 'assets/images/users/default.png';
 import { TableDataProps } from 'types/table';
 import makeData from 'data/react-table';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, HeaderGroup, SortingState, useReactTable } from '@tanstack/react-table';
 import ReactTable from 'data/react-table';
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from '@mui/material';
@@ -39,12 +39,22 @@ import ScrollX from 'components/ScrollX';
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
 // types
 import { LabelKeyObject } from 'react-csv/lib/core';
+import { getCandidate } from 'api/customer';
+import { CustomerListExtended } from 'types/customer';
+import { getImageUrl, ImagePath } from 'utils/getImageUrl';
 
 interface ReactTableProps {
   columns: ColumnDef<TableDataProps>[];
   data: TableDataProps[];
 }
+
 export default function TabCandidateProfile() {
+  const [candidate,setCandidate] =  useState<CustomerListExtended>(null);
+  const [avatar, setAvatar] = useState<string | undefined>(
+    candidate?.avatarImage
+      ? candidate.avatarImage
+      : defaultImages
+  );
   const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   const data: TableDataProps[] = makeData(1000);
   const columns = useMemo<ColumnDef<TableDataProps>[]>(
@@ -76,6 +86,21 @@ export default function TabCandidateProfile() {
     ],
     []
   );
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await getCandidate();
+        setAvatar(response.avatarImage);
+        setCandidate(response);
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
 
   function ReactTable({ columns, data }: ReactTableProps) {
     const matchDownSM = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
@@ -205,41 +230,18 @@ export default function TabCandidateProfile() {
             <MainCard>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <Stack direction="row" justifyContent="flex-end">
-                    <Chip label="Pro" size="small" color="primary" />
-                  </Stack>
+
                   <Stack spacing={2.5} alignItems="center">
                     <Avatar alt="Avatar 1" size="xl" src={defaultImages} />
                     <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">BITCH H.</Typography>
-                      <Typography color="secondary">Project Manager</Typography>
+                      {
+                      candidate!==null?
+                      <Typography variant="h5">{candidate.firstName} {candidate.lastName}</Typography>:<></>}
+                      <Typography color="secondary">{candidate!=null?candidate.employeeStatus:<></>}</Typography>
                     </Stack>
                   </Stack>
                 </Grid>
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-                <Grid item xs={12}>
-                  <Stack direction="row" justifyContent="space-around" alignItems="center">
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">86</Typography>
-                      <Typography color="secondary">Post</Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">40</Typography>
-                      <Typography color="secondary">Project</Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">4.5K</Typography>
-                      <Typography color="secondary">Members</Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
+                
                 <Grid item xs={12}>
                   <List component="nav" aria-label="main mailbox folders" sx={{ py: 0, '& .MuiListItem-root': { p: 0, py: 1 } }}>
                     <ListItem>
@@ -247,7 +249,7 @@ export default function TabCandidateProfile() {
                         <MailOutlined />
                       </ListItemIcon>
                       <ListItemSecondaryAction>
-                        <Typography align="right">anshan.dh81@gmail.com</Typography>
+                        <Typography align="right">{candidate!==null?candidate.email:<></>}</Typography>
                       </ListItemSecondaryAction>
                     </ListItem>
                     <ListItem>
@@ -255,7 +257,7 @@ export default function TabCandidateProfile() {
                         <PhoneOutlined />
                       </ListItemIcon>
                       <ListItemSecondaryAction>
-                        <Typography align="right">(+1-876) 8654 239 581</Typography>
+                        <Typography align="right">{candidate!==null?candidate.contact:<></>}</Typography>
                       </ListItemSecondaryAction>
                     </ListItem>
                     <ListItem>
@@ -263,17 +265,7 @@ export default function TabCandidateProfile() {
                         <AimOutlined />
                       </ListItemIcon>
                       <ListItemSecondaryAction>
-                        <Typography align="right">New York</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <EnvironmentOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Link align="right" href="https://google.com" target="_blank">
-                          https://anshan.dh.url
-                        </Link>
+                        <Typography align="right">{candidate!==null?candidate.city:<></>}</Typography>
                       </ListItemSecondaryAction>
                     </ListItem>
                   </List>
@@ -284,42 +276,19 @@ export default function TabCandidateProfile() {
           <Grid item xs={12}>
             <MainCard title="Course Progressions">
               <Grid container spacing={1.25}>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 1</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={30} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 2</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={80} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 3</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={90} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 4</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={30} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 5</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={95} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 6</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={75} />
-                </Grid>
+                {candidate!==null && candidate.courses!==null?
+                candidate.courses.map((data, index) => (
+                  <>
+                    <Grid item xs={6}>
+                      <Typography color="secondary">{data.name}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <LinearWithLabel value={data.progression} />
+                    </Grid>
+                  </>
+                ))
+                :<></>}
+               
               </Grid>
             </MainCard>
           </Grid>

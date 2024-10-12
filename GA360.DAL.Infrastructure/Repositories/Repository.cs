@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.DAL.Entities.BaseEntities;
 using GA360.DAL.Infrastructure.Contexts;
+using System.Reflection.Metadata.Ecma335;
 
 namespace GA360.DAL.Infrastructure.Repositories
 {
@@ -10,6 +11,9 @@ namespace GA360.DAL.Infrastructure.Repositories
         where T : class, IModel
     {
         public readonly CRMDbContext _dbContext;
+
+        public CRMDbContext Context { get => _dbContext; }
+
         public Repository(CRMDbContext dbContext)
         {
             this._dbContext = dbContext;

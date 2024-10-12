@@ -12,7 +12,7 @@ namespace GA360.DAL.Infrastructure.SeedData
     {
         public static void Initialize(CRMDbContext context)
         {
-
+          
             if (!context.EthnicOrigins.Any())
             {
                 var ethnicOrigins = new List<EthnicOrigin>
@@ -630,6 +630,84 @@ namespace GA360.DAL.Infrastructure.SeedData
                 }
                 context.SaveChanges();
             }
+
+            if (!context.Courses.Any())
+            {
+                var courses = new List<Course>
+                {
+                    new Course
+                    {
+                         CertificateDate = DateTime.Now,
+                         CertificateNumber = DateTime.Now.Millisecond.ToString(),
+                         CreatedAt = DateTime.Now,
+                         Status = 1,
+                         RegistrationDate = DateTime.Now,
+                         ExpectedDate = DateTime.Now,
+                         Name = "VR Environment",
+                         Description ="VR Course",
+                         Duration = 500
+                    },
+                    new Course
+                    {
+                         CertificateDate = DateTime.Now,
+                         CertificateNumber = DateTime.Now.Millisecond.ToString(),
+                         CreatedAt = DateTime.Now,
+                         Status = 3,
+                         RegistrationDate = DateTime.Now,
+                         ExpectedDate = DateTime.Now,
+                         Name = "CRM System",
+                         Description ="A new CRM",
+                         Duration=300
+                    },
+                    new Course
+                    {
+                         CertificateDate = DateTime.Now,
+                         CertificateNumber = DateTime.Now.Millisecond.ToString(),
+                         CreatedAt = DateTime.Now,
+                         Status = 2,
+                         RegistrationDate = DateTime.Now,
+                         ExpectedDate = DateTime.Now,
+                         Name = "Hazards",
+                         Description ="Hazards",
+                         Duration=100
+                    }
+                };
+
+                context.Courses.AddRange(courses);
+                context.SaveChanges();
+
+                var contacts = context.Customers.ToList();
+                
+                foreach ( var contact in contacts )
+                {
+                    context.QualificationCustomerCourseCertificates.Add(
+                        new QualificationCustomerCourseCertificate {
+                            CourseId = courses[0].Id,
+                            CustomerId = contact.Id,
+                            Progression = 70,
+                            Assesor = "Mike Smith"
+                        });
+                    context.QualificationCustomerCourseCertificates.Add(
+                        new QualificationCustomerCourseCertificate
+                        {
+                            CourseId = courses[1].Id,
+                            CustomerId = contact.Id,
+                            Progression = 40,
+                            Assesor = "Lisa Richardson"
+                        });
+                    context.QualificationCustomerCourseCertificates.Add(
+                        new QualificationCustomerCourseCertificate
+                        {
+                            CourseId = courses[2].Id,
+                            CustomerId = contact.Id,
+                            Progression = 100,
+                            Assesor = "Mary Bonnet"
+                        });
+
+                    context.SaveChanges();
+                }
+            }
+
         }
     }
 }

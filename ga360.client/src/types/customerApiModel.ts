@@ -34,6 +34,20 @@ export interface DocumentFileModel
     blobId: string;
 }
 
+export interface CourseModel
+{
+    id: number;
+    name: string;
+    description: string;
+    status: number;
+    progression: number;
+    duration: number;
+    assesor: string;
+    date: string;
+    card: string;
+    certification:string;
+}
+
 export interface CustomerApiModelExtended {
   id?: number;
   firstName: string;
@@ -70,6 +84,7 @@ export interface CustomerApiModelExtended {
   postcode: string;
   street: string;
   fileDocuments: DocumentFileModel[]
+  courses: CourseModel []
 }
 
 export const mapCustomerApiModelToCustomerListExtended = (
@@ -129,7 +144,8 @@ export const mapCustomerApiModelToCustomerListExtended = (
     number: source.number,
     postcode: source.postcode,
     documents: [],
-    fileDocuments: source.fileDocuments
+    fileDocuments: source.fileDocuments,
+    courses: source.courses
   };
 };
 

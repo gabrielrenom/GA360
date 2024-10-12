@@ -2,8 +2,10 @@
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
+using System.Security.Cryptography.X509Certificates;
 
 namespace GA360.Domain.Core.Services;
 
@@ -30,14 +32,18 @@ public class CustomerService : ICustomerService
         _documentRepository = documentRepository;
     }
 
-    public Customer GetCustomerById(int id)
+    public DAL.Entities.Entities.Customer GetCustomerById(int id)
     {
         return _customerRepository.Get(id);
     }
 
-    public Customer GetCustomerByEmail(string email)
+    public async Task<CustomerModel> GetCustomerByEmail(string email)
     {
-        return _customerRepository.GetCustomerByEmail(email);
+        var result = await _customerRepository.GetCustomerByEmail(email);
+        CustomerModel destination = new CustomerModel();
+        Map(result, destination);
+
+        return destination;
     }
 
     public IEnumerable<Customer> GetCustomersByCountry(int countryId)
@@ -67,7 +73,7 @@ public class CustomerService : ICustomerService
         return null;
     }
 
-    public async Task<Customer> AddCustomer(CustomerModel customerModel)
+    public async Task<Customer> AddCustomer(Models.CustomerModel customerModel)
     {
         try
         {
@@ -148,7 +154,7 @@ public class CustomerService : ICustomerService
         return null;
     }
 
-    public async Task<Customer> UpdateCustomer(int id, Customer customer)
+    public async Task<DAL.Entities.Entities.Customer> UpdateCustomer(int id, DAL.Entities.Entities.Customer customer)
     {
         var customerdb = _customerRepository.Get(id);
 
@@ -168,7 +174,7 @@ public class CustomerService : ICustomerService
         return customerdb;
     }
 
-    public async Task<Customer> UpdateCustomer(int id, CustomerModel customer)
+    public async Task<Customer> UpdateCustomer(int id, Models.CustomerModel customer)
     {
         var ethnicOrigin = await _ethnicityRepository.Get<EthnicOrigin>(x => x.Name.ToLower() == customer.Ethnicity.ToLower());
 
@@ -279,7 +285,7 @@ public class CustomerService : ICustomerService
         return result;
     }
 
-    public async Task<List<CustomerModel>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
+    public async Task<List<CustomerModel>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<DAL.Entities.Entities.Customer, TOrderKey>> orderBy, bool ascending = true)
     {
         var customerList = new List<CustomerModel>();
 
@@ -289,7 +295,7 @@ public class CustomerService : ICustomerService
         {
             foreach (var customer in customers)
             {
-                CustomerModel destination = new CustomerModel();
+                Models.CustomerModel destination = new Models.CustomerModel();
                 Map(customer, destination);
                 customerList.Add(destination);
             }
@@ -339,5 +345,20 @@ public class CustomerService : ICustomerService
             Url = x.Document.Path,
             Name = x.Document.Title
         }).ToList();
+
+        destination.Courses = source.QualificationCustomerCourseCertificates != null ? 
+            source.QualificationCustomerCourseCertificates
+            .Select(x => new CourseModel 
+            { 
+                Description = x.Course.Description,
+                Id = x.Course.Id,
+                Name = x.Course.Name,
+                Status  = x.Course.Status,
+                Progression = x.Progression,
+                Assesor = x.Assesor,   
+                Duration = x.Course.Duration,
+                Date = x.Course.RegistrationDate!=null?x.Course.RegistrationDate.ToShortDateString():string.Empty,
+            }).ToList() 
+            : new List<CourseModel>();
     }
 }

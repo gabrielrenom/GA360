@@ -77,6 +77,10 @@ export default defineConfig({
                 target,
                 secure: false
             },
+             '^/api/customer/get': {
+                target,
+                secure: false
+            },
             '^/api/customer/updatewithdocuments': {
                 target,
                 secure: false

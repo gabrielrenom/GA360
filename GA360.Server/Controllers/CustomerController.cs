@@ -29,9 +29,21 @@ namespace GA360.Server.Controllers
         [HttpGet("list")]
         public async Task<IActionResult> GetAllContacts()
         {
+
             var result = await _customerService.GetAllCustomersWithEntities(null, null, c => c.Email, true);
 
             return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromUserModelToViewModel(x)).ToList());
+        }
+
+        [AllowAnonymous]
+        [HttpGet("get")]
+        public async Task<IActionResult> GetCustomer()
+        {
+            var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+
+            var result = await _customerService.GetCustomerByEmail(emailClaim);
+
+            return Ok(result);
         }
 
         [AllowAnonymous]

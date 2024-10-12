@@ -11,9 +11,9 @@ namespace GA360.DAL.Infrastructure.Interfaces
 {
     public interface ICustomerRepository : IRepository<Customer>
     {
-        Customer GetCustomerByEmail(string email);
         IEnumerable<Customer> GetCustomersByCountry(int countryId);
         Task<List<Customer>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
         Task<Customer> GetWithAllEntitiesById(int id);
+        Task<Customer> GetCustomerByEmail(string email);
     }
 }

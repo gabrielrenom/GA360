@@ -18,7 +18,8 @@ export const endpoints = {
   modal: '/modal', // server URL
   insert: '/insert', // server URL
   update: '/update', // server URL
-  delete: '/delete' // server URL
+  delete: '/delete', // server URL
+  get: '/get'
 };
 
 export function useGetCustomer() {
@@ -41,7 +42,6 @@ export function useGetCustomer() {
 
   return memoizedValue;
 }
-
 
 //export function useGetCustomer() {
 //    const [data, setData] = useState<any>(null);
@@ -139,6 +139,18 @@ export async function insertCustomer(newCustomer: CustomerListExtended) {
 // //   .catch(error => console.error('Error:', error));
  
 // }
+
+export async function getCandidate() {
+
+  const response = await fetch("/api/customer/get", {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+  const result = await response.json();
+  
+  return result;
+}
 
 export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);

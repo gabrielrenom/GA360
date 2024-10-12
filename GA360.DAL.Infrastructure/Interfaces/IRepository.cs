@@ -1,9 +1,11 @@
 ﻿using GA360.DAL.Entities.BaseEntities;
+using GA360.DAL.Infrastructure.Contexts;
 using System.Linq.Expressions;
 
 namespace GA360.DAL.Infrastructure.Interfaces;
 public interface IRepository<T> where T : IModel
 {
+    CRMDbContext Context{ get;}
     T Get(int key);
     Task<List<T>> GetAll();
     Task<T> Get<T>(Expression<Func<T, bool>> predicate) where T : class;

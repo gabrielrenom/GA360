@@ -46,7 +46,22 @@ namespace GA360.Domain.Core.Models
         public int Status { get; set; }
         public int? TrainingCentre { get; set; }
         public string NationalInsurance { get; set; }
-        public string[] Skills { get;set; }
+        public string[] Skills { get; set; }
         public IList<FileModel> Files { get; set; }
+        public IList<CourseModel> Courses { get; set; }
+    }
+
+    public class CourseModel
+    {
+        public int Id { get; set; }
+        public int Status { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int Progression { get; set; }
+        public string Assesor { get; set; }
+        public int Duration { get; set; }
+        public string Date { get; set; }
+        public string Card { get; set; } = string.Empty;
+        public string Certification { get; set; } = string.Empty;
     }
 }

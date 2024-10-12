@@ -60,4 +60,17 @@ export type TableDataProps = {
   avatar: number;
   skills: string[];
   time: string[];
+
+  coursename: string;
+
 };
+
+export type CourseViewDataProps = {
+  coursename: string;
+  date: string;
+  duration: number;
+  assesor: string;
+  card: string;
+  certification: string;
+};
+
