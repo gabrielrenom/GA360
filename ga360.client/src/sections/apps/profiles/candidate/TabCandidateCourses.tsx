@@ -33,6 +33,7 @@ import ScrollX from 'components/ScrollX';
 import { LabelKeyObject } from 'react-csv/lib/core';
 import { getCandidate } from 'api/customer';
 import { CustomerListExtended } from 'types/customer';
+import CandidateProfile from './CandidateProfile';
 
 interface ReactTableProps {
   columns: ColumnDef<CourseViewDataProps>[];
@@ -238,51 +239,7 @@ export default function TabCandidateCourses() {
       <Grid item xs={12} sm={5} md={4} xl={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-          <MainCard>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-
-                  <Stack spacing={2.5} alignItems="center">
-                    <Avatar alt="Avatar 1" size="xl" src={defaultImages} />
-                    <Stack spacing={0.5} alignItems="center">
-                      {
-                      candidate!==null?
-                      <Typography variant="h5">{candidate.firstName} {candidate.lastName}</Typography>:<></>}
-                      <Typography color="secondary">{candidate!=null?candidate.employeeStatus:<></>}</Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <List component="nav" aria-label="main mailbox folders" sx={{ py: 0, '& .MuiListItem-root': { p: 0, py: 1 } }}>
-                    <ListItem>
-                      <ListItemIcon>
-                        <MailOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">{candidate!==null?candidate.email:<></>}</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <PhoneOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">{candidate!==null?candidate.contact:<></>}</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <AimOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">{candidate!==null?candidate.city:<></>}</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </List>
-                </Grid>
-              </Grid>
-            </MainCard>
+          <CandidateProfile candidate={candidate} defaultImages={defaultImages}></CandidateProfile>
           </Grid>
           <Grid item xs={12}>
           <MainCard title="Course Progressions">

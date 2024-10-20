@@ -12,7 +12,6 @@ namespace GA360.DAL.Infrastructure.SeedData
     {
         public static void Initialize(CRMDbContext context)
         {
-          
             if (!context.EthnicOrigins.Any())
             {
                 var ethnicOrigins = new List<EthnicOrigin>
@@ -28,7 +27,6 @@ namespace GA360.DAL.Infrastructure.SeedData
                 context.EthnicOrigins.AddRange(ethnicOrigins);
                 context.SaveChanges();
             }
-
 
             if (!context.TrainingCentres.Any() || !context.Addresses.Any())
             {
@@ -46,7 +44,6 @@ namespace GA360.DAL.Infrastructure.SeedData
                 );
                 context.SaveChanges();
             }
-
 
             // Check if the Countries table has any data
             if (!context.Countries.Any())
@@ -490,7 +487,6 @@ namespace GA360.DAL.Infrastructure.SeedData
                 context.SaveChanges();
             }
 
-
             // Check if the Clients table has any data
             var manchesteruni = context.Addresses.FirstOrDefault();
 
@@ -631,9 +627,12 @@ namespace GA360.DAL.Infrastructure.SeedData
                 context.SaveChanges();
             }
 
+            var courses = new List<Course>();
+            var qualifications = new List<Qualification>();
+
             if (!context.Courses.Any())
             {
-                var courses = new List<Course>
+                courses = new List<Course>
                 {
                     new Course
                     {
@@ -675,39 +674,87 @@ namespace GA360.DAL.Infrastructure.SeedData
 
                 context.Courses.AddRange(courses);
                 context.SaveChanges();
-
-                var contacts = context.Customers.ToList();
-                
-                foreach ( var contact in contacts )
-                {
-                    context.QualificationCustomerCourseCertificates.Add(
-                        new QualificationCustomerCourseCertificate {
-                            CourseId = courses[0].Id,
-                            CustomerId = contact.Id,
-                            Progression = 70,
-                            Assesor = "Mike Smith"
-                        });
-                    context.QualificationCustomerCourseCertificates.Add(
-                        new QualificationCustomerCourseCertificate
-                        {
-                            CourseId = courses[1].Id,
-                            CustomerId = contact.Id,
-                            Progression = 40,
-                            Assesor = "Lisa Richardson"
-                        });
-                    context.QualificationCustomerCourseCertificates.Add(
-                        new QualificationCustomerCourseCertificate
-                        {
-                            CourseId = courses[2].Id,
-                            CustomerId = contact.Id,
-                            Progression = 100,
-                            Assesor = "Mary Bonnet"
-                        });
-
-                    context.SaveChanges();
-                }
+            }
+            else
+            {
+                courses = context.Courses.ToList();
             }
 
+            if (!context.Qualifications.Any())
+            {
+                qualifications = new List<Qualification>
+                {
+                    new Qualification
+                        {
+                            Name = "Bachelor's Degree in Computer Science",
+                            RegistrationDate = new DateTime(2020, 9, 1),
+                            ExpectedDate = new DateTime(2024, 6, 30),
+                            CertificateDate = new DateTime(2024, 7, 15),
+                            CertificateNumber = 123456,
+                            Status = 1, // Assuming 1 represents 'Completed' status
+                        },
+                    new Qualification
+                        {
+                            Name = "Diploma in Nursing",
+                            RegistrationDate = new DateTime(2019, 1, 15),
+                            ExpectedDate = new DateTime(2021, 12, 15),
+                            CertificateDate = new DateTime(2022, 1, 10),
+                            CertificateNumber = 654321,
+                            Status = 1, // Assuming 1 represents 'Completed' status
+                        },
+                    new Qualification
+                        {
+                            Name = "Master's Degree in Business Administration",
+                            RegistrationDate = new DateTime(2021, 9, 1),
+                            ExpectedDate = new DateTime(2023, 6, 30),
+                            CertificateDate = new DateTime(2023, 7, 15),
+                            CertificateNumber = 789012,
+                            Status = 1, // Assuming 1 represents 'Completed' status
+                        }
+                };
+
+                context.Qualifications.AddRange(qualifications);
+                context.SaveChanges();
+            }
+            else
+            {
+                qualifications = context.Qualifications.ToList();
+            }
+
+            var contactsCourses = context.Customers.ToList();
+
+            foreach (var contact in contactsCourses)
+            {
+                context.QualificationCustomerCourseCertificates.Add(
+                    new QualificationCustomerCourseCertificate
+                    {
+                        CourseId = courses[0].Id,
+                        CustomerId = contact.Id,
+                        Progression = 70,
+                        Assesor = "Mike Smith",
+                        QualificationId = qualifications[0].Id,
+                    });
+                context.QualificationCustomerCourseCertificates.Add(
+                    new QualificationCustomerCourseCertificate
+                    {
+                        CourseId = courses[1].Id,
+                        CustomerId = contact.Id,
+                        Progression = 40,
+                        Assesor = "Lisa Richardson",
+                        QualificationId = qualifications[1].Id,
+                    });
+                context.QualificationCustomerCourseCertificates.Add(
+                    new QualificationCustomerCourseCertificate
+                    {
+                        CourseId = courses[2].Id,
+                        CustomerId = contact.Id,
+                        Progression = 100,
+                        Assesor = "Mary Bonnet",
+                        QualificationId = qualifications[2].Id,
+                    });
+
+                context.SaveChanges();
+            }
         }
     }
 }

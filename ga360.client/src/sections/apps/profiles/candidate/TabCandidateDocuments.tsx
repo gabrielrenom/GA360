@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 // material-ui
 import { Theme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -30,9 +28,9 @@ import PhoneOutlined from "@ant-design/icons/PhoneOutlined";
 import DownloadOutlined from "@ant-design/icons/DownloadOutlined";
 
 import defaultImages from "assets/images/users/default.png";
-import { TableDataProps } from "types/table";
+import { DocumentViewDataProps, TableDataProps } from "types/table";
 import makeData from "data/react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -70,60 +68,62 @@ import ScrollX from "components/ScrollX";
 // types
 import { LabelKeyObject } from "react-csv/lib/core";
 import EditOutlined from "@ant-design/icons/EditOutlined";
+import { CustomerListExtended } from "types/customer";
+import { getCandidate } from "api/customer";
+import { DocumentFileModel } from "types/customerApiModel";
+import CandidateProfile from "./CandidateProfile";
 //import Button from 'themes/overrides/Button';
 
 interface ReactTableProps {
-  columns: ColumnDef<TableDataProps>[];
-  data: TableDataProps[];
+  columns: ColumnDef<DocumentViewDataProps>[];
+  data: DocumentViewDataProps[];
 }
 export default function TabCandidateDocuments() {
+  const [candidate,setCandidate] =  useState<CustomerListExtended>(null);
+  const [documents, setDocuments] = useState<DocumentViewDataProps[]>([]);
+  const [avatar, setAvatar] = useState<string | undefined>(
+    candidate?.avatarImage
+      ? candidate.avatarImage
+      : defaultImages
+  );
+  
   const matchDownMD = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
   const data: TableDataProps[] = makeData(1000);
-  const columns = useMemo<ColumnDef<TableDataProps>[]>(
+  const columns = useMemo<ColumnDef<DocumentViewDataProps>[]>(
     () => [
       {
         header: "Document Name",
         footer: "Document Name",
-        accessorKey: "fullName",
+        accessorKey: "name",
         enableSorting: false,
       },
       {
+        accessorKey: "url",
         header: " ",
         meta: {
           className: "cell-right",
-          
         },
         disableSortBy: true,
         cell: ({ row }) => {
+          const url = row.original.url;
           return (
             <Stack
               direction="row"
               alignItems="center"
               justifyContent="flex-end" // Aligns actions to the right
               spacing={0}
-              >
-              // @ts-ignore
-              <Chip
-                label="View"
-                size="small"
-                color="primary"
-                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.stopPropagation();
-                }}
-                  />
-
+            >
               <IconButton size="medium">
+              <a href={url} target="_blank" rel="noopener noreferrer">
                 <DownloadOutlined />
+                </a>
               </IconButton>
-              <Tooltip title="View">
-                <IconButton color="primary" />
-              </Tooltip>
               <Tooltip title="Delete">
                 <IconButton
                   color="error"
-                          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.stopPropagation();
                   }}
                 />
@@ -136,6 +136,35 @@ export default function TabCandidateDocuments() {
     []
   );
   
+  function mapDocumentFilesToViewData(files: DocumentFileModel[]): DocumentViewDataProps[] {
+    return files.map(file => {
+        const nameParts = file.name.split('/');
+        const fileName = nameParts[nameParts.length - 1];
+        return {
+            name: fileName,
+            url: file.url
+        };
+    });
+}
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await getCandidate();
+        setAvatar(response.avatarImage);
+        setCandidate(response);
+
+        const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response.files);
+        
+        setDocuments(mappedFiles)
+
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   function ReactTable({ columns, data }: ReactTableProps) {
     const matchDownSM = useMediaQuery((theme: Theme) =>
@@ -143,7 +172,7 @@ export default function TabCandidateDocuments() {
     );
     const [sorting, setSorting] = useState<SortingState>([
       {
-        id: "age",
+        id: "name",
         desc: false,
       },
     ]);
@@ -299,100 +328,7 @@ export default function TabCandidateDocuments() {
       <Grid item xs={12} sm={5} md={4} xl={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <MainCard>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Stack direction="row" justifyContent="flex-end">
-                    <Chip label="Pro" size="small" color="primary" />
-                  </Stack>
-                  <Stack spacing={2.5} alignItems="center">
-                    <Avatar alt="Avatar 1" size="xl" src={defaultImages} />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">BITCH H.</Typography>
-                      <Typography color="secondary">Project Manager</Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-                <Grid item xs={12}>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-around"
-                    alignItems="center"
-                  >
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">86</Typography>
-                      <Typography color="secondary">Post</Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">40</Typography>
-                      <Typography color="secondary">Project</Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">4.5K</Typography>
-                      <Typography color="secondary">Members</Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-                <Grid item xs={12}>
-                  <List
-                    component="nav"
-                    aria-label="main mailbox folders"
-                    sx={{ py: 0, "& .MuiListItem-root": { p: 0, py: 1 } }}
-                  >
-                    <ListItem>
-                      <ListItemIcon>
-                        <MailOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">
-                          anshan.dh81@gmail.com
-                        </Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <PhoneOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">
-                          (+1-876) 8654 239 581
-                        </Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <AimOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">New York</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <EnvironmentOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Link
-                          align="right"
-                          href="https://google.com"
-                          target="_blank"
-                        >
-                          https://anshan.dh.url
-                        </Link>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </List>
-                </Grid>
-              </Grid>
-            </MainCard>
+            <CandidateProfile candidate={candidate} defaultImages={defaultImages}></CandidateProfile>
           </Grid>
           <Grid item xs={12}>
             <MainCard title="Course Progressions">
@@ -439,7 +375,7 @@ export default function TabCandidateDocuments() {
         </Grid>
       </Grid>
       <Grid item xs={12} sm={7} md={8} xl={9}>
-        <ReactTable {...{ data, columns }} />
+        <ReactTable data={documents} columns={columns}/>
       </Grid>
     </Grid>
   );

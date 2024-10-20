@@ -74,3 +74,7 @@ export type CourseViewDataProps = {
   certification: string;
 };
 
+export type DocumentViewDataProps = {
+  name: string;
+  url: string;
+}

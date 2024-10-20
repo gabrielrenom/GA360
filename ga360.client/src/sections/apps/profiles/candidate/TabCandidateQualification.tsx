@@ -29,7 +29,7 @@ import PhoneOutlined from '@ant-design/icons/PhoneOutlined';
 import defaultImages from 'assets/images/users/default.png';
 import { TableDataProps } from 'types/table';
 import makeData from 'data/react-table';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, HeaderGroup, SortingState, useReactTable } from '@tanstack/react-table';
 import ReactTable from 'data/react-table';
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from '@mui/material';
@@ -39,14 +39,25 @@ import ScrollX from 'components/ScrollX';
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
 // types
 import { LabelKeyObject } from 'react-csv/lib/core';
+import { CustomerListExtended } from 'types/customer';
+import { getCandidate } from 'api/customer';
+import CandidateProfile from './CandidateProfile';
 
 interface ReactTableProps {
   columns: ColumnDef<TableDataProps>[];
   data: TableDataProps[];
 }
 export default function TabCandidateQualification() {
+  const [candidate,setCandidate] =  useState<CustomerListExtended>(null);
   const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   const data: TableDataProps[] = makeData(1000);
+  const [avatar, setAvatar] = useState<string | undefined>(
+    candidate?.avatarImage
+      ? candidate.avatarImage
+      : defaultImages
+  );
+  
+
   const columns = useMemo<ColumnDef<TableDataProps>[]>(
     () => [
       {
@@ -77,6 +88,26 @@ export default function TabCandidateQualification() {
     []
   );
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await getCandidate();
+        setAvatar(response.avatarImage);
+        setCandidate(response);
+
+        
+        // const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response.files);
+        
+        // setDocuments(mappedFiles)
+
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+  
   function ReactTable({ columns, data }: ReactTableProps) {
     const matchDownSM = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
     const [sorting, setSorting] = useState<SortingState>([
@@ -202,84 +233,8 @@ export default function TabCandidateQualification() {
       <Grid item xs={12} sm={5} md={4} xl={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <MainCard>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Stack direction="row" justifyContent="flex-end">
-                    <Chip label="Pro" size="small" color="primary" />
-                  </Stack>
-                  <Stack spacing={2.5} alignItems="center">
-                    <Avatar alt="Avatar 1" size="xl" src={defaultImages} />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">BITCH H.</Typography>
-                      <Typography color="secondary">Project Manager</Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-                <Grid item xs={12}>
-                  <Stack direction="row" justifyContent="space-around" alignItems="center">
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">86</Typography>
-                      <Typography color="secondary">Post</Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">40</Typography>
-                      <Typography color="secondary">Project</Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">4.5K</Typography>
-                      <Typography color="secondary">Members</Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-                <Grid item xs={12}>
-                  <List component="nav" aria-label="main mailbox folders" sx={{ py: 0, '& .MuiListItem-root': { p: 0, py: 1 } }}>
-                    <ListItem>
-                      <ListItemIcon>
-                        <MailOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">anshan.dh81@gmail.com</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <PhoneOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">(+1-876) 8654 239 581</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <AimOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">New York</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <EnvironmentOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Link align="right" href="https://google.com" target="_blank">
-                          https://anshan.dh.url
-                        </Link>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </List>
-                </Grid>
-              </Grid>
-            </MainCard>
+          <CandidateProfile candidate={candidate} defaultImages={defaultImages}></CandidateProfile>
+
           </Grid>
           <Grid item xs={12}>
             <MainCard title="Course Progressions">

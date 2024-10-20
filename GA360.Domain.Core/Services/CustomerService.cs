@@ -3,6 +3,7 @@ using GA360.DAL.Infrastructure.Interfaces;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Security.Cryptography.X509Certificates;
@@ -19,8 +20,9 @@ public class CustomerService : ICustomerService
     private readonly ILogger<CustomerService> _logger;
     private readonly IFileService _fileService;
     private readonly IDocumentRepository _documentRepository;
+    private readonly IConfiguration _configuration;
 
-    public CustomerService(ICustomerRepository customerRepository, ILogger<CustomerService> logger, ICountryRepository countryrepository, ISkillRepository skillRepository, IEthnicityRepository ethnicityRepository, ITrainingCentreRepository trainingCentreRepository, IFileService fileService, IDocumentRepository documentRepository)
+    public CustomerService(ICustomerRepository customerRepository, ILogger<CustomerService> logger, ICountryRepository countryrepository, ISkillRepository skillRepository, IEthnicityRepository ethnicityRepository, ITrainingCentreRepository trainingCentreRepository, IFileService fileService, IDocumentRepository documentRepository, IConfiguration configuration)
     {
         _customerRepository = customerRepository;
         _logger = logger;
@@ -30,6 +32,7 @@ public class CustomerService : ICustomerService
         _trainingCentreRepository = trainingCentreRepository;
         _fileService = fileService;
         _documentRepository = documentRepository;
+        _configuration = configuration;
     }
 
     public DAL.Entities.Entities.Customer GetCustomerById(int id)
@@ -119,7 +122,7 @@ public class CustomerService : ICustomerService
                 AvatarImage = customerModel.AvatarImage,
             };
 
-            if (customerModel.TrainingCentre != null || customerModel.TrainingCentre>0)
+            if (customerModel.TrainingCentre != null || customerModel.TrainingCentre > 0)
             {
                 customer.TrainingCentreId = customerModel.TrainingCentre;
             }
@@ -257,7 +260,7 @@ public class CustomerService : ICustomerService
             BlobId = x.BlobId,
             Title = x.Name,
             Path = x.Url,
-            FileSize = x.ByteArrayContent !=null ? x.ByteArrayContent.Length.ToString():null,
+            FileSize = x.ByteArrayContent != null ? x.ByteArrayContent.Length.ToString() : null,
         }).ToList();
 
         await _documentRepository.UpsertDocuments(customerdb.Id, documentEntities);
@@ -304,7 +307,7 @@ public class CustomerService : ICustomerService
         return customerList;
     }
 
-    public static void Map(Customer source, CustomerModel destination)
+    public void Map(Customer source, CustomerModel destination)
     {
         destination.FirstName = source.FirstName;
         destination.LastName = source.LastName;
@@ -339,26 +342,42 @@ public class CustomerService : ICustomerService
         destination.Number = source.Address?.Number;
         destination.Postcode = source.Address?.Postcode;
         destination.Skills = source.CustomerSkills?.Select(cs => cs.Skill.Name).ToArray();
+
+        //TOdo
+        //destination.Qualifications = source.QualificationCustomerCourseCertificates != null ?
+        //    source.QualificationCustomerCourseCertificates
+        //    .Select(x => new QualificationModel
+        //    {
+        //        CertificateDate = x.Qualification.CertificateDate,
+        //        CertificateNumber = x.Qualification.CertificateNumber,
+        //        ExpectedDate = x.Qualification.ExpectedDate,
+        //        Id = x.Qualification.Id,
+        //        Name = x.Qualification.Name,
+        //        RegistrationDate = x.Qualification.RegistrationDate,
+        //        Status = x.Qualification.Status
+        //    }).ToList() : new List<QualificationModel>();
+
         destination.Files = source.DocumentCustomers?.Select(x => new FileModel
         {
             BlobId = x.Document.BlobId,
-            Url = x.Document.Path,
+            Url = $"{x.Document.Path}?{_configuration.GetSection("BlobStorageSettings:SharedAccessSignature").Value}",
             Name = x.Document.Title
         }).ToList();
 
-        destination.Courses = source.QualificationCustomerCourseCertificates != null ? 
+        destination.Courses = source.QualificationCustomerCourseCertificates != null ?
             source.QualificationCustomerCourseCertificates
-            .Select(x => new CourseModel 
-            { 
+            .Select(x => new CourseModel
+            {
                 Description = x.Course.Description,
                 Id = x.Course.Id,
                 Name = x.Course.Name,
-                Status  = x.Course.Status,
+                Status = x.Course.Status,
                 Progression = x.Progression,
-                Assesor = x.Assesor,   
+                Assesor = x.Assesor,
                 Duration = x.Course.Duration,
-                Date = x.Course.RegistrationDate!=null?x.Course.RegistrationDate.ToShortDateString():string.Empty,
-            }).ToList() 
+                Date = x.Course.RegistrationDate != null ? x.Course.RegistrationDate.ToShortDateString() : string.Empty,
+            }).ToList()
             : new List<CourseModel>();
+
     }
 }

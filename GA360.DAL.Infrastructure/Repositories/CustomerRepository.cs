@@ -26,6 +26,8 @@ namespace GA360.DAL.Infrastructure.Repositories
            .Include(x => x.Address)
            .Include(x => x.QualificationCustomerCourseCertificates)
            .ThenInclude(x => x.Course)
+           .Include(x => x.QualificationCustomerCourseCertificates)
+           .ThenInclude(x => x.Qualification)
            .FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
 
             return result;
