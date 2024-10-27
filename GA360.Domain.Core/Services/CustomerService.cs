@@ -344,18 +344,20 @@ public class CustomerService : ICustomerService
         destination.Skills = source.CustomerSkills?.Select(cs => cs.Skill.Name).ToArray();
 
         //TOdo
-        //destination.Qualifications = source.QualificationCustomerCourseCertificates != null ?
-        //    source.QualificationCustomerCourseCertificates
-        //    .Select(x => new QualificationModel
-        //    {
-        //        CertificateDate = x.Qualification.CertificateDate,
-        //        CertificateNumber = x.Qualification.CertificateNumber,
-        //        ExpectedDate = x.Qualification.ExpectedDate,
-        //        Id = x.Qualification.Id,
-        //        Name = x.Qualification.Name,
-        //        RegistrationDate = x.Qualification.RegistrationDate,
-        //        Status = x.Qualification.Status
-        //    }).ToList() : new List<QualificationModel>();
+        destination.Qualifications = source.QualificationCustomerCourseCertificates != null ?
+            source.QualificationCustomerCourseCertificates.Where(x=>x.QualificationId!=null)
+            .Select(x => new QualificationModel
+            {
+                CertificateDate = x.Qualification.CertificateDate,
+                CertificateNumber = x.Qualification.CertificateNumber,
+                ExpectedDate = x.Qualification.ExpectedDate,
+                Id = x.Qualification.Id,
+                Name = x.Qualification.Name,
+                RegistrationDate = x.Qualification.RegistrationDate,
+                Status = x.Qualification.Status,
+                Progression = x.QualificationProgression
+
+            }).ToList() : new List<QualificationModel>();
 
         destination.Files = source.DocumentCustomers?.Select(x => new FileModel
         {
@@ -364,15 +366,29 @@ public class CustomerService : ICustomerService
             Name = x.Document.Title
         }).ToList();
 
+        destination.Certificates = source.QualificationCustomerCourseCertificates != null ?
+            source.QualificationCustomerCourseCertificates
+            .Where(x=>x.CertificateId != null)
+            .Select(x=> new CertificateModel
+            {
+                  Charge = x.Certificate.Charge,
+                  Id = x.Certificate.Id,
+                  Name= x.Certificate.Name,
+                  Type = x.Certificate.Type,
+                  Date = x.CreatedAt
+            }).ToList()
+            : new List<CertificateModel>();
+
         destination.Courses = source.QualificationCustomerCourseCertificates != null ?
             source.QualificationCustomerCourseCertificates
+            .Where(x=>x.CourseId!=null)
             .Select(x => new CourseModel
             {
                 Description = x.Course.Description,
                 Id = x.Course.Id,
                 Name = x.Course.Name,
                 Status = x.Course.Status,
-                Progression = x.Progression,
+                Progression = x.CourseProgression,
                 Assesor = x.Assesor,
                 Duration = x.Course.Duration,
                 Date = x.Course.RegistrationDate != null ? x.Course.RegistrationDate.ToShortDateString() : string.Empty,

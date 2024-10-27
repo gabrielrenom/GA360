@@ -15,7 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<CRMDbContext>(options =>
 options
-.UseSqlServer(builder.Configuration.GetConnectionString("CRM")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+.UseSqlServer(builder.Configuration.GetConnectionString("CRM"))
+.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
 builder.Services.AddControllers();
 
@@ -51,7 +52,8 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
 }).AddOpenIdConnect("oidc", options =>
 {
-    options.Authority = "https://www.auth.signos.io";
+    //options.Authority = "https://www.auth.signos.io";
+    options.Authority = "https://localhost:5443";
     //options.Authority = "https://demo.duendesoftware.com";
     //options.ClientId = "interactive";
     //options.ClientId = "interactive.bff.lms.portal.prod";

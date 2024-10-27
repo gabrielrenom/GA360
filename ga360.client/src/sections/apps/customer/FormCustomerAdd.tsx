@@ -60,7 +60,7 @@ import DeleteFilled from "@ant-design/icons/DeleteFilled";
 // types
 import { SnackbarProps } from "types/snackbar";
 import { CustomerList, CustomerListExtended } from "types/customer";
-import { TrainingCentre } from "types/trainingcentre";
+import { TrainingCentre } from "types/trainingcentretypes";
 import { getTrainingCentres } from "api/trainingcentre";
 import { getEthnicities } from "api/ethnicity";
 import { Ethnicity } from "types/ethnicity";

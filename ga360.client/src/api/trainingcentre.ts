@@ -1,9 +1,11 @@
-import { TrainingCentre } from 'types/trainingcentre';
+import { TrainingCentre } from 'types/trainingcentretypes';
 
 export const endpoints = {
   key: '/api/trainingcentre',
   list: '/list',
 };
+
+
 
 export async function getTrainingCentres(): Promise<TrainingCentre[]> {
   const response = await fetch(endpoints.key + endpoints.list, {
@@ -20,4 +22,4 @@ export async function getTrainingCentres(): Promise<TrainingCentre[]> {
 
   const data: TrainingCentre[] = await response.json();
   return data;
-}
+  }

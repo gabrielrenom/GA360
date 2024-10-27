@@ -1,6 +1,6 @@
 import { Gender } from "config";
 import { CustomerList, CustomerListExtended } from "./customer";
-import { i } from "vite/dist/node/types.d-aGj9QkWt";
+import { i, S } from "vite/dist/node/types.d-aGj9QkWt";
 
 export interface CustomerApiModel {
   id?: number;
@@ -48,6 +48,15 @@ export interface CourseModel
     certification:string;
 }
 
+export interface CertificateModel
+{
+    id: number;
+    name: string;
+    charge: string;
+    type: string;
+    date: string;
+}
+
 export interface CustomerApiModelExtended {
   id?: number;
   firstName: string;
@@ -85,6 +94,8 @@ export interface CustomerApiModelExtended {
   street: string;
   fileDocuments: DocumentFileModel[]
   courses: CourseModel []
+  qualifications: QualificationModel []
+  certificates: CertificateModel []
 }
 
 export const mapCustomerApiModelToCustomerListExtended = (
@@ -145,7 +156,9 @@ export const mapCustomerApiModelToCustomerListExtended = (
     postcode: source.postcode,
     documents: [],
     fileDocuments: source.fileDocuments,
-    courses: source.courses
+    courses: source.courses,
+    qualifications: source.qualifications,
+    certificates: source.certificates
   };
 };
 
@@ -263,3 +276,14 @@ export const mapCustomerListToCustomerApiModelExtended = (
     postcode: user.postcode || "",
   };
 };
+
+export interface QualificationModel {
+  certificateDate: string; // ISO date string
+  certificateNumber: number;
+  expectedDate: string; // ISO date string
+  id: number;
+  name: string;
+  progression: number; // Assuming this is a percentage
+  registrationDate: string; // ISO date string
+  status: number; // You might want to use an enum for status if there are predefined values
+}

@@ -1,6 +1,6 @@
 import { Gender } from 'config';
 import { extend } from 'lodash';
-import { CourseModel, DocumentFileModel } from './customerApiModel';
+import { CertificateModel, CourseModel, DocumentFileModel, QualificationModel } from './customerApiModel';
 
 export interface CustomerProps {
   modal: boolean;
@@ -48,4 +48,6 @@ export interface CustomerListExtended extends CustomerList {
   documents: string[];
   fileDocuments: DocumentFileModel[];
   courses: CourseModel [];
+  qualifications: QualificationModel [];
+  certificates: CertificateModel [];
 }

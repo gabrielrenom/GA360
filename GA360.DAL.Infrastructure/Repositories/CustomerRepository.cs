@@ -28,6 +28,8 @@ namespace GA360.DAL.Infrastructure.Repositories
            .ThenInclude(x => x.Course)
            .Include(x => x.QualificationCustomerCourseCertificates)
            .ThenInclude(x => x.Qualification)
+           .Include(x => x.QualificationCustomerCourseCertificates)
+           .ThenInclude(x => x.Certificate)
            .FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
 
             return result;
@@ -69,6 +71,10 @@ namespace GA360.DAL.Infrastructure.Repositories
                 .ThenInclude(x=> x.Document)
                 .Include(x=> x.QualificationCustomerCourseCertificates)
                 .ThenInclude(x=> x.Course)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Qualification)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Certificate)
                 .AsQueryable();
 
             // Apply sorting
@@ -82,8 +88,5 @@ namespace GA360.DAL.Infrastructure.Repositories
 
             return await query.ToListAsync();
         }
-
-
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using GA360.DAL.Entities.Entities;
+﻿using GA360.DAL.Entities.BaseEntities;
+using GA360.DAL.Entities.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -50,6 +51,7 @@ namespace GA360.Domain.Core.Models
         public IList<FileModel> Files { get; set; }
         public IList<CourseModel> Courses { get; set; }
         public IList<QualificationModel> Qualifications { get; set; }
+        public IList<CertificateModel> Certificates { get; set; }
     }
 
     public class QualificationModel
@@ -60,6 +62,7 @@ namespace GA360.Domain.Core.Models
         public DateTime ExpectedDate { get; set; }
         public DateTime CertificateDate { get; set; }
         public int CertificateNumber { get; set; }
+        public int Progression { get; set; }
         public int Status { get; set; }
     }
 
@@ -75,5 +78,14 @@ namespace GA360.Domain.Core.Models
         public string Date { get; set; }
         public string Card { get; set; } = string.Empty;
         public string Certification { get; set; } = string.Empty;
+    }
+
+    public class CertificateModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Charge { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
     }
 }

@@ -11,6 +11,8 @@ import ClaimsDashboard from '../pages/claims/claims'
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
 import Candidates from '../pages/backoffice/candidates';
+import TrainingCentres from '../pages/backoffice/trainingcentres';
+
 import CandidateProfile from 'pages/apps/profiles/candidate';
 
 // render - dashboard
@@ -157,7 +159,11 @@ const MainRoutes = {
             {
               path: 'candidates',
               element: <Candidates />
-            }
+            },
+            {
+              path: 'trainingcentres',
+              element: <TrainingCentres />
+            },
           ]
         },
         {
@@ -622,6 +628,10 @@ const MainRoutes = {
           element: <AppContactUS />
         }
       ]
+    },
+    {
+      path: '/training',
+      element: <TrainingCentres />,
     }
   ]
 };

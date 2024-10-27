@@ -27,13 +27,13 @@ import MailOutlined from '@ant-design/icons/MailOutlined';
 import PhoneOutlined from '@ant-design/icons/PhoneOutlined';
 
 import defaultImages from 'assets/images/users/default.png';
-import { TableDataProps } from 'types/table';
+import { QualificationViewDataProps, TableDataProps } from 'types/table';
 import makeData from 'data/react-table';
 import { useEffect, useMemo, useState } from 'react';
 import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, HeaderGroup, SortingState, useReactTable } from '@tanstack/react-table';
 import ReactTable from 'data/react-table';
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from '@mui/material';
-import { CSVExport, HeaderSort, SelectColumnSorting,TablePagination } from 'components/third-party/react-table';
+import { CSVExport, HeaderSort, SelectColumnSorting, TablePagination } from 'components/third-party/react-table';
 import ScrollX from 'components/ScrollX';
 
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
@@ -42,247 +42,225 @@ import { LabelKeyObject } from 'react-csv/lib/core';
 import { CustomerListExtended } from 'types/customer';
 import { getCandidate } from 'api/customer';
 import CandidateProfile from './CandidateProfile';
+import { QualificationModel } from 'types/customerApiModel';
+import CourseProgressions from './CourseProfile';
 
 interface ReactTableProps {
-  columns: ColumnDef<TableDataProps>[];
-  data: TableDataProps[];
+    columns: ColumnDef<QualificationViewDataProps>[];
+    data: QualificationViewDataProps[];
 }
+
 export default function TabCandidateQualification() {
-  const [candidate,setCandidate] =  useState<CustomerListExtended>(null);
-  const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
-  const data: TableDataProps[] = makeData(1000);
-  const [avatar, setAvatar] = useState<string | undefined>(
-    candidate?.avatarImage
-      ? candidate.avatarImage
-      : defaultImages
-  );
-  
+    const [candidate, setCandidate] = useState<CustomerListExtended>(null);
+    const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
+    const [qualifications, setQualifications] = useState<QualificationViewDataProps[]>([]);
+    // const data: QualificationViewDataProps[] = makeData(1000);
+    const [avatar, setAvatar] = useState<string | undefined>(
+        candidate?.avatarImage
+            ? candidate.avatarImage
+            : defaultImages
+    );
 
-  const columns = useMemo<ColumnDef<TableDataProps>[]>(
-    () => [
-      {
-        header: 'Qualification Name',
-        footer: 'Qualification Name',
-        accessorKey: 'fullName',
-        enableSorting: false
-      },
-      {
-        header: 'Reg Date',
-        footer: 'Reg Date',
-        accessorKey: 'age',
-        meta: {
-          className: 'cell-right'
-        }
-      },
-      {
-        header: 'Status',
-        footer: 'Status',
-        accessorKey: 'role'
-      },
-      {
-        header: 'Progress',
-        footer: 'Progress',
-        accessorKey: 'role'
-      }
-    ],
-    []
-  );
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await getCandidate();
-        setAvatar(response.avatarImage);
-        setCandidate(response);
-
-        
-        // const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response.files);
-        
-        // setDocuments(mappedFiles)
-
-      } catch (error) {
-        console.error("Error fetching countries:", error);
-      }
+    const mapQualifications = (qualifications: QualificationModel[]): QualificationViewDataProps[] => {
+        return qualifications.map(certificate => ({
+            name: certificate.name,
+            regDate: new Date(certificate.registrationDate).toLocaleDateString('en-GB'), // Format date to UK format
+            status: certificate.status.toString(), // Assuming status is converted to string
+            progress: certificate.progression,
+        }));
     };
 
-    fetchUser();
-  }, []);
-  
-  function ReactTable({ columns, data }: ReactTableProps) {
-    const matchDownSM = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
-    const [sorting, setSorting] = useState<SortingState>([
-      {
-        id: 'age',
-        desc: false
-      }
-    ]);
-  
-    const table = useReactTable({
-      data,
-      columns,
-      state: {
-        sorting
-      },
-      onSortingChange: setSorting,
-      getCoreRowModel: getCoreRowModel(),
-      getSortedRowModel: getSortedRowModel(),
-      getPaginationRowModel: getPaginationRowModel(),
 
-    });
-  
-    let headers: LabelKeyObject[] = [];
-    table.getAllColumns().map((columns) =>
-      headers.push({
-        label: typeof columns.columnDef.header === 'string' ? columns.columnDef.header : '#',
-        // @ts-ignore
-        key: columns.columnDef.accessorKey
-      })
+    const columns = useMemo<ColumnDef<QualificationViewDataProps>[]>(
+        () => [
+            {
+                header: 'Qualification Name',
+                footer: 'Qualification Name',
+                accessorKey: 'name',
+                enableSorting: true
+            },
+            {
+                header: 'Reg Date',
+                footer: 'Reg Date',
+                accessorKey: 'regDate',
+                enableSorting: true,
+                meta: {
+                    className: 'cell-right'
+                }
+            },
+            {
+                header: 'Status',
+                footer: 'Status',
+                accessorKey: 'status'
+            },
+            {
+                header: 'Progress',
+                footer: 'Progress',
+                accessorKey: 'progress',
+                cell: ({ getValue }) => <LinearWithLabel value={getValue<number>()} />
+            }
+        ],
+        []
     );
-  
-    return (
-      <MainCard
-        title={matchDownSM ? 'Sorting' : 'Qualifications'}
-        content={false}
-        secondary={
-          <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
-            <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
-            <CSVExport {...{ data, headers, filename: top ? 'pagination-top.csv' : 'pagination-bottom.csv' }}  />
-          </Stack>
-        }
-      >
-        <ScrollX>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                {table.getHeaderGroups().map((headerGroup: HeaderGroup<any>) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      if (header.column.columnDef.meta !== undefined && header.column.getCanSort()) {
-                        Object.assign(header.column.columnDef.meta, {
-                          className: header.column.columnDef.meta.className + ' cursor-pointer prevent-select'
-                        });
-                      }
-  
-                      return (
-                        <TableCell
-                          key={header.id}
-                          {...header.column.columnDef.meta}
-                          onClick={header.column.getToggleSortingHandler()}
-                          {...(header.column.getCanSort() &&
-                            header.column.columnDef.meta === undefined && {
-                              className: 'cursor-pointer prevent-select'
-                            })}
-                        >
-                          {header.isPlaceholder ? null : (
-                            <Stack direction="row" spacing={1} alignItems="center">
-                              <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
-                              {header.column.getCanSort() && <HeaderSort column={header.column} />}
-                            </Stack>
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHead>
-              <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} {...cell.column.columnDef.meta}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-              <TableFooter>
-                {table.getFooterGroups().map((footerGroup) => (
-                  <TableRow key={footerGroup.id}>
-                    {footerGroup.headers.map((footer) => (
-                      <TableCell key={footer.id} {...footer.column.columnDef.meta}>
-                        {footer.isPlaceholder ? null : flexRender(footer.column.columnDef.header, footer.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableFooter>
-            </Table>
-          </TableContainer>
 
-              <Divider />
-              <Box sx={{ p: 2 }}>
-                <TablePagination
-                  {...{
-                    setPageSize: table.setPageSize,
-                    setPageIndex: table.setPageIndex,
-                    getState: table.getState,
-                    getPageCount: table.getPageCount
-                  }}
-                />
-              </Box>
-            
-        
-        </ScrollX>
-      </MainCard>
-    );
-  }
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await getCandidate();
+                console.log("HEYY", response)
+                setAvatar(response.avatarImage);
+                setCandidate(response);
+                const qualificationsResponse = mapQualifications(response.qualifications);
+                setQualifications(qualificationsResponse);
+                // const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response.files);
 
-  return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} sm={5} md={4} xl={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-          <CandidateProfile candidate={candidate} defaultImages={defaultImages}></CandidateProfile>
+                // setDocuments(mappedFiles)
 
-          </Grid>
-          <Grid item xs={12}>
-            <MainCard title="Course Progressions">
-              <Grid container spacing={1.25}>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 1</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={30} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 2</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={80} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 3</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={90} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 4</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={30} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 5</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={95} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 6</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={75} />
-                </Grid>
-              </Grid>
+            } catch (error) {
+                console.error("Error fetching countries:", error);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    function ReactTable({ columns, data }: ReactTableProps) {
+        const matchDownSM = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
+        const [sorting, setSorting] = useState<SortingState>([
+            {
+                id: 'age',
+                desc: false
+            }
+        ]);
+
+        const table = useReactTable({
+            data,
+            columns,
+            state: {
+                sorting
+            },
+            onSortingChange: setSorting,
+            getCoreRowModel: getCoreRowModel(),
+            getSortedRowModel: getSortedRowModel(),
+            getPaginationRowModel: getPaginationRowModel(),
+
+        });
+
+        let headers: LabelKeyObject[] = [];
+        table.getAllColumns().map((columns) =>
+            headers.push({
+                label: typeof columns.columnDef.header === 'string' ? columns.columnDef.header : '#',
+                // @ts-ignore
+                key: columns.columnDef.accessorKey
+            })
+        );
+
+        return (
+            <MainCard
+                title={matchDownSM ? 'Sorting' : 'Qualifications'}
+                content={false}
+                secondary={
+                    <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
+                        <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
+                        <CSVExport {...{ data, headers, filename: top ? 'pagination-top.csv' : 'pagination-bottom.csv' }} />
+                    </Stack>
+                }
+            >
+                <ScrollX>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                {table.getHeaderGroups().map((headerGroup: HeaderGroup<any>) => (
+                                    <TableRow key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => {
+                                            if (header.column.columnDef.meta !== undefined && header.column.getCanSort()) {
+                                                Object.assign(header.column.columnDef.meta, {
+                                                    className: header.column.columnDef.meta.className + ' cursor-pointer prevent-select'
+                                                });
+                                            }
+
+                                            return (
+                                                <TableCell
+                                                    key={header.id}
+                                                    {...header.column.columnDef.meta}
+                                                    onClick={header.column.getToggleSortingHandler()}
+                                                    {...(header.column.getCanSort() &&
+                                                        header.column.columnDef.meta === undefined && {
+                                                        className: 'cursor-pointer prevent-select'
+                                                    })}
+                                                >
+                                                    {header.isPlaceholder ? null : (
+                                                        <Stack direction="row" spacing={1} alignItems="center">
+                                                            <Box>{flexRender(header.column.columnDef.header, header.getContext())}</Box>
+                                                            {header.column.getCanSort() && <HeaderSort column={header.column} />}
+                                                        </Stack>
+                                                    )}
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                ))}
+                            </TableHead>
+                            <TableBody>
+                                {table.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id} {...cell.column.columnDef.meta}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                            <TableFooter>
+                                {table.getFooterGroups().map((footerGroup) => (
+                                    <TableRow key={footerGroup.id}>
+                                        {footerGroup.headers.map((footer) => (
+                                            <TableCell key={footer.id} {...footer.column.columnDef.meta}>
+                                                {footer.isPlaceholder ? null : flexRender(footer.column.columnDef.header, footer.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableFooter>
+                        </Table>
+                    </TableContainer>
+
+                    <Divider />
+                    <Box sx={{ p: 2 }}>
+                        <TablePagination
+                            {...{
+                                setPageSize: table.setPageSize,
+                                setPageIndex: table.setPageIndex,
+                                getState: table.getState,
+                                getPageCount: table.getPageCount
+                            }}
+                        />
+                    </Box>
+
+
+                </ScrollX>
             </MainCard>
-          </Grid>
+        );
+    }
+
+    return (
+        <Grid container spacing={3}>
+            <Grid item xs={12} sm={5} md={4} xl={3}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <CandidateProfile candidate={candidate} defaultImages={defaultImages}></CandidateProfile>
+
+                    </Grid>
+                    <Grid item xs={12}>
+                        <CourseProgressions candidate={candidate} />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid item xs={12} sm={7} md={8} xl={9}>
+                <ReactTable data={qualifications} columns={columns} />
+            </Grid>
         </Grid>
-      </Grid>
-      <Grid item xs={12} sm={7} md={8} xl={9}>
-      <ReactTable {...{ data, columns }} />
-      </Grid>
-    </Grid>
-  );
+    );
 }

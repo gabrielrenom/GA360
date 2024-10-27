@@ -78,3 +78,18 @@ export type DocumentViewDataProps = {
   name: string;
   url: string;
 }
+
+export type QualificationViewDataProps ={
+  name: string;
+  regDate: string;
+  status: string;
+  progress: number;
+}
+
+export type CertificationViewDataProps ={
+  name: string;
+  // id: number;
+  charge: string;
+  type: string;
+  regDate: string;
+}

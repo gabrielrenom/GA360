@@ -90,7 +90,6 @@ export default function TabCandidateDocuments() {
   const matchDownMD = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
-  const data: TableDataProps[] = makeData(1000);
   const columns = useMemo<ColumnDef<DocumentViewDataProps>[]>(
     () => [
       {

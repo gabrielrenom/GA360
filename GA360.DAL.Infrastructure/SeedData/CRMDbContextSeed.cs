@@ -721,6 +721,22 @@ namespace GA360.DAL.Infrastructure.SeedData
                 qualifications = context.Qualifications.ToList();
             }
 
+            var certificates = new List<Certificate>();
+
+
+            if (!context.Certificates.Any())
+            {
+                certificates = new List<Certificate>
+                {
+                    new Certificate { Name = "Certificate A", Charge = "Charge A", Type = "BA" },
+                    new Certificate { Name = "Certificate B", Charge = "Charge B", Type = "MSc" },
+                    new Certificate { Name = "Certificate C", Charge = "Charge C" , Type = "PhD"}
+                };
+
+                context.Certificates.AddRange(certificates);
+                context.SaveChanges();
+            }
+
             var contactsCourses = context.Customers.ToList();
 
             foreach (var contact in contactsCourses)
@@ -730,27 +746,30 @@ namespace GA360.DAL.Infrastructure.SeedData
                     {
                         CourseId = courses[0].Id,
                         CustomerId = contact.Id,
-                        Progression = 70,
+                        QualificationProgression = 70,
                         Assesor = "Mike Smith",
                         QualificationId = qualifications[0].Id,
+                        CertificateId = certificates[0].Id,
                     });
                 context.QualificationCustomerCourseCertificates.Add(
                     new QualificationCustomerCourseCertificate
                     {
                         CourseId = courses[1].Id,
                         CustomerId = contact.Id,
-                        Progression = 40,
+                        QualificationProgression = 40,
                         Assesor = "Lisa Richardson",
                         QualificationId = qualifications[1].Id,
+                        CertificateId = certificates[1].Id,
                     });
                 context.QualificationCustomerCourseCertificates.Add(
                     new QualificationCustomerCourseCertificate
                     {
                         CourseId = courses[2].Id,
                         CustomerId = contact.Id,
-                        Progression = 100,
+                        QualificationProgression = 100,
                         Assesor = "Mary Bonnet",
                         QualificationId = qualifications[2].Id,
+                        CertificateId = certificates[2].Id,
                     });
 
                 context.SaveChanges();
