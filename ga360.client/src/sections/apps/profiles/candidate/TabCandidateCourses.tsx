@@ -97,14 +97,14 @@ export default function TabCandidateCourses() {
         setAvatar(response.avatarImage);
         setCandidate(response);
 
-        const mappedCourses:CourseViewDataProps[] = response.courses.map((course) => ({
+        const mappedCourses: CourseViewDataProps[] = response.courses.map((course) => ({
           coursename: course.name,
           date: course.date,
-          duration: course.duration,
+          duration: course.duration ? `${course.duration} hours` : null,
           assesor: course.assesor,
           card: course.card,
           certification: course.certification
-        }));
+        }));        
 
         setCourseData(mappedCourses); 
       } catch (error) {
@@ -239,7 +239,7 @@ export default function TabCandidateCourses() {
       <Grid item xs={12} sm={5} md={4} xl={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-          <CandidateProfile candidate={candidate} defaultImages={defaultImages}></CandidateProfile>
+          <CandidateProfile candidate={candidate} defaultImages={avatar}></CandidateProfile>
           </Grid>
           <Grid item xs={12}>
           <MainCard title="Course Progressions">

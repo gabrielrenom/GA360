@@ -63,7 +63,7 @@ namespace GA360.Domain.Core.Models
         public DateTime CertificateDate { get; set; }
         public int CertificateNumber { get; set; }
         public int Progression { get; set; }
-        public int Status { get; set; }
+        public string Status { get; set; }
     }
 
     public class CourseModel

@@ -30,6 +30,18 @@ namespace GA360.DAL.Infrastructure.Repositories
            .ThenInclude(x => x.Qualification)
            .Include(x => x.QualificationCustomerCourseCertificates)
            .ThenInclude(x => x.Certificate)
+           .Include(x => x.QualificationCustomerCourseCertificates)
+           .ThenInclude(x => x.QualificationStatus)
+           .FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
+
+            return result;
+        }
+
+        public async Task<Customer> GetCustomerBasicByEmail(string email)
+        {
+            var result = await GetDbContext()?.Customers
+           ?.Include(x => x.EthnicOrigin)
+           ?.Include(x => x.Country)
            .FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
 
             return result;
@@ -75,6 +87,9 @@ namespace GA360.DAL.Infrastructure.Repositories
                 .ThenInclude(x => x.Qualification)
                 .Include(x => x.QualificationCustomerCourseCertificates)
                 .ThenInclude(x => x.Certificate)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.QualificationStatus)
+
                 .AsQueryable();
 
             // Apply sorting

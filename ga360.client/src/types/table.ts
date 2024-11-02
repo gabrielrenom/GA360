@@ -83,7 +83,7 @@ export type QualificationViewDataProps ={
   name: string;
   regDate: string;
   status: string;
-  progress: number;
+  progress: string;
 }
 
 export type CertificationViewDataProps ={

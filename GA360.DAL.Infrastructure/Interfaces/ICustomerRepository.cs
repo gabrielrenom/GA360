@@ -15,5 +15,6 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Task<List<Customer>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
         Task<Customer> GetWithAllEntitiesById(int id);
         Task<Customer> GetCustomerByEmail(string email);
+        Task<Customer> GetCustomerBasicByEmail(string email);
     }
 }

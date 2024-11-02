@@ -54,7 +54,6 @@ export default function TabCandidateQualification() {
     const [candidate, setCandidate] = useState<CustomerListExtended>(null);
     const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
     const [qualifications, setQualifications] = useState<QualificationViewDataProps[]>([]);
-    // const data: QualificationViewDataProps[] = makeData(1000);
     const [avatar, setAvatar] = useState<string | undefined>(
         candidate?.avatarImage
             ? candidate.avatarImage
@@ -113,9 +112,6 @@ export default function TabCandidateQualification() {
                 setCandidate(response);
                 const qualificationsResponse = mapQualifications(response.qualifications);
                 setQualifications(qualificationsResponse);
-                // const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response.files);
-
-                // setDocuments(mappedFiles)
 
             } catch (error) {
                 console.error("Error fetching countries:", error);
@@ -250,7 +246,7 @@ export default function TabCandidateQualification() {
             <Grid item xs={12} sm={5} md={4} xl={3}>
                 <Grid container spacing={3}>
                     <Grid item xs={12}>
-                        <CandidateProfile candidate={candidate} defaultImages={defaultImages}></CandidateProfile>
+                        <CandidateProfile candidate={candidate} defaultImages={avatar}></CandidateProfile>
 
                     </Grid>
                     <Grid item xs={12}>

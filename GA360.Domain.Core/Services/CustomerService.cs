@@ -49,6 +49,15 @@ public class CustomerService : ICustomerService
         return destination;
     }
 
+    public async Task<CustomerModel> GetBasicCustomerByEmail(string email)
+    {
+        var result = await _customerRepository.GetCustomerBasicByEmail(email);
+        CustomerModel destination = new CustomerModel();
+        Map(result, destination);
+
+        return destination;
+    }
+
     public IEnumerable<Customer> GetCustomersByCountry(int countryId)
     {
         return _customerRepository.GetCustomersByCountry(countryId);
@@ -354,7 +363,7 @@ public class CustomerService : ICustomerService
                 Id = x.Qualification.Id,
                 Name = x.Qualification.Name,
                 RegistrationDate = x.Qualification.RegistrationDate,
-                Status = x.Qualification.Status,
+                Status = x.QualificationStatus==null ? string.Empty : x.QualificationStatus.Name,
                 Progression = x.QualificationProgression
 
             }).ToList() : new List<QualificationModel>();

@@ -47,6 +47,17 @@ namespace GA360.Server.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("get/basic")]
+        public async Task<IActionResult> GetBasicCustomer()
+        {
+            var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+
+            var result = await _customerService.GetBasicCustomerByEmail(emailClaim);
+
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
         [HttpPost("create")]
         public async Task<IActionResult> AddContact([FromBody] UserViewModel contact)
         {

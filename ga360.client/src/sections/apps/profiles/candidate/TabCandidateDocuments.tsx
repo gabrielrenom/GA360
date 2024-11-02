@@ -327,7 +327,7 @@ export default function TabCandidateDocuments() {
       <Grid item xs={12} sm={5} md={4} xl={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <CandidateProfile candidate={candidate} defaultImages={defaultImages}></CandidateProfile>
+            <CandidateProfile candidate={candidate} defaultImages={avatar}></CandidateProfile>
           </Grid>
           <Grid item xs={12}>
             <MainCard title="Course Progressions">

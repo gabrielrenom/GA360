@@ -68,9 +68,8 @@ export default function Candidates() {
                 cell: ({ row, getValue }) => (
                     <Stack direction="row" spacing={1.5} alignItems="center">
                         <Avatar
-                            alt="Avatar 1"
-                        //    size="sm"
-                            src={getImageUrl(`avatar-${!row.original.avatar ? 1 : row.original.avatar}.png`, ImagePath.USERS)}
+                            alt="Candidate picture"
+                            src={row.original.avatarImage ? row.original.avatarImage:getImageUrl(`avatar-${!row.original.avatar ? 1 : row.original.avatar}.png`, ImagePath.USERS)}
                         />
                         <Stack spacing={0}>
                             <Typography variant="subtitle1">{getValue() as string}</Typography>

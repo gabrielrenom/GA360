@@ -285,5 +285,5 @@ export interface QualificationModel {
   name: string;
   progression: number; // Assuming this is a percentage
   registrationDate: string; // ISO date string
-  status: number; // You might want to use an enum for status if there are predefined values
+  status: string; // You might want to use an enum for status if there are predefined values
 }

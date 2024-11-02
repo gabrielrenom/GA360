@@ -21,5 +21,6 @@ namespace GA360.Domain.Core.Interfaces
         Task<Customer> UpdateCustomer(int id, Customer customer);
         Task<Customer> UpdateCustomer(int id, CustomerModel customer);
         Task<List<CustomerModel>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        Task<CustomerModel> GetBasicCustomerByEmail(string email);
     }
 }

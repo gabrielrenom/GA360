@@ -45,6 +45,7 @@ import { getImageUrl, ImagePath } from 'utils/getImageUrl';
 import CourseProgressions from './CourseProfile';
 import { CertificateModel } from 'types/customerApiModel';
 import chartsMap from 'menu-items/charts-map';
+import CandidateProfile from './CandidateProfile';
 
 interface ReactTableProps {
     columns: ColumnDef<CertificationViewDataProps>[];
@@ -54,11 +55,13 @@ interface ReactTableProps {
 
 export default function TabCandidateProfile() {
     const [candidate, setCandidate] = useState<CustomerListExtended>(null);
+
     const [avatar, setAvatar] = useState<string | undefined>(
         candidate?.avatarImage
             ? candidate.avatarImage
             : defaultImages
     );
+
     const [certificates, setCertificates] = useState<CertificationViewDataProps[]>([])
     const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
     const columns = useMemo<ColumnDef<CertificationViewDataProps>[]>(
@@ -105,9 +108,10 @@ export default function TabCandidateProfile() {
             try {
                 const response = await getCandidate();
                 setAvatar(response.avatarImage);
+                console.log("HOOO·",response)
+
                 setCandidate(response);
                 const certificatesResponse = mapCertificates(response.certificates);
-                console.log("HOOO·",certificatesResponse)
                 setCertificates(certificatesResponse);
 
             } catch (error) {
@@ -244,51 +248,7 @@ export default function TabCandidateProfile() {
             <Grid item xs={12} sm={5} md={4} xl={3}>
                 <Grid container spacing={3}>
                     <Grid item xs={12}>
-                        <MainCard>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
-
-                                    <Stack spacing={2.5} alignItems="center">
-                                        <Avatar alt="Avatar 1" size="xl" src={defaultImages} />
-                                        <Stack spacing={0.5} alignItems="center">
-                                            {
-                                                candidate !== null ?
-                                                    <Typography variant="h5">{candidate.firstName} {candidate.lastName}</Typography> : <></>}
-                                            <Typography color="secondary">{candidate != null ? candidate.employeeStatus : <></>}</Typography>
-                                        </Stack>
-                                    </Stack>
-                                </Grid>
-
-                                <Grid item xs={12}>
-                                    <List component="nav" aria-label="main mailbox folders" sx={{ py: 0, '& .MuiListItem-root': { p: 0, py: 1 } }}>
-                                        <ListItem>
-                                            <ListItemIcon>
-                                                <MailOutlined />
-                                            </ListItemIcon>
-                                            <ListItemSecondaryAction>
-                                                <Typography align="right">{candidate !== null ? candidate.email : <></>}</Typography>
-                                            </ListItemSecondaryAction>
-                                        </ListItem>
-                                        <ListItem>
-                                            <ListItemIcon>
-                                                <PhoneOutlined />
-                                            </ListItemIcon>
-                                            <ListItemSecondaryAction>
-                                                <Typography align="right">{candidate !== null ? candidate.contact : <></>}</Typography>
-                                            </ListItemSecondaryAction>
-                                        </ListItem>
-                                        <ListItem>
-                                            <ListItemIcon>
-                                                <AimOutlined />
-                                            </ListItemIcon>
-                                            <ListItemSecondaryAction>
-                                                <Typography align="right">{candidate !== null ? candidate.city : <></>}</Typography>
-                                            </ListItemSecondaryAction>
-                                        </ListItem>
-                                    </List>
-                                </Grid>
-                            </Grid>
-                        </MainCard>
+                        <CandidateProfile candidate={candidate} defaultImages={avatar}></CandidateProfile>
                     </Grid>
                     <Grid item xs={12}>
                         <CourseProgressions candidate={candidate} />

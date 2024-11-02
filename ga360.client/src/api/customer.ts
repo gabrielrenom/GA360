@@ -152,6 +152,18 @@ export async function getCandidate() {
   return result;
 }
 
+export async function getBasicCandidate() {
+
+  const response = await fetch("/api/customer/get/basic", {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+  const result = await response.json();
+  
+  return result;
+}
+
 export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
 
