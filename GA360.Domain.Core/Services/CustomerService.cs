@@ -156,6 +156,20 @@ public class CustomerService : ICustomerService
 
             var result = await _skillRepository.AddCustomerSkills(skills);
 
+            // FILES
+            var fileResult = await _fileService.UploadDocumentsAsync(customerModel.Files, customer.Id.ToString());
+
+            var documents = new List<DocumentCustomer>();
+            var documentEntities = fileResult.Select(x => new Document
+            {
+                BlobId = x.BlobId,
+                Title = x.Name,
+                Path = x.Url,
+                FileSize = x.ByteArrayContent != null ? x.ByteArrayContent.Length.ToString() : null,
+            }).ToList();
+
+            await _documentRepository.UpsertDocuments(customer.Id, documentEntities);
+
             return customer;
         }
         catch (Exception ex)
@@ -257,11 +271,6 @@ public class CustomerService : ICustomerService
         var result = await _skillRepository.AddCustomerSkills(skills);
 
         var fileResult = await _fileService.UploadDocumentsAsync(customer.Files, customerdb.Id.ToString());
-
-        //if (fileResult?.Where(x=>x.BlobId != string.Empty)?.ToList()?.Count == customer.Files.Count) 
-        //{
-
-        //}
 
         var documents = new List<DocumentCustomer>();
         var documentEntities = fileResult.Select(x => new Document

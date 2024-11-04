@@ -21,6 +21,7 @@ import AuthGuard from 'utils/route-guard/AuthGuard';
 import { MenuOrientation } from 'config';
 import useConfig from 'hooks/useConfig';
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import DynamicTableCourse from 'sections/apps/course/DynamicTableCourse';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -50,6 +51,7 @@ export default function DashboardLayout() {
         {!isHorizontal ? <Drawer /> : <HorizontalBar />}
 
         <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
+          
           <Toolbar sx={{ mt: isHorizontal ? 8 : 'inherit' }} />
           <Container
             maxWidth={container ? 'xl' : false}
@@ -62,7 +64,10 @@ export default function DashboardLayout() {
             }}
           >
             <Breadcrumbs />
+            {/* <DynamicTableCourse/> */}
             <Outlet />
+       
+
             <Footer />
           </Container>
         </Box>

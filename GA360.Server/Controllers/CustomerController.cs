@@ -46,10 +46,12 @@ namespace GA360.Server.Controllers
             return Ok(result);
         }
 
-        [AllowAnonymous]
         [HttpGet("get/basic")]
         public async Task<IActionResult> GetBasicCustomer()
         {
+            if (User.Claims.FirstOrDefault(x => x.Type == "email") == null)
+                return Forbid();
+
             var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
 
             var result = await _customerService.GetBasicCustomerByEmail(emailClaim);
@@ -59,10 +61,34 @@ namespace GA360.Server.Controllers
 
         [AllowAnonymous]
         [HttpPost("create")]
-        public async Task<IActionResult> AddContact([FromBody] UserViewModel contact)
+        public async Task<IActionResult> AddContact([FromForm] CustomerAddFilesViewModel contact)
         {
-            var result = await _customerService.AddCustomer(FromUserViewModelToCustomerModel(contact));
-            return Ok(result);
+            try
+            {
+                var customer = JsonSerializer.Deserialize<UserViewModel>(contact.Customer, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = new UpperCaseNamingPolicy()
+                });
+
+                var files = await FileService.ExtractFiles(contact.Files);
+
+                var result = await _customerService.AddCustomer(FromUserViewModelToCustomerModel(customer, files));
+
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.Preserve,
+                    WriteIndented = true
+                };
+
+                var jsonResult = JsonSerializer.Serialize(result, options);
+
+                return Ok(jsonResult);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+
         }
 
         [AllowAnonymous]

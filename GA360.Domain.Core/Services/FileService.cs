@@ -60,31 +60,34 @@ public class FileService:IFileService
 
         try
         {
-            // Process the uploaded files
-            foreach (var file in formFiles)
+            if (formFiles != null)
             {
-                if (file.Length > 0)
+                // Process the uploaded files
+                foreach (var file in formFiles)
                 {
-                    using (var memoryStream = new MemoryStream())
+                    if (file.Length > 0)
                     {
-                        await file.CopyToAsync(memoryStream);
-                        memoryStream.Position = 0;
-
-                        // Copy the content to a byte array
-                        var byteArrayContent = memoryStream.ToArray();
-
-                        // Create a FileModel instance and add it to the list
-                        var fileModel = new FileModel
+                        using (var memoryStream = new MemoryStream())
                         {
-                            Name = file.FileName,
-                            ByteArrayContent = byteArrayContent
-                        };
-                        fileModels.Add(fileModel);
+                            await file.CopyToAsync(memoryStream);
+                            memoryStream.Position = 0;
+
+                            // Copy the content to a byte array
+                            var byteArrayContent = memoryStream.ToArray();
+
+                            // Create a FileModel instance and add it to the list
+                            var fileModel = new FileModel
+                            {
+                                Name = file.FileName,
+                                ByteArrayContent = byteArrayContent
+                            };
+                            fileModels.Add(fileModel);
+                        }
                     }
-                }
-                else
-                {
-                    fileModels.Add(new FileModel { Name = file.FileName, BlobId = file.FileName });
+                    else
+                    {
+                        fileModels.Add(new FileModel { Name = file.FileName, BlobId = file.FileName });
+                    }
                 }
             }
         }

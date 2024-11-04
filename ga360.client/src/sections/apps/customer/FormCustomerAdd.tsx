@@ -47,6 +47,7 @@ import { ThemeMode, Gender } from "config";
 import { openSnackbar } from "api/snackbar";
 import {
   insertCustomer,
+  insertCustomerWithDocuments,
   updateCustomer,
   updateCustomerWithDocuments,
 } from "api/customer";
@@ -165,11 +166,14 @@ export default function FormCustomerAdd({
   const [documents, setDocuments] = useState<File[]>([]);
 
   useEffect(() => {
-    const files: File[] = customer.fileDocuments.map(
-      (doc) => new File([], doc.name)
-    );
-    setDocuments(files);
-  }, [customer.documents]);
+    if (customer != null) {
+      const files: File[] = customer.fileDocuments.map(
+        (doc) => new File([], doc.name)
+      );
+      setDocuments(files);
+    }
+  }, [customer]);
+  
 
   useEffect(() => {
     if (selectedImage) {
@@ -251,6 +255,8 @@ export default function FormCustomerAdd({
   const CustomerSchema = Yup.object().shape({
     firstName: Yup.string().max(255).required("First Name is required"),
     lastName: Yup.string().max(255).required("Last Name is required"),
+    fatherName: Yup.string().max(255).required("Father Name Name is required"),
+    age: Yup.number().required("Age is required"),
     email: Yup.string()
       .max(255)
       .required("Email is required")
@@ -258,6 +264,20 @@ export default function FormCustomerAdd({
     status: Yup.string().required("Status is required"),
     location: Yup.string().max(500),
     about: Yup.string().max(500),
+    gender: Yup.mixed().oneOf([Gender.MALE, Gender.FEMALE, Gender.NONBINARY, Gender.PREFERNOTTOSAY], 'Invalid gender').required('Gender is required'),
+    role: Yup.string().max(255).required("Role is required"),
+    country: Yup.string().max(255).required("Country is required"),
+    dateOfBirth: Yup.date()
+    .max(new Date(new Date().setFullYear(new Date().getFullYear() - 18)), "You must be at least 18 years old")
+    .required("Date of birth is required"),    
+    ethnicity: Yup.string().max(255).required("Ethnicity of birth is required"),
+    employeeStatus: Yup.string().max(255).required("Employee status of birth is required"),
+    trainingCentre: Yup.string().max(255).required("Training centre is required"),
+    city: Yup.string().max(255).required("City is required"),
+    postcode: Yup.string().max(255).required("Postcode is required"),
+    street: Yup.string().max(255).required("Street is required"),
+    number: Yup.string().max(255).required("House number is required"),
+
   });
 
   const [openAlert, setOpenAlert] = useState(false);
@@ -285,7 +305,6 @@ export default function FormCustomerAdd({
             newCustomer,
             documents
           ).then((success) => {
-            console.log("SUCCESSSS" , success)
             if (success) {
               openSnackbar({
                 open: true,
@@ -312,17 +331,36 @@ export default function FormCustomerAdd({
             setSubmitting(false);
           });
         } else {
-          await insertCustomer(newCustomer).then(() => {
-            openSnackbar({
-              open: true,
-              message: "Customer added successfully.",
-              variant: "alert",
-              alert: {
-                color: "success",
-              },
-            } as SnackbarProps);
+          setSubmitting(true); // Set submitting state to true
+          insertCustomerWithDocuments(
+            newCustomer,
+            documents
+          ).then((success) => {
+            console.log("INSERTED" , success)
+            if (success) {
+              openSnackbar({
+                open: true,
+                message: "Customer added successfully.",
+                variant: "alert",
+                alert: {
+                  color: "success",
+                },
+              } as SnackbarProps);
+            } else {
+              openSnackbar({
+                open: true,
+                message: "Failed to add customer.",
+                variant: "alert",
+                alert: {
+                  color: "error",
+                },
+              } as SnackbarProps);
+            }
             setSubmitting(false);
             closeModal();
+          }).catch((error) => {
+            console.error('Error:', error);
+            setSubmitting(false);
           });
         }
       } catch (error) {
@@ -334,66 +372,6 @@ export default function FormCustomerAdd({
     },
   });
 
-  // const formik = useFormik({
-  //   initialValues: getInitialValues(customer!),
-  //   validationSchema: CustomerSchema,
-  //   enableReinitialize: true,
-  //   onSubmit: async (values, { setSubmitting }) => {
-  //     try {
-  //       let newCustomer: CustomerListExtended = values;
-  //       newCustomer.name = newCustomer.firstName + " " + newCustomer.lastName;
-  //       newCustomer.avatarImage = avatarBase64;
-  //       if (customer) {
-  //         setSubmitting(true); // Set submitting state to true
-  //         updateCustomerWithDocuments(
-  //           newCustomer.id!,
-  //           newCustomer,
-  //           documents
-  //         ).then((success) => {
-  //           if (success) {
-  //             openSnackbar({
-  //               open: true,
-  //               message: "Customer update successfully.",
-  //               variant: "alert",
-  //               alert: {
-  //                 color: "success",
-  //               },
-  //             } as SnackbarProps);
-  //           } else {
-  //             openSnackbar({
-  //               open: true,
-  //               message: "Failed to update customer.",
-  //               variant: "alert",
-  //               alert: {
-  //                 color: "error",
-  //               },
-  //             } as SnackbarProps);
-  //           }
-  //           setSubmitting(false);
-  //           closeModal();
-  //         }).catch((error) => {
-  //           console.error('Error:', error);
-  //           setSubmitting(false);
-  //         });
-  //       } else {
-  //         await insertCustomer(newCustomer).then(() => {
-  //           openSnackbar({
-  //             open: true,
-  //             message: "Customer added successfully.",
-  //             variant: "alert",
-  //             alert: {
-  //               color: "success",
-  //             },
-  //           } as SnackbarProps);
-  //           setSubmitting(false);
-  //           closeModal();
-  //         });
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   },
-  // });
 
   const {
     errors,
@@ -556,6 +534,9 @@ export default function FormCustomerAdd({
                           fullWidth
                           id="customer-dateOfBirth"
                           type="date"
+                          error={Boolean(
+                            touched.dateOfBirth && errors.dateOfBirth
+                          )}
                           {...getFieldProps("dateOfBirth")}
                         />
                       </Stack>{" "}
@@ -569,6 +550,9 @@ export default function FormCustomerAdd({
                           fullWidth
                           id="customer-ethnicity"
                           {...getFieldProps("ethnicity")}
+                          error={Boolean(
+                            touched.ethnicity && errors.ethnicity
+                          )}
                         >
                           {ethnicities.map((ethnicity) => (
                             <MenuItem key={ethnicity.id} value={ethnicity.name}>
@@ -602,6 +586,9 @@ export default function FormCustomerAdd({
                           fullWidth
                           id="customer-employeeStatus"
                           {...getFieldProps("employeeStatus")}
+                          error={Boolean(
+                            touched.employeeStatus && errors.employeeStatus
+                          )}
                         >
                           {/* Add options for employee status */}
                           <MenuItem value="employed">Employed</MenuItem>
@@ -633,6 +620,9 @@ export default function FormCustomerAdd({
                           fullWidth
                           id="customer-trainingCentre"
                           {...getFieldProps("trainingCentre")}
+                          error={Boolean(
+                            touched.trainingCentre && errors.trainingCentre
+                          )}
                         >
                           {trainingCentres.length > 0 ? (
                             trainingCentres.map((centre) => (
@@ -648,7 +638,6 @@ export default function FormCustomerAdd({
                         </Select>
                       </Stack>
                     </Grid>
-
                     <Grid item xs={12} sm={6}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-nationalInsurance">
@@ -662,20 +651,24 @@ export default function FormCustomerAdd({
                       </Stack>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-role">
-                          Customer Role
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-role"
-                          placeholder="Enter Role"
-                          {...getFieldProps("role")}
-                          error={Boolean(touched.role && errors.role)}
-                          helperText={touched.role && errors.role}
-                        />
-                      </Stack>
-                    </Grid>
+  <Stack spacing={1}>
+    <InputLabel htmlFor="customer-role">
+      Customer Role
+    </InputLabel>
+    <Select
+      fullWidth
+      id="customer-role"
+      {...getFieldProps("role")}
+      error={Boolean(touched.role && errors.role)}
+    >
+      <MenuItem value="Admin">Admin</MenuItem>
+      <MenuItem value="Candidate">Candidate</MenuItem>
+    </Select>
+    {touched.role && errors.role && (
+      <FormHelperText error>{errors.role}</FormHelperText>
+    )}
+  </Stack>
+</Grid>
                     <Grid item xs={12} sm={6}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor="customer-gender">
@@ -683,6 +676,7 @@ export default function FormCustomerAdd({
                         </InputLabel>
                         <RadioGroup
                           row
+                          error={Boolean(touched.gender && errors.gender)}
                           aria-label="payment-card"
                           {...getFieldProps("gender")}
                         >
@@ -891,7 +885,6 @@ export default function FormCustomerAdd({
                           rows={2}
                           placeholder="Enter Location"
                           {...getFieldProps("location")}
-                          error={Boolean(touched.location && errors.location)}
                           helperText={touched.location && errors.location}
                         />
                       </Stack>
@@ -908,7 +901,6 @@ export default function FormCustomerAdd({
                           rows={2}
                           placeholder="Enter Customer Information"
                           {...getFieldProps("about")}
-                          error={Boolean(touched.about && errors.about)}
                           helperText={touched.about && errors.about}
                         />
                       </Stack>
@@ -961,7 +953,7 @@ export default function FormCustomerAdd({
                         </InputLabel>
                         <MultipleFileUploader
                           onFilesUpload={handleFilesUpload}
-                          detailedFiles = {customer.fileDocuments}
+                          detailedFiles = {documents}
                           initialFiles={documents}
                         />
                       </Stack>
@@ -1016,7 +1008,7 @@ export default function FormCustomerAdd({
                       variant="contained"
                       disabled={isSubmitting}
                     >
-                      {customer ? "Edit" : "Add"}
+                      {customer ? "Save" : "Add"}
                     </Button>
                     :<CircularProgress size={44} />}
 

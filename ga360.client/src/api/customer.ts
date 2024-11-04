@@ -164,12 +164,60 @@ export async function getBasicCandidate() {
   return result;
 }
 
+export async function insertCustomerWithDocuments(newCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
+  const mappedCustomer = mapCustomerListToCustomerApiModelExtended(newCustomer);
+
+  const formData = new FormData();
+  formData.append('Customer', JSON.stringify(mappedCustomer));
+
+  console.log("FILES",documents)
+
+  if (documents && documents.length > 0) {
+    documents.forEach((file) => formData.append('Files', file));
+  }
+  else
+  {
+    formData.append('Files', JSON.stringify([]));
+  }
+
+  const options: RequestInit = {
+    method: 'POST',
+    headers: {
+      'accept': '*/*',
+    },
+    body: formData,
+  };
+
+  try {
+    const response = await fetch(`/api/customer/create`, options);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    console.log(data);
+    return true; // Return true if the operation was successful
+  } catch (error) {
+    console.error('Error:', error);
+    return false; // Return false if there was an error
+  }
+
+  return true;
+}
+
 export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
 
   const formData = new FormData();
   formData.append('Customer', JSON.stringify(mappedCustomer));
-  documents.forEach((file) => formData.append('Files', file));
+
+  console.log("FIKELS", documents)
+  if (documents && documents.length > 0) {
+    documents.forEach((file) => formData.append('Files', file));
+  }
+  else
+  {
+    formData.append('Files', JSON.stringify([]));
+  }
 
   const options: RequestInit = {
     method: 'PUT',

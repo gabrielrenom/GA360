@@ -204,18 +204,7 @@ export default function TabCandidateDocuments() {
       <MainCard
         title={matchDownSM ? "Sorting" : "Documents"}
         content={false}
-        secondary={
-          <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
-            <SelectColumnSorting
-              {...{
-                getState: table.getState,
-                getAllColumns: table.getAllColumns,
-                setSorting,
-              }}
-            />
-            {/* <CSVExport {...{ data, headers, filename: top ? 'pagination-top.csv' : 'pagination-bottom.csv' }}  /> */}
-          </Stack>
-        }
+
       >
         <ScrollX>
           <TableContainer component={Paper}>
@@ -330,44 +319,21 @@ export default function TabCandidateDocuments() {
             <CandidateProfile candidate={candidate} defaultImages={avatar}></CandidateProfile>
           </Grid>
           <Grid item xs={12}>
-            <MainCard title="Course Progressions">
+          <MainCard title="Course Progressions">
               <Grid container spacing={1.25}>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 1</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={30} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 2</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={80} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 3</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={90} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 4</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={30} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 5</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={95} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Level 6</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={75} />
-                </Grid>
+                {candidate!==null && candidate.courses!==null?
+                candidate.courses.map((data, index) => (
+                  <>
+                    <Grid item xs={6}>
+                      <Typography color="secondary">{data.name}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <LinearWithLabel value={data.progression} />
+                    </Grid>
+                  </>
+                ))
+                :<></>}
+               
               </Grid>
             </MainCard>
           </Grid>
