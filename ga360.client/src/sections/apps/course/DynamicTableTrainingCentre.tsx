@@ -26,7 +26,7 @@ import {
 import MainCard from "components/MainCard";
 import { Stack, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
-import { addCourse, Course, deleteCourse, getCourses } from "api/courseService";
+import { addTrainingCentre, deleteTrainingCentre, getTrainingCentres, TrainingCentre, TrainingCentreWithAddress } from "api/trainingcentreService";
 
 
 const initialRows: GridRowsProp = [];
@@ -70,13 +70,13 @@ function EditToolbar(props: EditToolbarProps) {
         startIcon={<PlusOutlined />}
         onClick={handleClick}
       >
-        Add Course
+        Add Training Centre
       </Button>
     </GridToolbarContainer>
   );
 }
 
-export default function DynamicTableCourse() {
+export default function DynamicTableTrainingCentre() {
   const theme = useTheme();
   const downSM = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -84,19 +84,36 @@ export default function DynamicTableCourse() {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
 
   React.useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchTrainingCentres = async () => {
       try {
-        const courses: Course[] = await getCourses();
-        console.log("COURSES",courses)
-        setRows(courses);
+        const trainingCentres: TrainingCentre[] = await getTrainingCentres();
+        console.log("TRAINING CENTRES", trainingCentres);
+  
+        const trainingCentresWithAddress: TrainingCentreWithAddress[] = trainingCentres.map(mapTrainingCentreToWithAddress);
+        setRows(trainingCentresWithAddress);
       } catch (error) {
-        console.error('Failed to fetch courses:', error);
+        console.error('Failed to fetch training centres:', error);
       }
     };
-
-    fetchCourses();
+  
+    fetchTrainingCentres();
   }, []);
+  
 
+  const mapTrainingCentreToWithAddress = (centre: TrainingCentre): TrainingCentreWithAddress => {
+    const { id, name, addressId, address } = centre;
+    const { street, number, postcode, city } = address;
+    return {
+      id,
+      name,
+      addressId,
+      street,
+      number,
+      postcode,
+      city
+    };
+  };
+  
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true;
@@ -107,6 +124,7 @@ export default function DynamicTableCourse() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
+  
   const handleSaveClick = (id: GridRowId) => async () => {
     try {
       const updatedRow = rows.find((row) => row.id === id);
@@ -115,19 +133,19 @@ export default function DynamicTableCourse() {
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
       }
     } catch (error) {
-      console.error('Failed to save course:', error);
+      console.error('Failed to save training centre:', error);
     }
   };
   
+
   const handleDeleteClick = (id: GridRowId) => async () => {    
     try {
-      await deleteCourse(Number(id));
+      await deleteTrainingCentre(Number(id));
       setRows(rows.filter((row) => row.id !== id));
     }
     catch (error){
       console.error('Failed to delete course:', error);
-    }
-
+    }    
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -142,35 +160,31 @@ export default function DynamicTableCourse() {
     }
   };
 
-  const mapToCourse = (row: GridRowModel): Course => {
+  const mapWithAddressToTrainingCentre = (row: GridRowModel): TrainingCentreWithAddress => {
     return {
-      id: row.id as number,  // Assuming id is a string, adjust if necessary
+      id: row.id as number,
       name: row.name as string,
-      description: row.description as string,
-      duration: row.duration as number,
-      registrationDate: row.registrationDate ? new Date(row.registrationDate as string) : null,
-      expectedDate: row.expectedDate ? new Date(row.expectedDate as string) : null,
-      certificateDate: row.certificateDate ? new Date(row.certificateDate as string) : null,
-      certificateNumber: row.certificateNumber as string,
-      status: row.status as number
+      addressId: row.addressId as number,
+      street: row.street as string,
+      number: row.number as string,
+      postcode: row.postcode as string,
+      city: row.city as string
     };
   };
   
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
     try {
-      // If it's a new row, call the addCourse function
       if (newRow.isNew) {
-        const course = mapToCourse(newRow);
-        course.id = 0;
-        console.log("MY COURSE", course);
-        const createdCourse = await addCourse(course);
-        setRows(rows.map((row) => (row.id === newRow.id ? createdCourse : row)));
+        const trainingCentre = mapWithAddressToTrainingCentre(newRow as TrainingCentreWithAddress);
+        trainingCentre.id = 0;
+        const createdCentre = await addTrainingCentre(trainingCentre);
+        setRows(rows.map((row) => (row.id === newRow.id ? createdCentre : row)));
       } else {
         setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
       }
     } catch (error) {
-      console.error('Failed to add course:', error);
+      console.error('Failed to add training centre:', error);
     }
     return updatedRow;
   };
@@ -188,125 +202,106 @@ export default function DynamicTableCourse() {
       type: "number",
       headerAlign: 'center', // Aligns the header text to the center
       align: 'center', // Aligns the cell content to the center
-    },
-    {
-      field: "name",
-      headerName: "NAME",
-      flex: 1,
-      editable: true,
-    },
-    {
-      field: "description",
-      headerName: "DESCRIPTION",
-      flex: 1,
-      editable: true,
-    },
-    {
-      field: "duration",
-      headerName: "HOURS",
-      type: "number",
-      flex: 1,
-      editable: true,
-    },
-    {
-      field: "registrationDate",
-      headerName: "REGISTRATION",
-      type: "date",
-      flex: 1,
-      editable: true,
-      valueFormatter: (params) => { const date = new Date(params as string); return date.toLocaleDateString(); },
-    },
-    {
-      field: "expectedDate",
-      headerName: "EXPECTED",
-      type: "date",
-      flex: 1,
-      editable: true,
-      valueFormatter: (params) => { const date = new Date(params as string); return date.toLocaleDateString(); },
+      flex: 0.5,
 
     },
     {
-      field: "certificateDate",
-      headerName: "CERTIFICATION DATE",
-      type: "date",
-      flex: 2,
-      editable: true,
-      valueFormatter: (params) => { const date = new Date(params as string); return date.toLocaleDateString(); },
-    },
-    {
-      field: "certificateNumber",
-      headerName: "CERT NUMBER",
+      field: 'name',
+      headerName: 'NAME',
       flex: 1,
       editable: true,
     },
     {
-      field: "status",
-      headerName: "STATUS",
-      flex: 1,
-      editable: true,
-      type: "singleSelect",
-      valueOptions: [
-        { value: 1, label: "Active" },
-        { value: 2, label: "Not Active" },
-      ],
+      field: 'addressId',
+      headerName: 'ADDRESS ID',
+      flex: 0.5,
+      editable: false,
+      headerAlign: 'center',
+      align: 'center',
     },
     {
-        field: "actions",
-        type: "actions",
-        headerName: "ACTIONS",
-        flex: 1,
-        cellClassName: "actions",
-        getActions: ({ id }) => {
-          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-      
-          if (isInEditMode) {
-            return [
-              <GridActionsCellItem
-                icon={<SaveOutlined />}
-                label="Save"
-                sx={{ color: "primary.main" }}
-                onClick={handleSaveClick(id)}
-              />,
-              <GridActionsCellItem
-                icon={<CloseOutlined />}
-                label="Cancel"
-                className="textPrimary"
-                onClick={handleCancelClick(id)}
-                color="inherit"
-              />,
-            ];
-          }
-      
+      field: 'street',
+      headerName: 'STREET',
+      flex: 1,
+      editable: true,
+    },
+    {
+      field: 'number',
+      headerName: 'NUMBER',
+      flex: 0.5,
+      editable: true,
+    },
+    {
+      field: 'postcode',
+      headerName: 'POSTCODE',
+      flex: 0.5,
+      editable: true,
+    },
+    {
+      field: 'city',
+      headerName: 'CITY',
+      flex: 1,
+      editable: true,
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      cellClassName: 'actions',
+      getActions: ({ id }) => {
+        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+  
+        if (isInEditMode) {
           return [
             <GridActionsCellItem
-              icon={
-                <Tooltip title="Edit">
-                  <IconButton color="primary">
-                    <EditOutlined />
-                  </IconButton>
-                </Tooltip>
-              }
-              label="Edit"
-              className="textPrimary"
-              onClick={handleEditClick(id)}
-              color="inherit"
+              icon={<SaveOutlined />}
+              label="Save"
+              sx={{ color: 'primary.main' }}
+              onClick={handleSaveClick(id)}
             />,
             <GridActionsCellItem
-              icon={
-                <Tooltip title="Delete">
-                  <IconButton color="error">
-                    <DeleteOutlined />
-                  </IconButton>
-                </Tooltip>
-              }
-              label="Delete"
-              onClick={handleDeleteClick(id)}
+              icon={<CloseOutlined />}
+              label="Cancel"
+              className="textPrimary"
+              onClick={handleCancelClick(id)}
               color="inherit"
             />,
           ];
-        },
-      }
-    ]
+        }
+  
+        return [
+          <GridActionsCellItem
+            icon={
+              <Tooltip title="Edit">
+                <IconButton color="primary">
+                  <EditOutlined />
+                </IconButton>
+              </Tooltip>
+            }
+            label="Edit"
+            className="textPrimary"
+            onClick={handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            icon={
+              <Tooltip title="Delete">
+                <IconButton color="error">
+                  <DeleteOutlined />
+                </IconButton>
+              </Tooltip>
+            }
+            label="Delete"
+            onClick={handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
+];
+
+  
     return (
         <MainCard content={false}>
           <Stack

@@ -105,6 +105,21 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/course': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/qualification': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/trainingcentre': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
             '^/signin-oidc': {
                 target,
                 secure: false

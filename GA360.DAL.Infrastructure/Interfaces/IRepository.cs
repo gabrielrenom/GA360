@@ -12,9 +12,11 @@ public interface IRepository<T> where T : IModel
     Task<List<T>> GetAll(params Expression<Func<T, object>>[] includes);
     Task<List<T>> GetAll(params (Expression<Func<T, object>> include, Expression<Func<object, object>>[] thenIncludes)[] includes);
     void Add(T entity);
+    Task<T> AddAsync(T entity);
     T Find(Expression<Func<T, bool>> expression);
     IEnumerable<T> FindAll(Expression<Func<T, bool>> expression);
     void Update(T entity);
+    Task<T> UpdateAsync(T entity);
     void Delete(T entity);
     void SaveChanges();
     Task SaveChangesAsync();

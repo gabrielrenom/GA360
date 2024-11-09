@@ -35,6 +35,11 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.Configure<BlobStorageSettings>(builder.Configuration.GetSection("BlobStorageSettings"));
 
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IQualificationService, QualificationService>();
+builder.Services.AddScoped<IQualificationRepository, QualificationRepository>();
+
 builder.Services.AddBff(x =>
 {
     x.AntiForgeryHeaderValue = "Dog";

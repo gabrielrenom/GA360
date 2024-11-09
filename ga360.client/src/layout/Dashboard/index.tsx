@@ -22,6 +22,8 @@ import { MenuOrientation } from 'config';
 import useConfig from 'hooks/useConfig';
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import DynamicTableCourse from 'sections/apps/course/DynamicTableCourse';
+import DynamicTableQualification from 'sections/apps/course/DynamicTableQualifications';
+import DynamicTableTrainingCentre from 'sections/apps/course/DynamicTableTrainingCentre';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -64,14 +66,16 @@ export default function DashboardLayout() {
             }}
           >
             <Breadcrumbs />
-            {/* <DynamicTableCourse/> */}
+            <DynamicTableTrainingCentre/>
+            <DynamicTableQualification/>
+            <DynamicTableCourse/>
             <Outlet />
        
 
             <Footer />
           </Container>
         </Box>
-        <AddCustomer />
+        {/* <AddCustomer /> */}
       </Box>
     </AuthGuard>
   );

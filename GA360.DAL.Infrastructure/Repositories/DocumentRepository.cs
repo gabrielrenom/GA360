@@ -3,14 +3,19 @@ using GA360.DAL.Infrastructure.Contexts;
 using GA360.DAL.Infrastructure.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Data;
 
 namespace GA360.DAL.Infrastructure.Repositories;
 
 public class DocumentRepository : Repository<Document>, IDocumentRepository
 {
-    public DocumentRepository(CRMDbContext dbContext) : base(dbContext)
+    private CRMDbContext _context;
+    private ILogger<DocumentRepository> _logger;
+    public DocumentRepository(CRMDbContext dbContext, ILogger<DocumentRepository> logger) : base(dbContext)
     {
+        _context = dbContext;
+        _logger = logger;
     }
 
     public async Task<bool> CleanOrphans(int userId, List<Document> documents)
@@ -44,70 +49,71 @@ public class DocumentRepository : Repository<Document>, IDocumentRepository
     {
         try
         {
-            var existingEntities = GetDbContext().DocumentCustomer.Where(x => x.CustomerId == userId).ToList();
+            // Retrieve existing DocumentCustomer entries for the user
+            var documentsCustomers = await _context.DocumentCustomer
+                .Include(x => x.Document)
+                .Where(x => x.CustomerId == userId)
+                .ToListAsync();
 
-            if (documents != null)
+            // Get document IDs for existing entries
+            var documentIds = documentsCustomers.Select(x => x.Document.Id).ToList();
+
+            // Generate SQL to delete DocumentCustomer entries no longer in the list
+            if (documentIds.Any())
             {
-                var documentIds = GetDbContext().Documents
-                    .Where(d => documents.Select(doc => doc.BlobId).Contains(d.BlobId))
-                    .Select(d => d.Id)
-                    .ToList();
+                var documentIdsString = string.Join(",", documentIds);
+                var deleteDocumentCustomerSql = $"DELETE FROM DocumentCustomer " +
+                                                $"WHERE CustomerId = @userId AND DocumentId NOT IN ({documentIdsString})";
 
-                if (documentIds?.Count != 0)
+                _context.Database.ExecuteSqlRaw(deleteDocumentCustomerSql, new SqlParameter("@userId", userId));
+            }
+
+            foreach (var document in documents)
+            {
+                var existingDocumentCustomer = documentsCustomers
+                    .FirstOrDefault(x => x.Document.BlobId.ToLower() == document.BlobId.ToLower());
+
+                if (existingDocumentCustomer == null)
                 {
-                    var documentIdsString = string.Join(",", documentIds);
-
-                    var deleteDocumentCustomerSql = $"DELETE DC FROM DocumentCustomer DC " +
-                                                    $"WHERE DC.CustomerId = @userId AND DC.DocumentId NOT IN ({documentIdsString})";
-
-                    GetDbContext().Database.ExecuteSqlRaw(deleteDocumentCustomerSql,
-            new SqlParameter("@userId", userId));
-                }
-
-                var documentsToUpload = new List<Document>();
-                foreach (var document in documents)
-                {
-                    if (document.FileSize != "0")
+                    // Insert new document and DocumentCustomer entry
+                    var newDocument = new Document
                     {
-                        var result = await GetDbContext().Documents.FirstOrDefaultAsync(x => x.BlobId.ToLower() == document.BlobId.ToLower());
+                        BlobId = document.BlobId,
+                        Path = document.Path,
+                        Title = document.Title,
+                        FileSize = document.FileSize,
+                        Description = document.Title,
+                        FileType = string.Empty,
+                        Category = string.Empty
+                    };
 
-                        if (result == null)
-                        {
-                            documentsToUpload.Add(new Document
-                            {
-                                BlobId = document.BlobId,
-                                Path = document.Path,
-                                Title = document.Title,
-                                FileSize = document.FileSize,
-                                Description = document.Title,
-                                FileType = string.Empty,
-                                Category = string.Empty
-                            });
-                        }
-                    }
-                }
+                    _context.Documents.Add(newDocument);
+                    await _context.SaveChangesAsync();
 
-                GetDbContext().Documents.AddRange(documentsToUpload);
-
-                await GetDbContext().SaveChangesAsync();
-
-                foreach (var toupload in documentsToUpload)
-                {
-                    GetDbContext().DocumentCustomer.Add(new DocumentCustomer
+                    _context.DocumentCustomer.Add(new DocumentCustomer
                     {
                         CustomerId = userId,
-                        DocumentId = toupload.Id
+                        DocumentId = newDocument.Id,
                     });
+
+                    await _context.SaveChangesAsync();
                 }
+                else
+                {
+                    // Update existing document
+                    var existingDocument = existingDocumentCustomer.Document;
+                    existingDocument.Title = document.Title;
+                    existingDocument.Description = document.Title;
 
-                await GetDbContext().SaveChangesAsync();
-
+                    _context.Documents.Update(existingDocument);
+                    await _context.SaveChangesAsync();
+                }
             }
         }
         catch (Exception ex)
         {
-            string message = ex.Message;
-
+            _logger.LogError(ex, "An error occurred while upserting documents.");
+            throw;
         }
     }
 }

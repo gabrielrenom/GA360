@@ -67,6 +67,20 @@ namespace GA360.DAL.Infrastructure.Repositories
 
         public void SaveChanges() => _dbContext.SaveChanges();
         public async Task SaveChangesAsync() => await _dbContext.SaveChangesAsync();
+
+        public async Task<T> AddAsync(T entity) 
+        { 
+            await _dbContext.AddAsync(entity);
+            await _dbContext.SaveChangesAsync();
+            return entity; 
+        }
+
+        public async Task<T> UpdateAsync(T entity) 
+        {
+            _dbContext.Update(entity);
+            await _dbContext.SaveChangesAsync();
+            return entity;
+        }
     }
 
 }
