@@ -27,7 +27,9 @@ import MainCard from "components/MainCard";
 import { Stack, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
 import { QualificationModel } from "types/customerApiModel";
-import { addQualification, deleteQualification, getQualifications, Qualification } from "api/qualificationService";
+import { addQualification, deleteQualification, getQualifications, Qualification, updateQualification } from "api/qualificationService";
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 
 const initialRows: GridRowsProp = [];
@@ -84,6 +86,9 @@ export default function DynamicTableCourse() {
   const [rows, setRows] = React.useState<GridRowsProp>(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
 
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState('');
+
   React.useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -108,29 +113,31 @@ export default function DynamicTableCourse() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSaveClick = (id: GridRowId) => async () => {
-    try {
-      const updatedRow = rows.find((row) => row.id === id);
-      if (updatedRow) {
-        await processRowUpdate(updatedRow);
-        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-      }
-    } catch (error) {
-      console.error('Failed to save qualification:', error);
-    }
+  const handleSaveClick = (id: GridRowId) => () => {
+    setRowModesModel((prevRowModesModel) => ({
+      ...prevRowModesModel,
+      [id]: { mode: GridRowModes.View },
+    }));
   };
-  
 
-  const handleDeleteClick = (id: GridRowId) => async () => {    
+  const handleDeleteClick = (id: GridRowId) => async () => {
     try {
       await deleteQualification(Number(id));
       setRows(rows.filter((row) => row.id !== id));
+    } catch (error) {
+      console.error('Failed to delete course :', error);
+      setSnackbarMessage('Failed to delete course, it is probablu used by a candidate');
+      setSnackbarOpen(true);
     }
-    catch (error){
-      console.error('Failed to delete course:', error);
-    }  
   };
-
+  
+  const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+  
   const handleCancelClick = (id: GridRowId) => () => {
     setRowModesModel({
       ...rowModesModel,
@@ -158,20 +165,22 @@ export default function DynamicTableCourse() {
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
     try {
-      // If it's a new row, call the addQualification function
       if (newRow.isNew) {
         const qualification = mapToQualification(newRow);
         qualification.id = 0;
         const createdQualification = await addQualification(qualification);
         setRows(rows.map((row) => (row.id === newRow.id ? createdQualification : row)));
       } else {
+        const qualification = mapToQualification(newRow);
+        await updateQualification(qualification.id, qualification); // Call updateQualification for existing rows
         setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
       }
     } catch (error) {
-      console.error('Failed to add qualification:', error);
+      console.error('Failed to update qualification:', error);
     }
     return updatedRow;
   };
+  
   
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
@@ -362,6 +371,7 @@ const columns: GridColDef[] = [
               />
             </Box>
           </Stack>
+          <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose} ></Snackbar>
         </MainCard>
       );
     }      

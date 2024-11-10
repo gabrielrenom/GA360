@@ -47,16 +47,11 @@ public class CourseController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public IActionResult UpdateCourse(int id, [FromBody] Course course)
+    public async Task<IActionResult> UpdateCourse(int id, [FromBody] CourseViewModel course)
     {
-        var existingCourse = _courseService.GetCourse(id);
-        if (existingCourse == null)
-        {
-            return NotFound();
-        }
-        course.Id = id;
-        _courseService.UpdateCourse(course);
-        return NoContent();
+        var result = await _courseService.UpdateCourse(course.ToEntity());
+
+        return Ok(result.ToViewModel());
     }
 
     [HttpDelete("{id}")]

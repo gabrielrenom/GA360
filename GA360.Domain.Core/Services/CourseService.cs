@@ -30,10 +30,22 @@ public class CourseService : ICourseService
         return result;
     }
 
-    public void UpdateCourse(Course course)
+    public async Task<Course> UpdateCourse(Course course)
     {
-        _courseRepository.Update(course);
-        _courseRepository.SaveChanges();
+        var courseentity = _courseRepository.Get(course.Id);
+
+        courseentity.Duration = course.Duration;
+        courseentity.CertificateNumber = course.CertificateNumber;
+        courseentity.CertificateDate = course.CertificateDate;
+        courseentity.Description = course.Description;
+        courseentity.ExpectedDate = course.ExpectedDate;
+        courseentity.Name = course.Name;
+        courseentity.Status = course.Status;
+        courseentity.RegistrationDate = course.RegistrationDate;
+
+        var result = await _courseRepository.UpdateAsync(courseentity);
+
+        return result;
     }
 
     public void DeleteCourse(int id)

@@ -308,7 +308,7 @@ export default function FormCustomerAdd({
             if (success) {
               openSnackbar({
                 open: true,
-                message: "Customer update successfully.",
+                message: "Customer updated successfully.",
                 variant: "alert",
                 alert: {
                   color: "success",

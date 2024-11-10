@@ -65,16 +65,12 @@ public class TrainingCentreController:ControllerBase
     }
 
     [HttpPut("{id}")]
-    public IActionResult UpdateTrainingCentre(int id, [FromBody] TrainingCentre trainingCentre)
+    public async Task<IActionResult> UpdateTrainingCentre(int id, [FromBody] TrainingCentreViewModel trainingCentre)
     {
-        var existingTrainingCentre = _trainingCentreService.GetTrainingCentre(id);
-        if (existingTrainingCentre == null)
-        {
-            return NotFound();
-        }
-        trainingCentre.Id = id;
-        _trainingCentreService.UpdateTrainingCentre(trainingCentre);
-        return NoContent();
+        
+        var result = await _trainingCentreService.UpdateTrainingCentre(trainingCentre.ToEntity());
+
+        return Ok(result.ToViewModel());
     }
 
     [HttpDelete("{id}")]

@@ -47,16 +47,11 @@ public class QualificationController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public IActionResult UpdateQualification(int id, [FromBody] Qualification qualification)
+    public async Task<IActionResult> UpdateQualification(int id, [FromBody] QualificationViewModel qualification)
     {
-        var existingQualification = _qualificationService.GetQualification(id);
-        if (existingQualification == null)
-        {
-            return NotFound();
-        }
-        qualification.Id = id;
-        _qualificationService.UpdateQualification(qualification);
-        return NoContent();
+        var result = await _qualificationService.UpdateQualification(qualification.ToEntity());
+
+        return Ok(result.ToViewModel());
     }
 
     [HttpDelete("{id}")]

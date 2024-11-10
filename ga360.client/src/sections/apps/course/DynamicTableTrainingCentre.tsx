@@ -26,7 +26,7 @@ import {
 import MainCard from "components/MainCard";
 import { Stack, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
-import { addTrainingCentre, deleteTrainingCentre, getTrainingCentres, TrainingCentre, TrainingCentreWithAddress } from "api/trainingcentreService";
+import { addTrainingCentre, deleteTrainingCentre, getTrainingCentres, TrainingCentre, TrainingCentreWithAddress, updateTrainingCentre } from "api/trainingcentreService";
 
 
 const initialRows: GridRowsProp = [];
@@ -125,17 +125,13 @@ export default function DynamicTableTrainingCentre() {
   };
 
   
-  const handleSaveClick = (id: GridRowId) => async () => {
-    try {
-      const updatedRow = rows.find((row) => row.id === id);
-      if (updatedRow) {
-        await processRowUpdate(updatedRow);
-        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-      }
-    } catch (error) {
-      console.error('Failed to save training centre:', error);
-    }
+  const handleSaveClick = (id: GridRowId) => () => {
+    setRowModesModel((prevRowModesModel) => ({
+      ...prevRowModesModel,
+      [id]: { mode: GridRowModes.View },
+    }));
   };
+  
   
 
   const handleDeleteClick = (id: GridRowId) => async () => {    
@@ -174,20 +170,26 @@ export default function DynamicTableTrainingCentre() {
   
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
+    console.log("processRowUpdate");
+  
     try {
       if (newRow.isNew) {
         const trainingCentre = mapWithAddressToTrainingCentre(newRow as TrainingCentreWithAddress);
         trainingCentre.id = 0;
         const createdCentre = await addTrainingCentre(trainingCentre);
-        setRows(rows.map((row) => (row.id === newRow.id ? createdCentre : row)));
+        setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdCentre : row)));
       } else {
-        setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+        const trainingCentre = mapWithAddressToTrainingCentre(newRow as TrainingCentreWithAddress);
+        const updatedCentre = await updateTrainingCentre(trainingCentre.id, trainingCentre);
+        setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? updatedCentre : row)));
       }
     } catch (error) {
-      console.error('Failed to add training centre:', error);
+      console.error('Failed to update training centre:', error);
     }
     return updatedRow;
   };
+  
+  
   
   
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {

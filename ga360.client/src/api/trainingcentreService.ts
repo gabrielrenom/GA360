@@ -83,7 +83,7 @@ export async function addTrainingCentre(trainingCentre: TrainingCentreWithAddres
   return trainingCentreResult;
 }
 
-export async function updateTrainingCentre(id: number, trainingCentre: TrainingCentre): Promise<void> {
+export async function updateTrainingCentre(id: number, trainingCentre: TrainingCentreWithAddress): Promise<TrainingCentreWithAddress> {
   const response = await fetch(`${endpoints.key}/${id}`, {
     method: 'PUT',
     headers: {
@@ -96,6 +96,8 @@ export async function updateTrainingCentre(id: number, trainingCentre: TrainingC
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
+  const trainingCentreResult: TrainingCentreWithAddress = await response.json()
+  return trainingCentreResult;
 }
 
 export async function deleteTrainingCentre(id: number): Promise<void> {

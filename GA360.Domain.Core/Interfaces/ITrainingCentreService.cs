@@ -7,7 +7,7 @@ public interface ITrainingCentreService
     Task<List<TrainingCentre>> GetTrainingCentresAsync();
     TrainingCentre GetTrainingCentre(int id);
     Task<List<TrainingCentre>> GetAllTrainingCentres();
-    Task<TrainingCentre> AddTrainingCentre(TrainingCentre trainingCentre);    
-    void UpdateTrainingCentre(TrainingCentre trainingCentre);
+    Task<TrainingCentre> AddTrainingCentre(TrainingCentre trainingCentre);
+    Task<TrainingCentre> UpdateTrainingCentre(TrainingCentre trainingCentre);
     void DeleteTrainingCentre(int id);
 }

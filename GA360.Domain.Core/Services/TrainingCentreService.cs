@@ -35,10 +35,20 @@ public class TrainingCentreService : ITrainingCentreService
         return result;
     }
 
-    public void UpdateTrainingCentre(TrainingCentre trainingCentre)
+    public async Task<TrainingCentre> UpdateTrainingCentre(TrainingCentre trainingCentre)
     {
-        _trainingCentreRepository.Update(trainingCentre);
-        _trainingCentreRepository.SaveChanges();
+        var trainingcentreEntity = await _trainingCentreRepository.GetTrainingCentreByIdWithAddresses(trainingCentre.Id);
+
+        trainingcentreEntity.Address.Number = trainingCentre.Address.Number;
+        trainingcentreEntity.Address.Postcode = trainingCentre.Address.Postcode;
+        trainingcentreEntity.Address.Street = trainingCentre.Address.Street;
+        trainingcentreEntity.Address.City = trainingCentre.Address.City;
+        trainingcentreEntity.Name = trainingCentre.Name;
+        trainingcentreEntity.ModifiedAt = DateTime.UtcNow;
+
+        var result = await _trainingCentreRepository.UpdateAsync(trainingCentre);
+
+        return result;
     }
 
     public void DeleteTrainingCentre(int id)

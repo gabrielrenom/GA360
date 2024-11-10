@@ -29,10 +29,11 @@ public class QualificationService : IQualificationService
         return result;
     }
 
-    public void UpdateQualification(Qualification qualification)
+    public async Task<Qualification> UpdateQualification(Qualification qualification)
     {
-        _qualificationRepository.Update(qualification);
-        _qualificationRepository.SaveChanges();
+        var result = await _qualificationRepository.UpdateAsync(qualification);
+
+        return result;
     }
 
     public void DeleteQualification(int id)

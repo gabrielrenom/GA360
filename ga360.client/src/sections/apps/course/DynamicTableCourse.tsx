@@ -26,7 +26,7 @@ import {
 import MainCard from "components/MainCard";
 import { Stack, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
-import { addCourse, Course, deleteCourse, getCourses } from "api/courseService";
+import { addCourse, Course, deleteCourse, getCourses, updateCourse } from "api/courseService";
 
 
 const initialRows: GridRowsProp = [];
@@ -107,17 +107,13 @@ export default function DynamicTableCourse() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSaveClick = (id: GridRowId) => async () => {
-    try {
-      const updatedRow = rows.find((row) => row.id === id);
-      if (updatedRow) {
-        await processRowUpdate(updatedRow);
-        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-      }
-    } catch (error) {
-      console.error('Failed to save course:', error);
-    }
+  const handleSaveClick = (id: GridRowId) => () => {
+    setRowModesModel((prevRowModesModel) => ({
+      ...prevRowModesModel,
+      [id]: { mode: GridRowModes.View },
+    }));
   };
+  
   
   const handleDeleteClick = (id: GridRowId) => async () => {    
     try {
@@ -167,10 +163,12 @@ export default function DynamicTableCourse() {
         const createdCourse = await addCourse(course);
         setRows(rows.map((row) => (row.id === newRow.id ? createdCourse : row)));
       } else {
-        setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+        const course = mapToCourse(newRow);
+        await updateCourse(course.id, course);
+        setRows(rows.map((row) => (row.id === newRow.id ? course : row)));
       }
     } catch (error) {
-      console.error('Failed to add course:', error);
+      console.error('Failed to update course:', error);
     }
     return updatedRow;
   };

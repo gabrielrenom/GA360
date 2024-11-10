@@ -7,6 +7,7 @@ public interface IRepository<T> where T : IModel
 {
     CRMDbContext Context{ get;}
     T Get(int key);
+    Task<T> GetAsync(int key);
     Task<List<T>> GetAll();
     Task<T> Get<T>(Expression<Func<T, bool>> predicate) where T : class;
     Task<List<T>> GetAll(params Expression<Func<T, object>>[] includes);

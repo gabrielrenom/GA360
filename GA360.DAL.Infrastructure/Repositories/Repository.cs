@@ -21,6 +21,9 @@ namespace GA360.DAL.Infrastructure.Repositories
 
         protected CRMDbContext GetDbContext() { return _dbContext; }
         public T Get(int key) => _dbContext.Set<T>().Where(p => p.Id == key).Single();
+
+        public async Task<T> GetAsync(int key) => await _dbContext.Set<T>().Where(p => p.Id == key).SingleAsync();
+
         public async Task<T> Get<T>(Expression<Func<T, bool>> predicate) where T : class
         {
             return await _dbContext.Set<T>().FirstOrDefaultAsync(predicate);
@@ -60,6 +63,7 @@ namespace GA360.DAL.Infrastructure.Repositories
         public IEnumerable<T> FindAll(Expression<Func<T, bool>> expression) => _dbContext.Set<T>().Where(expression);
 
         public void Update(T entity) => _dbContext.Update<T>(entity);
+
 
         public void Delete(T entity) => _dbContext.Remove<T>(entity);
 

@@ -7,6 +7,6 @@ public interface ICourseService
     Course GetCourse(int id);
     Task<List<Course>> GetAllCourses();
     Task<Course> AddCourse(Course course);
-    void UpdateCourse(Course course);
+    Task<Course> UpdateCourse(Course course);
     void DeleteCourse(int id);
 }
