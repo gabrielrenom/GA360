@@ -24,6 +24,7 @@ import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import DynamicTableCourse from 'sections/apps/course/DynamicTableCourse';
 import DynamicTableQualification from 'sections/apps/course/DynamicTableQualifications';
 import DynamicTableTrainingCentre from 'sections/apps/course/DynamicTableTrainingCentre';
+import DynamicTableCustomersWithCourseQualificationRecords from 'sections/apps/course/DynamicTableCustomersWithCourseQualificationRecords';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -66,9 +67,10 @@ export default function DashboardLayout() {
             }}
           >
             <Breadcrumbs />
-            <DynamicTableTrainingCentre/>
+            <DynamicTableCustomersWithCourseQualificationRecords/>
+            {/* <DynamicTableTrainingCentre/>
             <DynamicTableQualification/>
-            <DynamicTableCourse/>
+            <DynamicTableCourse/> */}
             <Outlet />
        
 

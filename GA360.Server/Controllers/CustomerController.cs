@@ -5,6 +5,7 @@ using GA360.Domain.Core.Services;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static GA360.Commons.Helpers.JsonHelper;
@@ -33,6 +34,63 @@ namespace GA360.Server.Controllers
             var result = await _customerService.GetAllCustomersWithEntities(null, null, c => c.Email, true);
 
             return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromUserModelToViewModel(x)).ToList());
+        }
+
+        [AllowAnonymous]
+        [HttpGet("list/basic")]
+        public async Task<IActionResult> GetAllBasicContacts()
+        {
+
+            var result = await _customerService.GetAll();
+
+            return Ok(result == null ? new List<UserViewModel>() : result.Select(x => x.ToBasicViewModel()).ToList());
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("customerswithcoursequalificationrecords")]
+        public async Task<IActionResult> GetAllCustomersWithCourseQualificationRecords(
+            int? pageNumber, int? pageSize, string orderBy = "Email", bool ascending = true)
+        {
+            // Convert the string `orderBy` to a lambda expression
+            var parameter = Expression.Parameter(typeof(Customer), "x");
+            var property = Expression.Property(parameter, orderBy);
+            var lambda = Expression.Lambda<Func<Customer, object>>(Expression.Convert(property, typeof(object)), parameter);
+
+            var customers = await _customerService.GetAllCustomersWithCourseQualificationRecords(
+                pageNumber, pageSize, lambda, ascending);
+
+            // Convert each customer to its view model and flatten the results
+            var customerViewModels = customers?.SelectMany(c => c.ToCustomersWithCourseQualificationRecordsViewModel()).ToList()
+                                     ?? new List<CustomersWithCourseQualificationRecordsViewModel>();
+
+            return Ok(customerViewModels);
+        }
+
+
+        [AllowAnonymous]
+        [HttpDelete("customerswithcoursequalificationrecords/{id}")]
+        public async Task<IActionResult> DeleteCustomersWithCourseQualificationRecords(int id)
+        {
+            await _customerService.DeleteCustomersWithCourseQualificationRecords(id);
+            return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpPut("customerswithcoursequalificationrecords/{id}")]
+        public async Task<IActionResult> UpdateCustomersWithCourseQualificationRecords(int id, [FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
+        {
+            var result = await _customerService.UpdateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());
+
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("customerswithcoursequalificationrecords")]
+        public async Task<IActionResult> CreateCustomersWithCourseQualificationRecords([FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
+        {
+            var result = await _customerService.CreateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());
+            return Ok(result);
         }
 
         [AllowAnonymous]

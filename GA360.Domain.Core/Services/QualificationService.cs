@@ -45,4 +45,11 @@ public class QualificationService : IQualificationService
             _qualificationRepository.SaveChanges();
         }
     }
+
+    public async Task<List<QualificationStatus>> GetAllQualificationsStatus()
+    {
+        var result = await _qualificationRepository.GetQualificationStatusAsync();
+
+        return result;
+    }
 }

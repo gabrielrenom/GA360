@@ -40,6 +40,9 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IQualificationService, QualificationService>();
 builder.Services.AddScoped<IQualificationRepository, QualificationRepository>();
 
+builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
+builder.Services.AddScoped<ICertificateService, CertificateService>();
+
 builder.Services.AddBff(x =>
 {
     x.AntiForgeryHeaderValue = "Dog";

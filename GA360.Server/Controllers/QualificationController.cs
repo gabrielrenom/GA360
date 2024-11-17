@@ -28,6 +28,14 @@ public class QualificationController : ControllerBase
     }
 
     [AllowAnonymous]
+    [HttpGet("qualificationstatuses")]
+    public async Task<IActionResult> GetQualificationStatuses()
+    {
+        var qualifications = await _qualificationService.GetAllQualificationsStatus();
+        return Ok(qualifications);
+    }
+
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public IActionResult GetQualification(int id)
     {

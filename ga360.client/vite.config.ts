@@ -120,6 +120,16 @@ export default defineConfig({
                 secure: false,
                 changeOrigin: true
             },
+            '^/api/customer/customerswithcoursequalificationrecords': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/certificate': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
             '^/signin-oidc': {
                 target,
                 secure: false

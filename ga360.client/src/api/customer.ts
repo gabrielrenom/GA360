@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { fetcher } from 'utils/axios';
 
 // types
-import { CustomerList, CustomerListExtended, CustomerProps } from 'types/customer';
+import { BasicCustomer, CustomerList, CustomerListExtended, CustomerProps } from 'types/customer';
 import { mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel, mapCustomerListToCustomerApiModelExtended } from 'types/customerApiModel';
 
 const initialState: CustomerProps = {
@@ -139,6 +139,21 @@ export async function insertCustomer(newCustomer: CustomerListExtended) {
 // //   .catch(error => console.error('Error:', error));
  
 // }
+
+export async function getBasicCandidates(): Promise<BasicCustomer[]> {
+  const response = await fetch("/api/customer/list/basic", {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+
+  if (!response.ok) {
+      throw new Error('Network response was not ok');
+  }
+
+  const result: BasicCustomer[] = await response.json();
+  return result;
+}
 
 export async function getCandidate() {
 

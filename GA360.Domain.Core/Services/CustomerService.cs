@@ -325,6 +325,95 @@ public class CustomerService : ICustomerService
         return customerList;
     }
 
+    public async Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
+    {
+        var customerList = new List<Customer>();
+
+        var customers = await _customerRepository.GetAllCustomersWithCourseQualificationRecords(pageNumber, pageSize, c => c.FirstName, true);
+
+        if (customers != null)
+        {
+            foreach (var customer in customers)
+            {
+                customerList.Add(customer);
+            }
+        }
+
+        return customerList;
+    }
+
+    public async Task<bool> DeleteCustomersWithCourseQualificationRecords(int id)
+    {
+        var result = await _customerRepository.DeleteCustomersWithCourseQualificationRecords(id);
+
+        return result;
+    }
+
+    public async Task<CustomersWithCourseQualificationRecordsModel> UpdateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer)
+    {
+        var result = await _customerRepository.UpdateCustomersWithCourseQualificationRecords(new QualificationCustomerCourseCertificate
+        {
+            CertificateId = customer.CertificateId,
+            QualificationStatusId = customer.QualificationStatusId,
+            QualificationId = customer.QualificationId,
+            QualificationProgression = customer.Progression,
+            CustomerId = customer.CustomerId,
+            CourseId = customer.CourseId,
+            Id = customer.Id
+        });
+
+        return new CustomersWithCourseQualificationRecordsModel
+        {
+            Email = customer.Email,
+            CertificateName = customer.CertificateName,
+            CourseName = customer.CourseName,
+            CertificateId = result.CertificateId,
+            CourseId = result.CourseId,
+            CustomerId = customer.CustomerId,
+            Progression = customer.Progression,
+            QualificationId = result.QualificationId,
+            QualificationName = customer.QualificationName,
+            TrainingCentre = customer.TrainingCentre,
+            TrainingCentreId = customer.TrainingCentreId,
+            Id = result.Id,
+            QualificationStatusId = result.QualificationStatusId,
+            QualificationStatus = customer.QualificationStatus
+        };
+    }
+
+    public async Task<CustomersWithCourseQualificationRecordsModel> CreateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer)
+    {
+        var entity = (new QualificationCustomerCourseCertificate
+        {
+            QualificationId = customer.QualificationId,
+            CertificateId = customer.CertificateId,
+            CourseProgression = customer.Progression,
+            CustomerId = customer.CustomerId,
+            QualificationStatusId = customer.QualificationStatusId,
+            CourseId = customer.CourseId
+        });
+
+        var result = await _customerRepository.CreateCustomersWithCourseQualificationRecords(entity);
+
+        return new CustomersWithCourseQualificationRecordsModel
+        {
+            CustomerId = customer.CustomerId,
+            CourseId = customer?.CourseId,
+            QualificationId = customer?.QualificationId,
+            Email = customer?.Email,
+            CertificateId = customer?.CertificateId,
+            TrainingCentre = customer?.TrainingCentre,
+            CertificateName = customer?.CertificateName,
+            CourseName = customer?.CourseName,
+            Progression = customer.Progression,
+            QualificationName = customer.QualificationName,
+            TrainingCentreId = customer?.TrainingCentreId,
+            Id = result.Id,
+            QualificationStatus = result.QualificationStatus != null ? result.QualificationStatus.Name :string.Empty,
+            QualificationStatusId = result.QualificationStatus != null ? result.QualificationStatusId :null,
+        };
+    }
+
     public void Map(Customer source, CustomerModel destination)
     {
         destination.FirstName = source.FirstName;
@@ -363,7 +452,7 @@ public class CustomerService : ICustomerService
 
         //TOdo
         destination.Qualifications = source.QualificationCustomerCourseCertificates != null ?
-            source.QualificationCustomerCourseCertificates.Where(x=>x.QualificationId!=null)
+            source.QualificationCustomerCourseCertificates.Where(x => x.QualificationId != null)
             .Select(x => new QualificationModel
             {
                 CertificateDate = x.Qualification.CertificateDate,
@@ -372,7 +461,7 @@ public class CustomerService : ICustomerService
                 Id = x.Qualification.Id,
                 Name = x.Qualification.Name,
                 RegistrationDate = x.Qualification.RegistrationDate,
-                Status = x.QualificationStatus==null ? string.Empty : x.QualificationStatus.Name,
+                Status = x.QualificationStatus == null ? string.Empty : x.QualificationStatus.Name,
                 Progression = x.QualificationProgression
 
             }).ToList() : new List<QualificationModel>();
@@ -386,20 +475,20 @@ public class CustomerService : ICustomerService
 
         destination.Certificates = source.QualificationCustomerCourseCertificates != null ?
             source.QualificationCustomerCourseCertificates
-            .Where(x=>x.CertificateId != null)
-            .Select(x=> new CertificateModel
+            .Where(x => x.CertificateId != null)
+            .Select(x => new CertificateModel
             {
-                  Charge = x.Certificate.Charge,
-                  Id = x.Certificate.Id,
-                  Name= x.Certificate.Name,
-                  Type = x.Certificate.Type,
-                  Date = x.CreatedAt
+                Charge = x.Certificate.Charge,
+                Id = x.Certificate.Id,
+                Name = x.Certificate.Name,
+                Type = x.Certificate.Type,
+                Date = x.CreatedAt
             }).ToList()
             : new List<CertificateModel>();
 
         destination.Courses = source.QualificationCustomerCourseCertificates != null ?
             source.QualificationCustomerCourseCertificates
-            .Where(x=>x.CourseId!=null)
+            .Where(x => x.CourseId != null)
             .Select(x => new CourseModel
             {
                 Description = x.Course.Description,
@@ -412,6 +501,5 @@ public class CustomerService : ICustomerService
                 Date = x.Course.RegistrationDate != null ? x.Course.RegistrationDate.ToShortDateString() : string.Empty,
             }).ToList()
             : new List<CourseModel>();
-
     }
 }

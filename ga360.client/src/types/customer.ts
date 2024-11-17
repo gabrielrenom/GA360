@@ -51,3 +51,8 @@ export interface CustomerListExtended extends CustomerList {
   qualifications: QualificationModel [];
   certificates: CertificateModel [];
 }
+
+export interface BasicCustomer {
+  id: number;
+  email: string;
+}
