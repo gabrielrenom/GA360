@@ -29,7 +29,7 @@ const TrainingCentreDropdown: React.FC<TrainingCentreDropdownProps> = ({ value, 
 
   const trainingCentreOptions = trainingCentres.map(tc => ({
     label: tc.name,
-    value: tc.name,
+    value: tc.id.toString(),
   }));
 
   return (

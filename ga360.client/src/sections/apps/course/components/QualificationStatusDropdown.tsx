@@ -29,7 +29,7 @@ const QualificationStatusDropdown: React.FC<QualificationStatusDropdownProps> = 
 
   const qualificationStatusOptions = qualificationStatuses.map(status => ({
     label: status.name,
-    value: status.name,
+    value: status.id.toString(),
   }));
 
   return (

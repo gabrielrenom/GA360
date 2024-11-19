@@ -139,6 +139,25 @@ namespace GA360.DAL.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<Customer> GetCustomerWithCourseQualificationRecordById(int id)
+        {
+            var entity = await GetDbContext()
+                .Set<Customer>()
+                .Include(x=>x.TrainingCentre)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Course)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Qualification)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Certificate)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.QualificationStatus)
+                .FirstOrDefaultAsync(x => x.QualificationCustomerCourseCertificates.Any(y => y.Id == id));
+
+            return entity;
+        }
+
+
         public async Task<bool> DeleteCustomersWithCourseQualificationRecords(int id)
         {
             try

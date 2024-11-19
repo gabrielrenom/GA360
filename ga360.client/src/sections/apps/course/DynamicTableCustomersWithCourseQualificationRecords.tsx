@@ -43,6 +43,7 @@ import { Course, getCourses } from "api/courseService";
 import { Certificate, getCertificates } from "api/certificateService";
 import TrainingCentreDropdown from "./components/TrainingCentreDropdown";
 import QualificationStatusDropdown from "./components/QualificationStatusDropdown";
+import CertificateDropdown from "./components/CertificateDropdown";
 
 
 interface EditToolbarProps {
@@ -106,20 +107,20 @@ export default function DynamicTableCustomersWithCourseQualificationRecords() {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [courses, setCourses] = useState<Course[]>([]);
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  // const [certificates, setCertificates] = useState<Certificate[]>([]);
 
-  useEffect(() => {
-    const fetchCertificates = async () => {
-      try {
-        const data = await getCertificates();
-        setCertificates(data);
-      } catch (error) {
-        console.error("Failed to fetch certificates", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCertificates = async () => {
+  //     try {
+  //       const data = await getCertificates();
+  //       setCertificates(data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch certificates", error);
+  //     }
+  //   };
 
-    fetchCertificates();
-  }, []);
+  //   fetchCertificates();
+  // }, []);
 
   useEffect(() => {
     const fetchQualifications = async () => {
@@ -162,6 +163,7 @@ useEffect(() => {
 
   fetchEmails();
 }, []);
+
 useEffect(() => {
   const fetchCourses = async () => {
     try {
@@ -186,12 +188,16 @@ useEffect(() => {
   };
 
   const handleSaveClick = (id: GridRowId) => async () => {
+    // Set row mode to View
     setRowModesModel((prevModel) => ({
       ...prevModel,
       [id]: { mode: GridRowModes.View },
     }));
+  
+    // Get the row to update
     const rowToUpdate = rows.find((row) => row.id === id);
     if (rowToUpdate) {
+      // Perform the save operation if the row is new or updated
       await processRowUpdate(rowToUpdate);
     }
   };
@@ -218,29 +224,67 @@ useEffect(() => {
     }
   };
 
-  const processRowUpdate = async (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    try {
-      if (newRow.isNew) {
-        const createdRow = await createCustomersWithCourseQualificationRecords(updatedRow as unknown as CustomersWithCourseQualificationRecordsViewModel);
-        setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdRow : row)));
-      } else {
-        const updatedRowData = await updateCustomersWithCourseQualificationRecords(Number(newRow.id), updatedRow as CustomersWithCourseQualificationRecordsViewModel);
-        setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? updatedRowData : row)));
-      }
-      return updatedRow;
-    } catch (error) {
-      console.error("Failed to save record", error);
-      return newRow;
+  
+const processRowUpdate = async (newRow: GridRowModel) => {
+  const updatedRow = { ...newRow, isNew: false };
+  try {
+    const newCustomerQualification = updatedRow as unknown as CustomersWithCourseQualificationRecordsViewModel;
+    
+    // Initialize the ID to 0 for new rows
+    if (newRow.isNew) {
+      newCustomerQualification.id = 0;
     }
-  };
+
+    // Convert certificateName to certificateId if it is not null, undefined, or an empty string
+    if (newCustomerQualification.certificateName) {
+      newCustomerQualification.certificateId = Number(newCustomerQualification.certificateName);
+    }
+
+    // Convert courseName to courseId
+    if (newCustomerQualification.courseName) {
+      newCustomerQualification.courseId = Number(newCustomerQualification.courseName);
+    }
+
+    // Convert qualificationName to qualificationId
+    if (newCustomerQualification.qualificationName) {
+      newCustomerQualification.qualificationId = Number(newCustomerQualification.qualificationName);
+    }
+
+    // Convert email to customerId
+    if (newCustomerQualification.email) {
+      newCustomerQualification.customerId = Number(newCustomerQualification.email);
+    }
+
+    // Convert qualificationStatus to qualificationStatusId
+    if (newCustomerQualification.qualificationStatus) {
+      newCustomerQualification.qualificationStatusId = Number(newCustomerQualification.qualificationStatus);
+    }
+
+    // Perform the save operation based on the state of the row
+    if (newRow.isNew) {
+      if(newCustomerQualification.isNew == false)
+      {
+      const createdRow = await createCustomersWithCourseQualificationRecords(newCustomerQualification);
+      setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdRow : row)));
+      }
+    } 
+    // else {
+    //   const updatedRowData = await updateCustomersWithCourseQualificationRecords(Number(newRow.id), newCustomerQualification);
+    //   setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? updatedRowData : row)));
+    // }
+    return updatedRow;
+  } catch (error) {
+    console.error("Failed to save record", error);
+    return newRow;
+  }
+};
   
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
   };
 
   
-  const emailOptions = emails.map(email => ({ label: email.email, value: email.email }));
+  const emailOptions = emails.map(email => ({ label: email.email, value: email.id.toString() }));
 
   interface EmailDropdownProps {
     value: string;
@@ -279,7 +323,7 @@ useEffect(() => {
     );
   };
 
-  const courseOptions = courses.map(course => ({ label: course.name, value: course.name }));
+  const courseOptions = courses.map(course => ({ label: course.name, value: course.id.toString() }));
   
   interface CourseDropdownProps {
     value: string;
@@ -319,7 +363,7 @@ useEffect(() => {
     );
   };
   
-  const qualificationOptions = qualifications.map(qualification => ({ label: qualification.name, value: qualification.name }));
+  const qualificationOptions = qualifications.map(qualification => ({ label: qualification.name, value: qualification.id.toString() }));
 
   interface QualificationDropdownProps {
     value: string;
@@ -359,51 +403,51 @@ useEffect(() => {
     );
   };
 
-  interface CertificateDropdownProps {
-    value: string;
-    onChange: (value: string) => void;
-  }
+  // interface CertificateDropdownProps {
+  //   value: string;
+  //   onChange: (value: string) => void;
+  // }
   
-  const certificateOptions = certificates.map(cert => ({
-    label: cert.name,
-    value: cert.name,
-  }));
+  // const certificateOptions = certificates.map(cert => ({
+  //   label: cert.name,
+  //   value: cert.id.toString(),
+  // }));
   
-  const CertificateDropdown: React.FC<CertificateDropdownProps> = ({ value, onChange }) => {
-    const [certificates, setCertificates] = useState<Certificate[]>([]);
+  // const CertificateDropdown: React.FC<CertificateDropdownProps> = ({ value, onChange }) => {
+  //   const [certificates, setCertificates] = useState<Certificate[]>([]);
   
-    const handleChange = (event: any, newValue: any) => {
-      onChange(newValue ? newValue.value : '');
-    };
+  //   const handleChange = (event: any, newValue: any) => {
+  //     onChange(newValue ? newValue.value : '');
+  //   };
   
 
   
-    return (
-      <Box display="flex" flexDirection="column" width="100%"  style={{ paddingLeft: '10px'}}>
-        <Autocomplete
-          value={certificateOptions.find(option => option.value === value) || null}
-          onChange={handleChange}
-          options={certificateOptions}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Certificate"
-              variant="outlined"
-              fullWidth
-              style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }} // Set background color here
-              InputLabelProps={{ style: { marginTop: '10px' } }} // Adjust label margin here
-            />
-          )}
-          PaperComponent={(props) => (
-            <div {...props} style={{ ...props.style, maxWidth: '100%', minWidth: '300px', backgroundColor: 'white' }} /> // Set background color here
-          )}
-          style={{ width: '300px', flex: 1 }}
-        />
-      </Box>
-    );
-  };
+  //   return (
+  //     <Box display="flex" flexDirection="column" width="100%"  style={{ paddingLeft: '10px'}}>
+  //       <Autocomplete
+  //         value={certificateOptions.find(option => option.value === value) || null}
+  //         onChange={handleChange}
+  //         options={certificateOptions}
+  //         getOptionLabel={(option) => option.label}
+  //         isOptionEqualToValue={(option, value) => option.value === value}
+  //         renderInput={(params) => (
+  //           <TextField
+  //             {...params}
+  //             label="Certificate"
+  //             variant="outlined"
+  //             fullWidth
+  //             style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }} // Set background color here
+  //             InputLabelProps={{ style: { marginTop: '10px' } }} // Adjust label margin here
+  //           />
+  //         )}
+  //         PaperComponent={(props) => (
+  //           <div {...props} style={{ ...props.style, maxWidth: '100%', minWidth: '300px', backgroundColor: 'white' }} /> // Set background color here
+  //         )}
+  //         style={{ width: '300px', flex: 1 }}
+  //       />
+  //     </Box>
+  //   );
+  // };
   
   
 
@@ -423,7 +467,7 @@ useEffect(() => {
         />
       ),
     },
-    { field: "courseId", hideable: true },
+   { field: "courseId", hideable: true },
     {
       field: 'courseName',
       headerName: 'COURSE',
@@ -476,7 +520,8 @@ useEffect(() => {
           onChange={(value) => params.api.setEditCellValue({ id: params.id, field: params.field, value })}
         />
       ),
-    },    { field: "progression", headerName: "PROGRESSION", flex: 1, editable: false },
+    },    
+    { field: "progression", headerName: "PROGRESSION", flex: 1, editable: true },
     { field: "qualificationStatusId", hideable: true },
     {
       field: 'qualificationStatus',

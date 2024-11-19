@@ -20,5 +20,6 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Task<bool> DeleteCustomersWithCourseQualificationRecords(int id);
         Task<QualificationCustomerCourseCertificate> UpdateCustomersWithCourseQualificationRecords(QualificationCustomerCourseCertificate qualificationCustomerCourseCertificate);
         Task<QualificationCustomerCourseCertificate> CreateCustomersWithCourseQualificationRecords(QualificationCustomerCourseCertificate qualificationCustomerCourseCertificate);
+        Task<Customer> GetCustomerWithCourseQualificationRecordById(int id);
     }
 }
