@@ -5,10 +5,13 @@ using GA360.Domain.Core.Services;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static GA360.Commons.Helpers.JsonHelper;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GA360.Server.Controllers
 {
@@ -19,12 +22,17 @@ namespace GA360.Server.Controllers
         private readonly ILogger<CustomerController> _logger;
         private readonly ICustomerService _customerService;
         private readonly IConfiguration _configuration;
-        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService, IConfiguration configuration)
+        private readonly IMemoryCache _memoryCache;
+
+        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService, IConfiguration configuration, IMemoryCache memoryCache)
         {
             _logger = logger;
             _customerService = customerService;
             _configuration = configuration;
+            _memoryCache = memoryCache;
         }
+
+
 
         [AllowAnonymous]
         [HttpGet("list")]
@@ -40,11 +48,25 @@ namespace GA360.Server.Controllers
         [HttpGet("list/basic")]
         public async Task<IActionResult> GetAllBasicContacts()
         {
+            var cacheKey = "GetAllBasicContacts";
+            if (!_memoryCache.TryGetValue(cacheKey, out List<BasicUserViewModel> cachedResult))
+            {
+                var result = await _customerService.GetAll();
 
-            var result = await _customerService.GetAll();
+                var basicContacts = result == null ? new List<BasicUserViewModel>() : result.Select(x => x.ToBasicViewModel()).Distinct().ToList();
 
-            return Ok(result == null ? new List<UserViewModel>() : result.Select(x => x.ToBasicViewModel()).ToList());
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(30)) // Adjust cache duration as needed
+                    .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+
+                _memoryCache.Set(cacheKey, basicContacts, cacheEntryOptions);
+
+                cachedResult = basicContacts;
+            }
+
+            return Ok(cachedResult);
         }
+
 
         [AllowAnonymous]
         [HttpGet]
@@ -52,28 +74,39 @@ namespace GA360.Server.Controllers
         public async Task<IActionResult> GetAllCustomersWithCourseQualificationRecords(
             int? pageNumber, int? pageSize, string orderBy = "Email", bool ascending = true)
         {
-            // Convert the string `orderBy` to a lambda expression
-            var parameter = Expression.Parameter(typeof(Customer), "x");
-            var property = Expression.Property(parameter, orderBy);
-            var lambda = Expression.Lambda<Func<Customer, object>>(Expression.Convert(property, typeof(object)), parameter);
+            var cacheKey = $"GetAllCustomersWithCourseQualificationRecords";
+            if (!_memoryCache.TryGetValue(cacheKey, out List<CustomersWithCourseQualificationRecordsViewModel> cachedResult))
+            {
+                // Convert the string `orderBy` to a lambda expression
+                var parameter = Expression.Parameter(typeof(Customer), "x");
+                var property = Expression.Property(parameter, orderBy);
+                var lambda = Expression.Lambda<Func<Customer, object>>(Expression.Convert(property, typeof(object)), parameter);
 
-            var customers = await _customerService.GetAllCustomersWithCourseQualificationRecords(
-                pageNumber, pageSize, lambda, ascending);
+                var customers = await _customerService.GetAllCustomersWithCourseQualificationRecords(
+                    pageNumber, pageSize, lambda, ascending);
 
-            // Convert each customer to its view model and flatten the results
-            var customerViewModels = customers?.SelectMany(c => c.ToCustomersWithCourseQualificationRecordsViewModel()).ToList()
-                                     ?? new List<CustomersWithCourseQualificationRecordsViewModel>();
+                // Convert each customer to its view model and flatten the results
+                cachedResult = customers?.SelectMany(c => c.ToCustomersWithCourseQualificationRecordsViewModel()).ToList()
+                                         ?? new List<CustomersWithCourseQualificationRecordsViewModel>();
 
-            return Ok(customerViewModels);
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                   .SetSlidingExpiration(TimeSpan.FromMinutes(30)) // Adjust cache duration as needed
+                   .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+
+                _memoryCache.Set(cacheKey, cachedResult, cacheEntryOptions);
+            }
+
+            return Ok(cachedResult);
         }
 
 
         [AllowAnonymous]
-        [HttpDelete("customerswithcoursequalificationrecords/{id}")]
-        public async Task<IActionResult> DeleteCustomersWithCourseQualificationRecords(int id)
+        [HttpPost("customerswithcoursequalificationrecords")]
+        public async Task<IActionResult> CreateCustomersWithCourseQualificationRecords([FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
         {
-            await _customerService.DeleteCustomersWithCourseQualificationRecords(id);
-            return Ok();
+            var result = await _customerService.CreateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());
+            _memoryCache.Remove("GetAllCustomersWithCourseQualificationRecords"); // Clear cache when data is modified
+            return Ok(result);
         }
 
         [AllowAnonymous]
@@ -81,16 +114,17 @@ namespace GA360.Server.Controllers
         public async Task<IActionResult> UpdateCustomersWithCourseQualificationRecords(int id, [FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
         {
             var result = await _customerService.UpdateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());
-
+            _memoryCache.Remove("GetAllCustomersWithCourseQualificationRecords"); // Clear cache when data is modified
             return Ok(result);
         }
 
         [AllowAnonymous]
-        [HttpPost("customerswithcoursequalificationrecords")]
-        public async Task<IActionResult> CreateCustomersWithCourseQualificationRecords([FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
+        [HttpDelete("customerswithcoursequalificationrecords/{id}")]
+        public async Task<IActionResult> DeleteCustomersWithCourseQualificationRecords(int id)
         {
-            var result = await _customerService.CreateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());
-            return Ok(result);
+            await _customerService.DeleteCustomersWithCourseQualificationRecords(id);
+            _memoryCache.Remove("GetAllCustomersWithCourseQualificationRecords"); // Clear cache when data is modified
+            return Ok();
         }
 
         [AllowAnonymous]
@@ -140,6 +174,8 @@ namespace GA360.Server.Controllers
 
                 var jsonResult = JsonSerializer.Serialize(result, options);
 
+                _memoryCache.Remove("GetAllBasicContacts"); // Clear cache when data is modified
+
                 return Ok(jsonResult);
             }
             catch (Exception ex)
@@ -154,6 +190,7 @@ namespace GA360.Server.Controllers
         public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
         {
             var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
+            _memoryCache.Remove("GetAllBasicContacts"); // Clear cache when data is modified
             return Ok(result);
         }
 
@@ -177,7 +214,7 @@ namespace GA360.Server.Controllers
             };
 
             var jsonResult = JsonSerializer.Serialize(result, options);
-
+            _memoryCache.Remove("GetAllBasicContacts"); // Clear cache when data is modified
             return Ok(jsonResult);
         }
 
@@ -186,6 +223,8 @@ namespace GA360.Server.Controllers
         public async Task<IActionResult> DeleteContact(int id)
         {
             await _customerService.DeleteCustomer(id);
+            _memoryCache.Remove("GetAllBasicContacts"); // Clear cache when data is modified
+
             return Ok();
         }
 
@@ -289,7 +328,7 @@ namespace GA360.Server.Controllers
                 Street = userViewModel.Street,
                 TrainingCentre = userViewModel.TrainingCentre,
                 Ethnicity = userViewModel.Ethnicity,
-                Files = files 
+                Files = files
             };
         }
 

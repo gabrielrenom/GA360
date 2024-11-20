@@ -44,6 +44,10 @@ import { Certificate, getCertificates } from "api/certificateService";
 import TrainingCentreDropdown from "./components/TrainingCentreDropdown";
 import QualificationStatusDropdown from "./components/QualificationStatusDropdown";
 import CertificateDropdown from "./components/CertificateDropdown";
+import CourseDropdown from "./components/CourseDropdown";
+import QualificationDropdown from "./components/QualificationDropdown";
+import EmailDropdown from "./components/EmailDropdown";
+// import EmailDropdown from "./components/EmailDropdown";
 
 
 interface EditToolbarProps {
@@ -105,35 +109,6 @@ export default function DynamicTableCustomersWithCourseQualificationRecords() {
 
   const [rows, setRows] = React.useState<CustomersWithCourseQualificationRecordsViewModel[]>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [qualifications, setQualifications] = useState<Qualification[]>([]);
-  // const [certificates, setCertificates] = useState<Certificate[]>([]);
-
-  // useEffect(() => {
-  //   const fetchCertificates = async () => {
-  //     try {
-  //       const data = await getCertificates();
-  //       setCertificates(data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch certificates", error);
-  //     }
-  //   };
-
-  //   fetchCertificates();
-  // }, []);
-
-  useEffect(() => {
-    const fetchQualifications = async () => {
-      try {
-        const qualificationData = await getQualifications();
-        setQualifications(qualificationData);
-      } catch (error) {
-        console.error("Failed to fetch qualifications", error);
-      }
-    };
-
-    fetchQualifications();
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,34 +124,6 @@ export default function DynamicTableCustomersWithCourseQualificationRecords() {
     fetchData();
   }, []);
 
-  const [emails, setEmails] = useState<BasicCustomer[]>([]);
-
-useEffect(() => {
-  const fetchEmails = async () => {
-    try {
-      const emailData = await getBasicCandidates();
-      setEmails(emailData);
-    } catch (error) {
-      console.error("Failed to fetch emails", error);
-    }
-  };
-
-  fetchEmails();
-}, []);
-
-useEffect(() => {
-  const fetchCourses = async () => {
-    try {
-      const courseData = await getCourses();
-      setCourses(courseData);
-    } catch (error) {
-      console.error("Failed to fetch courses", error);
-    }
-  };
-
-  fetchCourses();
-}, []);
-
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true;
@@ -184,20 +131,20 @@ useEffect(() => {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
+    const rowToEdit = rows.find((row) => row.id === id);
+    console.log("ROWTOEDIT", rowToEdit)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
   const handleSaveClick = (id: GridRowId) => async () => {
-    // Set row mode to View
     setRowModesModel((prevModel) => ({
       ...prevModel,
       [id]: { mode: GridRowModes.View },
     }));
   
-    // Get the row to update
     const rowToUpdate = rows.find((row) => row.id === id);
+    console.log("ROWTOUPDATE", rowToUpdate)
     if (rowToUpdate) {
-      // Perform the save operation if the row is new or updated
       await processRowUpdate(rowToUpdate);
     }
   };
@@ -224,12 +171,11 @@ useEffect(() => {
     }
   };
 
-  
 const processRowUpdate = async (newRow: GridRowModel) => {
   const updatedRow = { ...newRow, isNew: false };
   try {
     const newCustomerQualification = updatedRow as unknown as CustomersWithCourseQualificationRecordsViewModel;
-    
+    console.log("UPDATED", updatedRow)
     // Initialize the ID to 0 for new rows
     if (newRow.isNew) {
       newCustomerQualification.id = 0;
@@ -264,14 +210,16 @@ const processRowUpdate = async (newRow: GridRowModel) => {
     if (newRow.isNew) {
       if(newCustomerQualification.isNew == false)
       {
+        console.log("Adding...")
       const createdRow = await createCustomersWithCourseQualificationRecords(newCustomerQualification);
       setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdRow : row)));
       }
     } 
-    // else {
-    //   const updatedRowData = await updateCustomersWithCourseQualificationRecords(Number(newRow.id), newCustomerQualification);
-    //   setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? updatedRowData : row)));
-    // }
+    else {
+      console.log("updating...",newCustomerQualification)
+      const updatedRowData = await updateCustomersWithCourseQualificationRecords(Number(newRow.id), newCustomerQualification);
+      setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? updatedRowData : row)));
+    }
     return updatedRow;
   } catch (error) {
     console.error("Failed to save record", error);
@@ -284,173 +232,6 @@ const processRowUpdate = async (newRow: GridRowModel) => {
   };
 
   
-  const emailOptions = emails.map(email => ({ label: email.email, value: email.id.toString() }));
-
-  interface EmailDropdownProps {
-    value: string;
-    onChange: (value: string) => void;
-    options: { label: string, value: string }[];
-  }
-
-  const EmailDropdown: React.FC<EmailDropdownProps> = ({ value, onChange, options }) => {
-    const handleChange = (event: any, newValue: any) => {
-      onChange(newValue ? newValue.value : '');
-    };
-  
-    return (
-      <Box display="flex" flexDirection="column" width="100%"  style={{ paddingLeft: '10px'}}>
-        <Autocomplete
-          value={options.find(option => option.value === value) || null}
-          onChange={handleChange}
-          options={options}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Email"
-              variant="outlined"
-              style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }} // Set background color here
-              InputLabelProps={{ style: { marginTop: '10px' } }} // Adjust label margin here
-            />
-          )}
-          PaperComponent={(props) => (
-            <div {...props} style={{ ...props.style, maxWidth: '100%', minWidth: '300px', backgroundColor: 'white' }} /> // Set background color here
-          )}
-          style={{ width: '300px', flex: 1 }}
-        />
-      </Box>
-    );
-  };
-
-  const courseOptions = courses.map(course => ({ label: course.name, value: course.id.toString() }));
-  
-  interface CourseDropdownProps {
-    value: string;
-    onChange: (value: string) => void;
-    options: { label: string, value: string }[];
-  }
-  
-  const CourseDropdown: React.FC<CourseDropdownProps> = ({ value, onChange, options }) => {
-    const handleChange = (event: any, newValue: any) => {
-      onChange(newValue ? newValue.value : '');
-    };
-  
-    return (
-      <Box display="flex" flexDirection="column" width="100%"  style={{ paddingLeft: '10px'}}>
-        <Autocomplete
-          value={options.find(option => option.value === value) || null}
-          onChange={handleChange}
-          options={options}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Course"
-              variant="outlined"
-              fullWidth
-              style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }} // Set background color here
-              InputLabelProps={{ style: { marginTop: '10px' } }} // Adjust label margin here
-            />
-          )}
-          PaperComponent={(props) => (
-            <div {...props} style={{ ...props.style, maxWidth: '100%', minWidth: '300px', backgroundColor: 'white' }} /> // Set background color here
-          )}
-          style={{ width: '300px', flex: 1 }}
-        />
-      </Box>
-    );
-  };
-  
-  const qualificationOptions = qualifications.map(qualification => ({ label: qualification.name, value: qualification.id.toString() }));
-
-  interface QualificationDropdownProps {
-    value: string;
-    onChange: (value: string) => void;
-    options: { label: string, value: string }[];
-  }
-  
-  const QualificationDropdown: React.FC<QualificationDropdownProps> = ({ value, onChange, options }) => {
-    const handleChange = (event: any, newValue: any) => {
-      onChange(newValue ? newValue.value : '');
-    };
-  
-    return (
-      <Box display="flex" flexDirection="column" width="100%"  style={{ paddingLeft: '10px'}}>
-        <Autocomplete
-          value={options.find(option => option.value === value) || null}
-          onChange={handleChange}
-          options={options}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Qualification"
-              variant="outlined"
-              fullWidth
-              style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }} // Set background color here
-              InputLabelProps={{ style: { marginTop: '10px' } }} // Adjust label margin here
-            />
-          )}
-          PaperComponent={(props) => (
-            <div {...props} style={{ ...props.style, maxWidth: '100%', minWidth: '300px', backgroundColor: 'white' }} /> // Set background color here
-          )}
-          style={{ width: '300px', flex: 1 }}
-        />
-      </Box>
-    );
-  };
-
-  // interface CertificateDropdownProps {
-  //   value: string;
-  //   onChange: (value: string) => void;
-  // }
-  
-  // const certificateOptions = certificates.map(cert => ({
-  //   label: cert.name,
-  //   value: cert.id.toString(),
-  // }));
-  
-  // const CertificateDropdown: React.FC<CertificateDropdownProps> = ({ value, onChange }) => {
-  //   const [certificates, setCertificates] = useState<Certificate[]>([]);
-  
-  //   const handleChange = (event: any, newValue: any) => {
-  //     onChange(newValue ? newValue.value : '');
-  //   };
-  
-
-  
-  //   return (
-  //     <Box display="flex" flexDirection="column" width="100%"  style={{ paddingLeft: '10px'}}>
-  //       <Autocomplete
-  //         value={certificateOptions.find(option => option.value === value) || null}
-  //         onChange={handleChange}
-  //         options={certificateOptions}
-  //         getOptionLabel={(option) => option.label}
-  //         isOptionEqualToValue={(option, value) => option.value === value}
-  //         renderInput={(params) => (
-  //           <TextField
-  //             {...params}
-  //             label="Certificate"
-  //             variant="outlined"
-  //             fullWidth
-  //             style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }} // Set background color here
-  //             InputLabelProps={{ style: { marginTop: '10px' } }} // Adjust label margin here
-  //           />
-  //         )}
-  //         PaperComponent={(props) => (
-  //           <div {...props} style={{ ...props.style, maxWidth: '100%', minWidth: '300px', backgroundColor: 'white' }} /> // Set background color here
-  //         )}
-  //         style={{ width: '300px', flex: 1 }}
-  //       />
-  //     </Box>
-  //   );
-  // };
-  
-  
-
   const columns: GridColDef[] = [
     { field: "id", headerName: "#", flex: 1, editable: true, type: "number" },
     { field: "customerId", hideable: true },
@@ -463,10 +244,10 @@ const processRowUpdate = async (newRow: GridRowModel) => {
         <EmailDropdown
           value={params.value}
           onChange={(value) => params.api.setEditCellValue({ id: params.id, field: params.field, value })}
-          options={emailOptions}
         />
       ),
     },
+    
    { field: "courseId", hideable: true },
     {
       field: 'courseName',
@@ -477,7 +258,6 @@ const processRowUpdate = async (newRow: GridRowModel) => {
         <CourseDropdown
           value={params.value}
           onChange={(value) => params.api.setEditCellValue({ id: params.id, field: params.field, value })}
-          options={courseOptions}
         />
       )
     },
@@ -491,7 +271,6 @@ const processRowUpdate = async (newRow: GridRowModel) => {
         <QualificationDropdown
           value={params.value}
           onChange={(value) => params.api.setEditCellValue({ id: params.id, field: params.field, value })}
-          options={qualificationOptions}
         />
       ),
     },    

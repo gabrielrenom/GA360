@@ -367,23 +367,38 @@ public class CustomerService : ICustomerService
             Id = customer.Id
         });
 
-        return new CustomersWithCourseQualificationRecordsModel
+        if (result == null)
+            return null;
+
+        var qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
+
+        int trainingCentreId;
+        if (int.TryParse(customer.TrainingCentre, out trainingCentreId))
         {
-            Email = customer.Email,
-            CertificateName = customer.CertificateName,
-            CourseName = customer.CourseName,
-            CertificateId = result.CertificateId,
-            CourseId = result.CourseId,
-            CustomerId = customer.CustomerId,
-            Progression = customer.Progression,
-            QualificationId = result.QualificationId,
-            QualificationName = customer.QualificationName,
-            TrainingCentre = customer.TrainingCentre,
-            TrainingCentreId = customer.TrainingCentreId,
-            Id = result.Id,
-            QualificationStatusId = result.QualificationStatusId,
-            QualificationStatus = customer.QualificationStatus
-        };
+            qualificationRecord.TrainingCentreId = trainingCentreId;
+
+            await UpdateCustomer(qualificationRecord.Id, qualificationRecord);
+
+            qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
+        }
+
+        var customerRecord = new CustomersWithCourseQualificationRecordsModel();
+        customerRecord.CustomerId = customer.CustomerId;
+        customerRecord.CourseId = customer?.CourseId;
+        customerRecord.QualificationId = customer?.QualificationId;
+        customerRecord.Email = qualificationRecord?.Email;
+        customerRecord.CertificateId = customer?.CertificateId;
+        customerRecord.TrainingCentre = qualificationRecord?.TrainingCentre?.Name ?? string.Empty;
+        customerRecord.CertificateName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Certificate?.Name;
+        customerRecord.CourseName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Course?.Name;
+        customerRecord.Progression = customer.Progression;
+        customerRecord.QualificationName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Qualification?.Name;
+        customerRecord.TrainingCentreId = customer?.TrainingCentreId;
+        customerRecord.Id = result.Id;
+        customerRecord.QualificationStatus = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.QualificationStatus?.Name ?? string.Empty;
+        customerRecord.QualificationStatusId = result?.QualificationStatusId;
+
+        return customerRecord;
     }
 
     public async Task<CustomersWithCourseQualificationRecordsModel> CreateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer)
@@ -399,8 +414,9 @@ public class CustomerService : ICustomerService
         });
 
         var result = await _customerRepository.CreateCustomersWithCourseQualificationRecords(entity);
-       
 
+        if (result == null)
+            return null;
         var qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
         qualificationRecord.TrainingCentreId = Convert.ToInt32(customer.TrainingCentre);
         await UpdateCustomer(qualificationRecord.Id, qualificationRecord);

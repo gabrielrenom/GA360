@@ -124,7 +124,7 @@ namespace GA360.DAL.Infrastructure.Repositories
                 .ThenInclude(x => x.Certificate)
                 .Include(x => x.QualificationCustomerCourseCertificates)
                 .ThenInclude(x => x.QualificationStatus)
-
+                .Include(x=>x.TrainingCentre)
                 .AsQueryable();
 
             // Apply sorting

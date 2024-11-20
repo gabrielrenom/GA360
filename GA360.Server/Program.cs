@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add memory cache services
+builder.Services.AddMemoryCache();
 
 // Add services to the container.
 builder.Services.AddDbContext<CRMDbContext>(options =>

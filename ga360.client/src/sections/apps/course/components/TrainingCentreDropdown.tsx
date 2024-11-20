@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, TextField, Box } from '@mui/material';
+import { MenuItem, TextField, Box } from '@mui/material';
 import { getTrainingCentres, TrainingCentre } from 'api/trainingcentreService';
 
 interface TrainingCentreDropdownProps {
@@ -9,52 +9,53 @@ interface TrainingCentreDropdownProps {
 
 const TrainingCentreDropdown: React.FC<TrainingCentreDropdownProps> = ({ value, onChange }) => {
   const [trainingCentres, setTrainingCentres] = useState<TrainingCentre[]>([]);
+  const [selectedValue, setSelectedValue] = useState<string>(''); // Use local state for selected value
 
   useEffect(() => {
     const fetchTrainingCentres = async () => {
       try {
         const data = await getTrainingCentres();
         setTrainingCentres(data);
+
+        // Set the initial selected value if it matches one of the options
+        
+        const matchedTrainingCentre = data.find(tc => tc.name === value);
+        if (matchedTrainingCentre) {
+          setSelectedValue(matchedTrainingCentre.id.toString());
+          onChange(matchedTrainingCentre.id.toString()); // Ensure parent component is updated
+        }
       } catch (error) {
         console.error("Failed to fetch training centres", error);
       }
     };
 
     fetchTrainingCentres();
-  }, []);
+  }, [value, onChange]);
 
-  const handleChange = (event: any, newValue: any) => {
-    onChange(newValue ? newValue.value : '');
+  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const newValue = event.target.value as string;
+    setSelectedValue(newValue);
+    onChange(newValue);
   };
-
-  const trainingCentreOptions = trainingCentres.map(tc => ({
-    label: tc.name,
-    value: tc.id.toString(),
-  }));
 
   return (
     <Box display="flex" flexDirection="column" width="100%" style={{ paddingLeft: '10px' }}>
-      <Autocomplete
-        value={trainingCentreOptions.find(option => option.value === value) || null}
+      <TextField
+        select
+        label="Training Centre"
+        value={selectedValue}
         onChange={handleChange}
-        options={trainingCentreOptions}
-        getOptionLabel={(option) => option.label}
-        isOptionEqualToValue={(option, value) => option.value === value}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Training Centre"
-            variant="outlined"
-            fullWidth
-            style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }}
-            InputLabelProps={{ style: { marginTop: '10px' } }}
-          />
-        )}
-        PaperComponent={(props) => (
-          <div {...props} style={{ ...props.style, maxWidth: '100%', minWidth: '300px', backgroundColor: 'white' }} /> // Set background color here
-        )}
-        style={{ width: '300px', flex: 1 }}
-      />
+        variant="outlined"
+        fullWidth
+        style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }}
+        InputLabelProps={{ style: { marginTop: '10px' } }}
+      >
+        {trainingCentres.map((trainingCentre) => (
+          <MenuItem key={trainingCentre.id} value={trainingCentre.id.toString()}>
+            {trainingCentre.name}
+          </MenuItem>
+        ))}
+      </TextField>
     </Box>
   );
 };

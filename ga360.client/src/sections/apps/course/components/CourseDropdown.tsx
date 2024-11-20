@@ -1,35 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { MenuItem, TextField, Box } from '@mui/material';
-import { Certificate, getCertificates } from 'api/certificateService';
+import { Course, getCourses } from 'api/courseService';
 
-interface CertificateDropdownProps {
+interface CourseDropdownProps {
   value: string;
   onChange: (value: string) => void;
 }
 
-const CertificateDropdown: React.FC<CertificateDropdownProps> = ({ value, onChange }) => {
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
+const CourseDropdown: React.FC<CourseDropdownProps> = ({ value, onChange }) => {
+  const [courses, setCourses] = useState<Course[]>([]);
   const [selectedValue, setSelectedValue] = useState<string>(''); // Use local state for selected value
 
   useEffect(() => {
-    const fetchCertificates = async () => {
+    const fetchCourses = async () => {
       try {
-        const data = await getCertificates();
-        setCertificates(data);
-        console.log("fetchCertificates CALLED");
+        const courseData = await getCourses();
+        setCourses(courseData);
 
         // Set the initial selected value if it matches one of the options
-        const matchedCertificate = data.find(cert => cert.name === value);
-        if (matchedCertificate) {
-          setSelectedValue(matchedCertificate.id.toString());
-          onChange(matchedCertificate.id.toString()); // Ensure parent component is updated
+        const matchedCourse = courseData.find(course => course.name === value);
+        if (matchedCourse) {
+          setSelectedValue(matchedCourse.id.toString());
+          onChange(matchedCourse.id.toString()); // Ensure parent component is updated
         }
       } catch (error) {
-        console.error("Failed to fetch certificates", error);
+        console.error("Failed to fetch courses", error);
       }
     };
 
-    fetchCertificates();
+    fetchCourses();
   }, [value, onChange]);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -42,7 +41,7 @@ const CertificateDropdown: React.FC<CertificateDropdownProps> = ({ value, onChan
     <Box display="flex" flexDirection="column" width="100%" style={{ paddingLeft: '10px' }}>
       <TextField
         select
-        label="Certificate"
+        label="Course"
         value={selectedValue}
         onChange={handleChange}
         variant="outlined"
@@ -50,9 +49,9 @@ const CertificateDropdown: React.FC<CertificateDropdownProps> = ({ value, onChan
         style={{ width: '150px', paddingTop: '10px', backgroundColor: 'white' }}
         InputLabelProps={{ style: { marginTop: '10px' } }}
       >
-        {certificates.map((certificate) => (
-          <MenuItem key={certificate.id} value={certificate.id.toString()}>
-            {certificate.name}
+        {courses.map((course) => (
+          <MenuItem key={course.id} value={course.id.toString()}>
+            {course.name}
           </MenuItem>
         ))}
       </TextField>
@@ -60,4 +59,4 @@ const CertificateDropdown: React.FC<CertificateDropdownProps> = ({ value, onChan
   );
 };
 
-export default CertificateDropdown;
+export default CourseDropdown;
