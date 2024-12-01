@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { fetcher } from 'utils/axios';
 
 // types
-import { BasicCustomer, CustomerList, CustomerListExtended, CustomerProps } from 'types/customer';
+import { BasicCustomer, CustomerList, CustomerListExtended, CustomerProps, User } from 'types/customer';
 import { mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel, mapCustomerListToCustomerApiModelExtended } from 'types/customerApiModel';
 
 const initialState: CustomerProps = {
@@ -19,8 +19,25 @@ export const endpoints = {
   insert: '/insert', // server URL
   update: '/update', // server URL
   delete: '/delete', // server URL
-  get: '/get'
+  get: '/get',
+  user:'/user'
 };
+
+export async function getUser(): Promise<User> {
+  const response = await fetch("/api/customer/user", {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+
+  if (!response.ok) {
+      throw new Error('Network response was not ok');
+  }
+
+  const result: User = await response.json();
+  return result;
+}
+
 
 export function useGetCustomer() {
   const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.list, fetcher, {

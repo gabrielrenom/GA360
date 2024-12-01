@@ -32,8 +32,6 @@ namespace GA360.Server.Controllers
             _memoryCache = memoryCache;
         }
 
-
-
         [AllowAnonymous]
         [HttpGet("list")]
         public async Task<IActionResult> GetAllContacts()
@@ -67,6 +65,24 @@ namespace GA360.Server.Controllers
             return Ok(cachedResult);
         }
 
+        [AllowAnonymous]
+        [HttpGet("customerwithcoursequalificationrecords")]
+        public async Task<IActionResult> GetCustomerWithCourseQualificationRecords(
+            int? pageNumber, int? pageSize, string orderBy = "Email", bool ascending = true)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            // Convert the string `orderBy` to a lambda expression
+            var parameter = Expression.Parameter(typeof(Customer), "x");
+            var property = Expression.Property(parameter, orderBy);
+            var lambda = Expression.Lambda<Func<Customer, object>>(Expression.Convert(property, typeof(object)), parameter);
+
+            var result = await _customerService.GetAllCustomerWithCourseQualificationRecords(emailClaim, pageNumber, pageSize, lambda, ascending);
+            
+            return Ok(result!=null?
+                result?.SelectMany(c => c.ToCustomersWithCourseQualificationRecordsViewModel()).ToList():
+                new List<CustomersWithCourseQualificationRecordsViewModel>());
+        }
 
         [AllowAnonymous]
         [HttpGet]
@@ -134,6 +150,17 @@ namespace GA360.Server.Controllers
             var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
 
             var result = await _customerService.GetCustomerByEmail(emailClaim);
+
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("user")]
+        public async Task<IActionResult> GetUser()
+        {
+            var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+
+            var result = await _customerService.GetBasicCustomerByEmail(emailClaim);
 
             return Ok(result);
         }

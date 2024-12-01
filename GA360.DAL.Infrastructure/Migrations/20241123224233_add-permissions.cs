@@ -6,26 +6,22 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GA360.DAL.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedDocs : Migration
+    public partial class addpermissions : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "BlobId",
-                table: "Documents",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
-
             migrationBuilder.CreateTable(
-                name: "DocumentCustomer",
+                name: "ApplicationPermissions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DocumentId = table.Column<int>(type: "int", nullable: false),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    TrainingCentreId = table.Column<int>(type: "int", nullable: true),
+                    QualificationId = table.Column<int>(type: "int", nullable: true),
+                    CourseId = table.Column<int>(type: "int", nullable: true),
+                    CertificateId = table.Column<int>(type: "int", nullable: true),
+                    RoleId = table.Column<int>(type: "int", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ModyfiedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -37,41 +33,26 @@ namespace GA360.DAL.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DocumentCustomer", x => x.Id);
+                    table.PrimaryKey("PK_ApplicationPermissions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DocumentCustomer_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DocumentCustomer_Documents_DocumentId",
-                        column: x => x.DocumentId,
-                        principalTable: "Documents",
+                        name: "FK_ApplicationPermissions_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_DocumentCustomer_CustomerId",
-                table: "DocumentCustomer",
-                column: "CustomerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DocumentCustomer_DocumentId",
-                table: "DocumentCustomer",
-                column: "DocumentId");
+                name: "IX_ApplicationPermissions_RoleId",
+                table: "ApplicationPermissions",
+                column: "RoleId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "DocumentCustomer");
-
-            migrationBuilder.DropColumn(
-                name: "BlobId",
-                table: "Documents");
+                name: "ApplicationPermissions");
         }
     }
 }

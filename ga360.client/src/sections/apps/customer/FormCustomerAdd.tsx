@@ -1,4 +1,4 @@
-import { useEffect, useState, ChangeEvent } from "react";
+import { useEffect, useState, ChangeEvent, useContext } from "react";
 
 // material-ui
 import { useTheme } from "@mui/material/styles";
@@ -72,6 +72,9 @@ import { Country } from "types/country";
 import MultiFileUpload from "components/third-party/dropzone/MultiFile";
 import MultipleFileUploader from "components/MultipleFileUploader";
 import { DocumentFileModel } from "types/customerApiModel";
+import DuendeContext from "contexts/DuendeContext";
+import { Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs } from "@mui/material";
+import DynamicTableCustomerWithCourseQualificationRecords from "../course/DynamicTableCustomerWithCourseQualificationRecords";
 
 interface StatusProps {
   value: number;
@@ -165,6 +168,9 @@ export default function FormCustomerAdd({
   const [countries, setCountries] = useState<Country[]>([]);
   const [documents, setDocuments] = useState<File[]>([]);
 
+  const { user, isLoggedIn } = useContext(DuendeContext);
+
+  console.log('Context values in SomeComponent:', user, isLoggedIn );
   useEffect(() => {
     if (customer != null) {
       const files: File[] = customer.fileDocuments.map(
@@ -371,8 +377,8 @@ export default function FormCustomerAdd({
 
     },
   });
-
-
+  const [value, setValue] = useState(0);
+  const handleChange = (event, newValue) => { setValue(newValue); };
   const {
     errors,
     touched,
@@ -392,645 +398,674 @@ export default function FormCustomerAdd({
     );
 
   return (
-    <>
-      <FormikProvider value={formik}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-
-          <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
-            <DialogTitle>
-              {customer ? "Edit Candidate" : "New Candidate"}
-            </DialogTitle>
-            <Divider />
-            <DialogContent sx={{ p: 2.5 }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={3}>
-                  <Stack direction="row" justifyContent="center" sx={{ mt: 3 }}>
-                    <FormLabel
-                      htmlFor="change-avtar"
-                      sx={{
-                        position: "relative",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        "&:hover .MuiBox-root": { opacity: 1 },
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Avatar
-                        alt="Avatar 1"
-                        src={avatar}
-                        sx={{ width: 72, height: 72, border: "1px dashed" }}
-                      />
-                      <Box
+    <Box sx={{ bgcolor: 'background.paper', p: 4 }}>
+    <Tabs value={value} onChange={handleChange} aria-label="tabs">
+      <Tab label="Candidate" />
+      <Tab label="Qualifications" />
+      <Tab label="Batch Upload" />
+    </Tabs>
+    <Box sx={{ mt: 2 }}>
+      {console.log("HAY", user.role === "Training Centre")}
+      {value === 0  && (
+        <>
+        <FormikProvider value={formik}>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
+              <DialogTitle>
+                {customer ? "Edit Candidate" : "New Candidate"}
+              </DialogTitle>
+              <Divider />
+              <DialogContent sx={{ p: 2.5 }}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={3}>
+                    <Stack direction="row" justifyContent="center" sx={{ mt: 3 }}>
+                      <FormLabel
+                        htmlFor="change-avtar"
                         sx={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          background:
-                            theme.palette.mode === ThemeMode.DARK
-                              ? "rgba(255, 255, 255, .75)"
-                              : "rgba(0,0,0,.65)",
-                          width: "100%",
-                          height: "100%",
-                          opacity: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
+                          position: "relative",
+                          borderRadius: "50%",
+                          overflow: "hidden",
+                          "&:hover .MuiBox-root": { opacity: 1 },
+                          cursor: "pointer",
                         }}
                       >
-                        <Stack spacing={0.5} alignItems="center">
-                          <CameraOutlined
-                            style={{
-                              color: theme.palette.secondary.lighter,
-                              fontSize: "2rem",
-                            }}
+                        <Avatar
+                          alt="Avatar 1"
+                          src={avatar}
+                          sx={{ width: 72, height: 72, border: "1px dashed" }}
+                        />
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            background:
+                              theme.palette.mode === ThemeMode.DARK
+                                ? "rgba(255, 255, 255, .75)"
+                                : "rgba(0,0,0,.65)",
+                            width: "100%",
+                            height: "100%",
+                            opacity: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Stack spacing={0.5} alignItems="center">
+                            <CameraOutlined
+                              style={{
+                                color: theme.palette.secondary.lighter,
+                                fontSize: "2rem",
+                              }}
+                            />
+                            <Typography sx={{ color: "secondary.lighter" }}>
+                              Upload
+                            </Typography>
+                          </Stack>
+                        </Box>
+                      </FormLabel>
+                      <TextField
+                        type="file"
+                        id="change-avtar"
+                        placeholder="Outlined"
+                        variant="outlined"
+                        sx={{ display: "none" }}
+                        // onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        //   setSelectedImage(e.target.files?.[0])
+                        // }
+                        onChange={handleFileChange}
+                      />
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={8}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-firstName">
+                            First Name
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-firstName"
+                            placeholder="Enter First Name"
+                            {...getFieldProps("firstName")}
+                            error={Boolean(touched.firstName && errors.firstName)}
+                            helperText={touched.firstName && errors.firstName}
                           />
-                          <Typography sx={{ color: "secondary.lighter" }}>
-                            Upload
-                          </Typography>
                         </Stack>
-                      </Box>
-                    </FormLabel>
-                    <TextField
-                      type="file"
-                      id="change-avtar"
-                      placeholder="Outlined"
-                      variant="outlined"
-                      sx={{ display: "none" }}
-                      // onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      //   setSelectedImage(e.target.files?.[0])
-                      // }
-                      onChange={handleFileChange}
-                    />
-                  </Stack>
-                </Grid>
-                <Grid item xs={12} md={8}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-firstName">
-                          First Name
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-firstName"
-                          placeholder="Enter First Name"
-                          {...getFieldProps("firstName")}
-                          error={Boolean(touched.firstName && errors.firstName)}
-                          helperText={touched.firstName && errors.firstName}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-lastName">
-                          Last Name
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-lastName"
-                          placeholder="Enter Last Name"
-                          {...getFieldProps("lastName")}
-                          error={Boolean(touched.lastName && errors.lastName)}
-                          helperText={touched.lastName && errors.lastName}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-email">Email</InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-email"
-                          placeholder="Enter Customer Email"
-                          {...getFieldProps("email")}
-                          error={Boolean(touched.email && errors.email)}
-                          helperText={touched.email && errors.email}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-fatherName">
-                          Father Name
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-fatherName"
-                          placeholder="Enter Father Name"
-                          {...getFieldProps("fatherName")}
-                          error={Boolean(
-                            touched.fatherName && errors.fatherName
-                          )}
-                          helperText={touched.fatherName && errors.fatherName}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-dateOfBirth">
-                          Date of Birth
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-dateOfBirth"
-                          type="date"
-                          error={Boolean(
-                            touched.dateOfBirth && errors.dateOfBirth
-                          )}
-                          {...getFieldProps("dateOfBirth")}
-                        />
-                      </Stack>{" "}
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-ethnicity">
-                          Ethnicity
-                        </InputLabel>
-                        <Select
-                          fullWidth
-                          id="customer-ethnicity"
-                          {...getFieldProps("ethnicity")}
-                          error={Boolean(
-                            touched.ethnicity && errors.ethnicity
-                          )}
-                        >
-                          {ethnicities.map((ethnicity) => (
-                            <MenuItem key={ethnicity.id} value={ethnicity.name}>
-                              {ethnicity.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Stack>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-disability">
-                          Disability
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-disability"
-                          multiline
-                          rows={2}
-                          {...getFieldProps("disability")}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-employeeStatus">
-                          Employee Status
-                        </InputLabel>
-                        <Select
-                          fullWidth
-                          id="customer-employeeStatus"
-                          {...getFieldProps("employeeStatus")}
-                          error={Boolean(
-                            touched.employeeStatus && errors.employeeStatus
-                          )}
-                        >
-                          {/* Add options for employee status */}
-                          <MenuItem value="employed">Employed</MenuItem>
-                          <MenuItem value="selfEmployed">
-                            Self-Employed
-                          </MenuItem>
-                          <MenuItem value="unemployed">Unemployed</MenuItem>  
-                        </Select>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-employer">
-                          Employer
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-employer"
-                          {...getFieldProps("employer")}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-trainingCentre">
-                          Training Centre
-                        </InputLabel>
-                        <Select
-                          fullWidth
-                          id="customer-trainingCentre"
-                          {...getFieldProps("trainingCentre")}
-                          error={Boolean(
-                            touched.trainingCentre && errors.trainingCentre
-                          )}
-                        >
-                          {trainingCentres.length > 0 ? (
-                            trainingCentres.map((centre) => (
-                              <MenuItem key={centre.id} value={centre.id}>
-                                {centre.name}
-                              </MenuItem>
-                            ))
-                          ) : (
-                            <MenuItem value="" disabled>
-                              No training centres available
-                            </MenuItem>
-                          )}
-                        </Select>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-nationalInsurance">
-                          UK National Insurance
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-nationalInsurance"
-                          {...getFieldProps("nationalInsurance")}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-  <Stack spacing={1}>
-    <InputLabel htmlFor="customer-role">
-      Customer Role
-    </InputLabel>
-    <Select
-      fullWidth
-      id="customer-role"
-      {...getFieldProps("role")}
-      error={Boolean(touched.role && errors.role)}
-    >
-      <MenuItem value="Admin">Admin</MenuItem>
-      <MenuItem value="Candidate">Candidate</MenuItem>
-    </Select>
-    {touched.role && errors.role && (
-      <FormHelperText error>{errors.role}</FormHelperText>
-    )}
-  </Stack>
-</Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-gender">
-                          Gender
-                        </InputLabel>
-                        <RadioGroup
-                          row
-                          error={Boolean(touched.gender && errors.gender)}
-                          aria-label="payment-card"
-                          {...getFieldProps("gender")}
-                        >
-                          <FormControlLabel
-                            control={<Radio value={Gender.FEMALE} />}
-                            label={Gender.FEMALE}
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-lastName">
+                            Last Name
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-lastName"
+                            placeholder="Enter Last Name"
+                            {...getFieldProps("lastName")}
+                            error={Boolean(touched.lastName && errors.lastName)}
+                            helperText={touched.lastName && errors.lastName}
                           />
-                          <FormControlLabel
-                            control={<Radio value={Gender.MALE} />}
-                            label={Gender.MALE}
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-email">Email</InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-email"
+                            placeholder="Enter Customer Email"
+                            {...getFieldProps("email")}
+                            error={Boolean(touched.email && errors.email)}
+                            helperText={touched.email && errors.email}
                           />
-                          <FormControlLabel
-                            control={<Radio value={Gender.NONBINARY} />}
-                            label={Gender.NONBINARY}
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-fatherName">
+                            Father Name
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-fatherName"
+                            placeholder="Enter Father Name"
+                            {...getFieldProps("fatherName")}
+                            error={Boolean(
+                              touched.fatherName && errors.fatherName
+                            )}
+                            helperText={touched.fatherName && errors.fatherName}
                           />
-                          <FormControlLabel
-                            control={<Radio value={Gender.PREFERNOTTOSAY} />}
-                            label={Gender.PREFERNOTTOSAY}
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-dateOfBirth">
+                            Date of Birth
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-dateOfBirth"
+                            type="date"
+                            error={Boolean(
+                              touched.dateOfBirth && errors.dateOfBirth
+                            )}
+                            {...getFieldProps("dateOfBirth")}
                           />
-                        </RadioGroup>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-status">
-                          Status
-                        </InputLabel>
-                        <FormControl fullWidth>
+                        </Stack>{" "}
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-ethnicity">
+                            Ethnicity
+                          </InputLabel>
                           <Select
-                            id="column-hiding"
-                            displayEmpty
-                            {...getFieldProps("status")}
-                            onChange={(event: SelectChangeEvent<string>) =>
-                              setFieldValue(
-                                "status",
-                                event.target.value as string
-                              )
-                            }
-                            input={
-                              <OutlinedInput
-                                id="select-column-hiding"
-                                placeholder="Sort by"
-                              />
-                            }
-                            renderValue={(selected) => {
-                              if (!selected) {
-                                return (
-                                  <Typography variant="subtitle1">
-                                    Select Status
-                                  </Typography>
-                                );
-                              }
-
-                              const selectedStatus = allStatus.filter(
-                                (item) => item.value === Number(selected)
-                              );
-                              return (
-                                <Typography variant="subtitle2">
-                                  {selectedStatus.length > 0
-                                    ? selectedStatus[0].label
-                                    : "Pending"}
-                                </Typography>
-                              );
-                            }}
+                            fullWidth
+                            id="customer-ethnicity"
+                            {...getFieldProps("ethnicity")}
+                            error={Boolean(touched.ethnicity && errors.ethnicity)}
                           >
-                            {allStatus.map((column: StatusProps) => (
-                              <MenuItem key={column.value} value={column.value}>
-                                <ListItemText primary={column.label} />
+                            {ethnicities.map((ethnicity) => (
+                              <MenuItem key={ethnicity.id} value={ethnicity.name}>
+                                {ethnicity.name}
                               </MenuItem>
                             ))}
                           </Select>
-                        </FormControl>
-                        {touched.status && errors.status && (
-                          <FormHelperText
-                            error
-                            id="standard-weight-helper-text-email-login"
-                            sx={{ pl: 1.75 }}
+                        </Stack>
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-disability">
+                            Disability
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-disability"
+                            multiline
+                            rows={2}
+                            {...getFieldProps("disability")}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-employeeStatus">
+                            Employee Status
+                          </InputLabel>
+                          <Select
+                            fullWidth
+                            id="customer-employeeStatus"
+                            {...getFieldProps("employeeStatus")}
+                            error={Boolean(
+                              touched.employeeStatus && errors.employeeStatus
+                            )}
                           >
-                            {errors.status}
-                          </FormHelperText>
-                        )}
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-contact">
-                          Contact
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-contact"
-                          placeholder="Enter Contact"
-                          {...getFieldProps("contact")}
-                          error={Boolean(touched.contact && errors.contact)}
-                          helperText={touched.contact && errors.contact}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-street">
-                          Street
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-street"
-                          placeholder="Enter Street"
-                          {...getFieldProps("street")}
-                          error={Boolean(touched.street && errors.street)}
-                          helperText={touched.street && errors.street}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-number">
-                          House Number
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-number"
-                          placeholder="Enter Number"
-                          {...getFieldProps("number")}
-                          error={Boolean(touched.number && errors.number)}
-                          helperText={touched.number && errors.number}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-postcode">
-                          Postcode
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-postcode"
-                          placeholder="Enter Postcode"
-                          {...getFieldProps("postcode")}
-                          error={Boolean(touched.postcode && errors.postcode)}
-                          helperText={touched.postcode && errors.postcode}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-city">City</InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-city"
-                          placeholder="Enter City"
-                          {...getFieldProps("city")}
-                          error={Boolean(touched.city && errors.city)}
-                          helperText={touched.city && errors.city}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-country">
-                          Country
-                        </InputLabel>
-                        <FormControl
-                          fullWidth
-                          error={Boolean(
-                            formik.touched.country && formik.errors.country
-                          )}
-                        >
-                          {countries.length > 0 ? (
+                            {/* Add options for employee status */}
+                            <MenuItem value="employed">Employed</MenuItem>
+                            <MenuItem value="selfEmployed">
+                              Self-Employed
+                            </MenuItem>
+                            <MenuItem value="unemployed">Unemployed</MenuItem>  
+                          </Select>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-employer">
+                            Employer
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-employer"
+                            {...getFieldProps("employer")}
+                          />
+                        </Stack>
+                      </Grid>
+                      {user && user.roles && user.roles.includes("Admin") ? (
+                        <Grid item xs={12}>
+                          <Stack spacing={1}>
+                            <InputLabel htmlFor="customer-trainingCentre">
+                              Training Centre
+                            </InputLabel>
                             <Select
-                              id="customer-country"
-                              value={formik.values.country}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              name="country"
-                              displayEmpty
+                              fullWidth
+                              id="customer-trainingCentre"
+                              {...getFieldProps("trainingCentre")}
+                              error={Boolean(touched.trainingCentre && errors.trainingCentre)}
                             >
-                              <MenuItem value="" disabled>
-                                Select Country
-                              </MenuItem>
-                              {countries.map((country) => (
-                                <MenuItem key={country.id} value={country.name}>
-                                  {country.name}
+                              {trainingCentres.length > 0 ? (
+                                trainingCentres.map((centre) => (
+                                  <MenuItem key={centre.id} value={centre.id}>
+                                    {centre.name}
+                                  </MenuItem>
+                                ))
+                              ) : (
+                                <MenuItem value="" disabled>
+                                  No training centres available
+                                </MenuItem>
+                              )}
+                            </Select>
+                          </Stack>
+                        </Grid>
+                      ) : (
+                        <></>
+                      )}
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-nationalInsurance">
+                            UK National Insurance
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-nationalInsurance"
+                            {...getFieldProps("nationalInsurance")}
+                          />
+                        </Stack>
+                      </Grid>
+                      {user && user.roles && user.roles.includes("Admin")?
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-role">
+                            Customer Role
+                          </InputLabel>
+                          <Select
+                            fullWidth
+                            id="customer-role"
+                            {...getFieldProps("role")}
+                            error={Boolean(touched.role && errors.role)}
+                          >
+                            <MenuItem value="Admin">Admin</MenuItem>
+                            <MenuItem value="Training Centre">
+                              Training Centre
+                            </MenuItem>
+                            <MenuItem value="Candidate">Candidate</MenuItem>
+                          </Select>
+                          {touched.role && errors.role && (
+                            <FormHelperText error>{errors.role}</FormHelperText>
+                          )}
+                        </Stack>
+                      </Grid>:<></>}
+                      
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-gender">
+                            Gender
+                          </InputLabel>
+                          <RadioGroup
+                            row
+                            error={Boolean(touched.gender && errors.gender)}
+                            aria-label="payment-card"
+                            {...getFieldProps("gender")}
+                          >
+                            <FormControlLabel
+                              control={<Radio value={Gender.FEMALE} />}
+                              label={Gender.FEMALE}
+                            />
+                            <FormControlLabel
+                              control={<Radio value={Gender.MALE} />}
+                              label={Gender.MALE}
+                            />
+                            <FormControlLabel
+                              control={<Radio value={Gender.NONBINARY} />}
+                              label={Gender.NONBINARY}
+                            />
+                            <FormControlLabel
+                              control={<Radio value={Gender.PREFERNOTTOSAY} />}
+                              label={Gender.PREFERNOTTOSAY}
+                            />
+                          </RadioGroup>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-status">
+                            Status
+                          </InputLabel>
+                          <FormControl fullWidth>
+                            <Select
+                              id="column-hiding"
+                              displayEmpty
+                              {...getFieldProps("status")}
+                              onChange={(event: SelectChangeEvent<string>) =>
+                                setFieldValue(
+                                  "status",
+                                  event.target.value as string
+                                )
+                              }
+                              input={
+                                <OutlinedInput
+                                  id="select-column-hiding"
+                                  placeholder="Sort by"
+                                />
+                              }
+                              renderValue={(selected) => {
+                                if (!selected) {
+                                  return (
+                                    <Typography variant="subtitle1">
+                                      Select Status
+                                    </Typography>
+                                  );
+                                }
+
+                                const selectedStatus = allStatus.filter(
+                                  (item) => item.value === Number(selected)
+                                );
+                                return (
+                                  <Typography variant="subtitle2">
+                                    {selectedStatus.length > 0
+                                      ? selectedStatus[0].label
+                                      : "Pending"}
+                                  </Typography>
+                                );
+                              }}
+                            >
+                              {allStatus.map((column: StatusProps) => (
+                                <MenuItem key={column.value} value={column.value}>
+                                  <ListItemText primary={column.label} />
                                 </MenuItem>
                               ))}
                             </Select>
-                          ) : (
-                            <>Loading...</>
-                          )}
-                          {formik.touched.country && formik.errors.country && (
-                            <FormHelperText>
-                              {formik.errors.country}
+                          </FormControl>
+                          {touched.status && errors.status && (
+                            <FormHelperText
+                              error
+                              id="standard-weight-helper-text-email-login"
+                              sx={{ pl: 1.75 }}
+                            >
+                              {errors.status}
                             </FormHelperText>
                           )}
-                        </FormControl>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-location">
-                          Location
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-location"
-                          multiline
-                          rows={2}
-                          placeholder="Enter Location"
-                          {...getFieldProps("location")}
-                          helperText={touched.location && errors.location}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-about">
-                          About Customer
-                        </InputLabel>
-                        <TextField
-                          fullWidth
-                          id="customer-about"
-                          multiline
-                          rows={2}
-                          placeholder="Enter Customer Information"
-                          {...getFieldProps("about")}
-                          helperText={touched.about && errors.about}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-skills">
-                          Skills
-                        </InputLabel>
-                        <Autocomplete
-                          multiple
-                          fullWidth
-                          id="customer-skills"
-                          options={skills.map((skill) => skill.name)}
-                          {...getFieldProps("skills")}
-                          getOptionLabel={(label) => label}
-                          onChange={(event, newValue) => {
-                            setFieldValue("skills", newValue);
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              name="skill"
-                              placeholder="Add Skills"
-                            />
-                          )}
-                          renderTags={(value, getTagProps) =>
-                            value.map((option, index) => (
-                              <Chip
-                                {...getTagProps({ index })}
-                                variant="combined"
-                                key={index}
-                                label={option}
-                                deleteIcon={
-                                  <CloseOutlined
-                                    style={{ fontSize: "0.75rem" }}
-                                  />
-                                }
-                                sx={{ color: "text.primary" }}
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-contact">
+                            Contact
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-contact"
+                            placeholder="Enter Contact"
+                            {...getFieldProps("contact")}
+                            error={Boolean(touched.contact && errors.contact)}
+                            helperText={touched.contact && errors.contact}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-street">
+                            Street
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-street"
+                            placeholder="Enter Street"
+                            {...getFieldProps("street")}
+                            error={Boolean(touched.street && errors.street)}
+                            helperText={touched.street && errors.street}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-number">
+                            House Number
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-number"
+                            placeholder="Enter Number"
+                            {...getFieldProps("number")}
+                            error={Boolean(touched.number && errors.number)}
+                            helperText={touched.number && errors.number}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-postcode">
+                            Postcode
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-postcode"
+                            placeholder="Enter Postcode"
+                            {...getFieldProps("postcode")}
+                            error={Boolean(touched.postcode && errors.postcode)}
+                            helperText={touched.postcode && errors.postcode}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-city">City</InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-city"
+                            placeholder="Enter City"
+                            {...getFieldProps("city")}
+                            error={Boolean(touched.city && errors.city)}
+                            helperText={touched.city && errors.city}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-country">
+                            Country
+                          </InputLabel>
+                          <FormControl
+                            fullWidth
+                            error={Boolean(
+                              formik.touched.country && formik.errors.country
+                            )}
+                          >
+                            {countries.length > 0 ? (
+                              <Select
+                                id="customer-country"
+                                value={formik.values.country}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                name="country"
+                                displayEmpty
+                              >
+                                <MenuItem value="" disabled>
+                                  Select Country
+                                </MenuItem>
+                                {countries.map((country) => (
+                                  <MenuItem key={country.id} value={country.name}>
+                                    {country.name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            ) : (
+                              <>Loading...</>
+                            )}
+                            {formik.touched.country && formik.errors.country && (
+                              <FormHelperText>
+                                {formik.errors.country}
+                              </FormHelperText>
+                            )}
+                          </FormControl>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-location">
+                            Location
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-location"
+                            multiline
+                            rows={2}
+                            placeholder="Enter Location"
+                            {...getFieldProps("location")}
+                            helperText={touched.location && errors.location}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-about">
+                            About Customer
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            id="customer-about"
+                            multiline
+                            rows={2}
+                            placeholder="Enter Customer Information"
+                            {...getFieldProps("about")}
+                            helperText={touched.about && errors.about}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-skills">
+                            Skills
+                          </InputLabel>
+                          <Autocomplete
+                            multiple
+                            fullWidth
+                            id="customer-skills"
+                            options={skills.map((skill) => skill.name)}
+                            {...getFieldProps("skills")}
+                            getOptionLabel={(label) => label}
+                            onChange={(event, newValue) => {
+                              setFieldValue("skills", newValue);
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                name="skill"
+                                placeholder="Add Skills"
                               />
-                            ))
-                          }
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-documents">
-                          Documents
-                        </InputLabel>
-                        <MultipleFileUploader
-                          onFilesUpload={handleFilesUpload}
-                          detailedFiles = {documents}
-                          initialFiles={documents}
-                        />
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Stack spacing={1}>
-                        <InputLabel htmlFor="customer-portfolio">
-                          Portfolio
-                        </InputLabel>
-                        <Select
-                          fullWidth
-                          id="customer-portfolio"
-                          {...getFieldProps("portfolio")}
-                        >
-                          <MenuItem value="original">Original</MenuItem>
-                          <MenuItem value="renewal">Renewal</MenuItem>
-                        </Select>
-                      </Stack>
+                            )}
+                            renderTags={(value, getTagProps) =>
+                              value.map((option, index) => (
+                                <Chip
+                                  {...getTagProps({ index })}
+                                  variant="combined"
+                                  key={index}
+                                  label={option}
+                                  deleteIcon={
+                                    <CloseOutlined
+                                      style={{ fontSize: "0.75rem" }}
+                                    />
+                                  }
+                                  sx={{ color: "text.primary" }}
+                                />
+                              ))
+                            }
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-documents">
+                            Documents
+                          </InputLabel>
+                          <MultipleFileUploader
+                            onFilesUpload={handleFilesUpload}
+                            detailedFiles={documents}
+                            initialFiles={documents}
+                          />
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor="customer-portfolio">
+                            Portfolio
+                          </InputLabel>
+                          <Select
+                            fullWidth
+                            id="customer-portfolio"
+                            {...getFieldProps("portfolio")}
+                          >
+                            <MenuItem value="original">Original</MenuItem>
+                            <MenuItem value="renewal">Renewal</MenuItem>
+                          </Select>
+                        </Stack>
+                      </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-              </Grid>
-            </DialogContent>
-            <Divider />
-            <DialogActions sx={{ p: 2.5 }}>
-              <Grid
-                container
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Grid item>
-                  {customer && (
-                    <Tooltip title="Delete Customer" placement="top">
-                      <IconButton
-                        onClick={() => setOpenAlert(true)}
-                        size="large"
-                        color="error"
-                      >
-                        <DeleteFilled />
-                      </IconButton>
-                    </Tooltip>
-                  )}
+              </DialogContent>
+              <Divider />
+              <DialogActions sx={{ p: 2.5 }}>
+                <Grid
+                  container
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Grid item>
+                    {customer && (
+                      <Tooltip title="Delete Customer" placement="top">
+                        <IconButton
+                          onClick={() => setOpenAlert(true)}
+                          size="large"
+                          color="error"
+                        >
+                          <DeleteFilled />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Grid>
+                  <Grid item>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Button color="error" onClick={closeModal}>
+                        Cancel
+                      </Button>
+                      {hasBeenSubmitted === false ? (
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          disabled={isSubmitting}
+                        >
+                          {customer ? "Save" : "Add"}
+                        </Button>
+                      ) : (
+                        <CircularProgress size={44} />
+                      )}
+                    </Stack>
+                  </Grid>
                 </Grid>
-                <Grid item>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Button color="error" onClick={closeModal}>
-                      Cancel
-                    </Button>
-                    {hasBeenSubmitted===false?
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      disabled={isSubmitting}
-                    >
-                      {customer ? "Save" : "Add"}
-                    </Button>
-                    :<CircularProgress size={44} />}
-
-                  </Stack>
-                </Grid>
-              </Grid>
-            </DialogActions>
-            <Divider />
-
-
-          </Form>
-          
-        </LocalizationProvider>
-      </FormikProvider>
-      {customer && (
-        <AlertCustomerDelete
-          id={customer.id!}
-          title={customer.name}
-          open={openAlert}
-          handleClose={handleAlertClose}
-        />
+              </DialogActions>
+              <Divider />
+            </Form>
+          </LocalizationProvider>
+        </FormikProvider>
+        {customer && (
+          <AlertCustomerDelete
+            id={customer.id!}
+            title={customer.name}
+            open={openAlert}
+            handleClose={handleAlertClose}
+          />
+        )}
+        </>
       )}
-    </>
+      {user && (user.role === "Training Centre" || user.role === "Super Admin") && value === 1 && (
+        <>
+        <DynamicTableCustomerWithCourseQualificationRecords/>
+        </>
+      )}
+      {user && (user.role === "Training Centre" || user.role === "Super Admin") && value === 2 && (
+        <Box>
+          <Typography variant="h6">Batch Upload</Typography>
+          <Button variant="contained" component="label">
+            Upload File
+            <input type="file" hidden />
+          </Button>
+        </Box>
+      )}
+    </Box>
+  </Box>
   );
 }
+

@@ -16,6 +16,13 @@ namespace GA360.DAL.Infrastructure.Contexts
     {
         private readonly IConfiguration _configuration;
         public DbSet<Client> Clients { get; set; }
+        public DbSet<ApplicationPermission> ApplicationPermissions { get; set; }
+        public DbSet<EntityPermission> EntityPermissions { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<TrainingCentrePermission> TrainingCentrePermissions { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<ClientCustomer> ClientContacts { get; set; }
         public DbSet<Country> Countries { get; set; }

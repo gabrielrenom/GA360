@@ -43,6 +43,7 @@ export interface QualificationStatus {
 export const endpoints = {
   key: '/api/qualification',
   fullrecord: '/api/customer/customerswithcoursequalificationrecords',
+  singlerecord: '/api/customer/customerwithcoursequalificationrecords',
   qualificationstatuses: '/api/qualification/qualificationstatuses',
 };
 
@@ -143,6 +144,25 @@ export async function deleteQualification(id: number): Promise<void> {
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
+}
+
+export async function getAllCustomerWithCourseQualificationRecords(pageNumber?: number, pageSize?: number, orderBy: string = "Email", ascending: boolean = true): Promise<CustomersWithCourseQualificationRecordsViewModel[]> {
+  pageNumber = 1
+  pageSize = 20
+  const response = await fetch(`${endpoints.singlerecord}?pageNumber=${pageNumber}&pageSize=${pageSize}&orderBy=${orderBy}&ascending=${ascending}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF': 'Dog',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data: CustomersWithCourseQualificationRecordsViewModel[] = await response.json();
+  return data;
 }
 
 export async function getAllCustomersWithCourseQualificationRecords(pageNumber?: number, pageSize?: number, orderBy: string = "Email", ascending: boolean = true): Promise<CustomersWithCourseQualificationRecordsViewModel[]> {

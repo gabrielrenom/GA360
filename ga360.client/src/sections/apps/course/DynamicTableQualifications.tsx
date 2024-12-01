@@ -79,7 +79,7 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-export default function DynamicTableCourse() {
+export default function DynamicTableQualifications() {
   const theme = useTheme();
   const downSM = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -199,13 +199,13 @@ const columns: GridColDef[] = [
   },
   {
     field: 'name',
-    headerName: 'Name',
+    headerName: 'NAME',
     flex: 1,
     editable: true,
   },
   {
     field: 'registrationDate',
-    headerName: 'Registration Date',
+    headerName: 'REGISTRATION DATE',
     type: 'date',
     flex: 1,
     editable: true,
@@ -216,7 +216,7 @@ const columns: GridColDef[] = [
   },
   {
     field: 'expectedDate',
-    headerName: 'Expected Date',
+    headerName: 'EXPECTED DATE',
     type: 'date',
     flex: 1,
     editable: true,
@@ -227,7 +227,7 @@ const columns: GridColDef[] = [
   },
   {
     field: 'certificateDate',
-    headerName: 'Certificate Date',
+    headerName: 'CERTIFICATE DATE',
     type: 'date',
     flex: 1,
     editable: true,
@@ -238,13 +238,13 @@ const columns: GridColDef[] = [
   },
   {
     field: 'certificateNumber',
-    headerName: 'Certificate Number',
+    headerName: 'CERTIFICATE NUMBER',
     flex: 1,
     editable: true,
   },
   {
     field: 'status',
-    headerName: 'Status',
+    headerName: 'STATUS',
     flex: 1,
     editable: true,
     type: 'singleSelect',

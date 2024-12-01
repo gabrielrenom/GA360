@@ -56,3 +56,12 @@ export interface BasicCustomer {
   id: number;
   email: string;
 }
+
+export interface User {
+  firstName: string;
+  lastName: string;
+  email: string;
+  customerId: number;
+  role: string;
+  roleId: number;
+}

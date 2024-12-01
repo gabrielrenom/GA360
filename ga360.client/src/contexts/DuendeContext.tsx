@@ -12,6 +12,8 @@ import authReducer from 'contexts/auth-reducer/auth';
 import Loader from 'components/Loader';
 import axios from 'utils/axios';
 import { AuthProps } from 'types/auth';
+import { User } from 'types/customer';
+import { getUser } from "api/customer";
 
 const chance = new Chance();
 
@@ -49,6 +51,7 @@ export  const DuendeProvider = ({ children }) => {
 
     useEffect(() => {
         const init = async () => {
+            
             try {
                 const response = await fetch("/bff/user", {
                     headers: {
@@ -60,13 +63,18 @@ export  const DuendeProvider = ({ children }) => {
                     const name = userResult.find((x: { type: string; }) => x.type === 'name').value;
                     const id = userResult.find((x: { type: string; }) => x.type === 'sid').value;
                     const email = userResult.find((x: { type: string; }) => x.type === 'email').value;
-
+                    
+                    const userDetails: User = await getUser(); 
+                    
                     const user = {
                         name: name,
                         id: id,
-                        email: email
+                        email: email,
+                        roleId: userDetails.roleId,
+                        role: userDetails.role,
+                        firstName: userDetails.firstName,
+                        lastName: userDetails.lastName
                     };
-
                     dispatch({
                         type: LOGIN,
                         payload: {
@@ -74,6 +82,8 @@ export  const DuendeProvider = ({ children }) => {
                             user
                         }
                     });
+                    console.log("MY USER",user);
+
                 } else {
                     dispatch({
                         type: LOGOUT

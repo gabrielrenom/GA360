@@ -45,6 +45,16 @@ namespace GA360.DAL.Infrastructure.Repositories
             return result;
         }
 
+        public async Task<Customer> GetBasicCustomerByEmail(string email)
+        {
+            var result = await GetDbContext()?.Customers
+                .Include(x=>x.Roles)
+                .ThenInclude(x=>x.Role)
+           .FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
+
+            return result;
+        }
+
         public async Task<Customer> GetCustomerBasicByEmail(string email)
         {
             var result = await GetDbContext()?.Customers
@@ -98,6 +108,34 @@ namespace GA360.DAL.Infrastructure.Repositories
                 .Include(x => x.QualificationCustomerCourseCertificates)
                 .ThenInclude(x => x.QualificationStatus)
 
+                .AsQueryable();
+
+            // Apply sorting
+            query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+
+            // Apply pagination if pageNumber and pageSize are provided
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                query = query.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
+        {
+            var query = GetDbContext()
+                .Set<Customer>()
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Course)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Qualification)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Certificate)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.QualificationStatus)
+                .Include(x => x.TrainingCentre)
+                .Where(x=>x.Email.ToLower() == email.ToLower())
                 .AsQueryable();
 
             // Apply sorting
@@ -214,5 +252,19 @@ namespace GA360.DAL.Infrastructure.Repositories
             }
 
         }
+
+        public async Task<List<ApplicationPermission>> GetApplicationPermissions(string email)
+        {
+            var entity = await GetDbContext().ApplicationPermissions
+                .Include(x => x.Role)
+                .ThenInclude(x => x.UserRoles)
+                .ThenInclude(x => x.Customer)
+                .Where(x => x.Role.UserRoles
+                .Any(ur => ur.Customer.Email.ToLower() == email.ToLower()))
+                .ToListAsync();
+
+            return entity;
+        }
+
     }
 }

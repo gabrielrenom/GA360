@@ -22,9 +22,10 @@ namespace GA360.Domain.Core.Interfaces
         Task<Customer> UpdateCustomer(int id, CustomerModel customer);
         Task<List<CustomerModel>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
         Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
-        Task<CustomerModel> GetBasicCustomerByEmail(string email);
+        Task<object> GetBasicCustomerByEmail(string email);
         Task<bool> DeleteCustomersWithCourseQualificationRecords(int id);
         Task<CustomersWithCourseQualificationRecordsModel> UpdateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer);
         Task<CustomersWithCourseQualificationRecordsModel> CreateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer);
+        Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
     }
 }

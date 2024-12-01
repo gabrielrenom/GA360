@@ -11,6 +11,7 @@ namespace GA360.DAL.Infrastructure.Interfaces
 {
     public interface ICustomerRepository : IRepository<Customer>
     {
+        Task<List<ApplicationPermission>> GetApplicationPermissions(string email);
         IEnumerable<Customer> GetCustomersByCountry(int countryId);
         Task<List<Customer>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
         Task<Customer> GetWithAllEntitiesById(int id);
@@ -21,5 +22,7 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Task<QualificationCustomerCourseCertificate> UpdateCustomersWithCourseQualificationRecords(QualificationCustomerCourseCertificate qualificationCustomerCourseCertificate);
         Task<QualificationCustomerCourseCertificate> CreateCustomersWithCourseQualificationRecords(QualificationCustomerCourseCertificate qualificationCustomerCourseCertificate);
         Task<Customer> GetCustomerWithCourseQualificationRecordById(int id);
+        Task<Customer> GetBasicCustomerByEmail(string email);
+        Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
     }
 }

@@ -39,7 +39,6 @@ public class Customer : Audit, IModel
     public virtual List<CustomerSkills> CustomerSkills { get; set; }
     public virtual List<QualificationCustomerCourseCertificate>? QualificationCustomerCourseCertificates { get; set; }
     public virtual List<DocumentCustomer>? DocumentCustomers { get; set; }
-
+    public virtual List<UserRole>? Roles { get; set; }
     public virtual TrainingCentre TrainingCentre { get; set; }
-
 }

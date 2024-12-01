@@ -65,6 +65,10 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/customer/user': {
+                target,
+                secure: false
+            },
             '^/api/customer/create': {
                 target,
                 secure: false
@@ -86,6 +90,10 @@ export default defineConfig({
                 secure: false
             },
             '^/api/customer/updatewithdocuments': {
+                target,
+                secure: false
+            },
+            '^/api/customer/customerwithcoursequalificationrecords': {
                 target,
                 secure: false
             },

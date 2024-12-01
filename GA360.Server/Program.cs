@@ -1,6 +1,7 @@
 using Duende.Bff;
 using Duende.Bff.Yarp;
 using GA360.Commons.Settings;
+using GA360.DAL.Entities.Entities;
 using GA360.DAL.Infrastructure.Contexts;
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.DAL.Infrastructure.Repositories;
@@ -44,6 +45,8 @@ builder.Services.AddScoped<IQualificationRepository, QualificationRepository>();
 
 builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
+
+builder.Services.AddScoped<IPermissionService, PermissionService>();
 
 builder.Services.AddBff(x =>
 {

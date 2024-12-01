@@ -12,19 +12,26 @@ public class CourseController : ControllerBase
 {
     private readonly ILogger<CourseController> _logger;
     private readonly ICourseService _courseService;
+    private readonly IPermissionService _permissionService;
 
-    public CourseController(ILogger<CourseController> logger, ICourseService courseService)
+    public CourseController(ILogger<CourseController> logger, ICourseService courseService, IPermissionService permissionService)
     {
         _logger = logger;
         _courseService = courseService;
+        _permissionService = permissionService;
     }
 
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetCourses()
     {
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
         var courses = await _courseService.GetAllCourses();
-        return Ok(courses);
+
+        var coursesPermissions = await _permissionService.FilterPermissions(emailClaim, courses);
+
+        return Ok(coursesPermissions);
     }
 
     [AllowAnonymous]

@@ -49,13 +49,18 @@ public class CustomerService : ICustomerService
         return destination;
     }
 
-    public async Task<CustomerModel> GetBasicCustomerByEmail(string email)
+    public async Task<object> GetBasicCustomerByEmail(string email)
     {
-        var result = await _customerRepository.GetCustomerBasicByEmail(email);
-        CustomerModel destination = new CustomerModel();
-        Map(result, destination);
-
-        return destination;
+        var result = await _customerRepository.GetBasicCustomerByEmail(email);
+        return new
+        {
+            Email = result.Email,
+            FirstName = result.FirstName,
+            LastName = result.LastName,
+            Role = result.Roles!=null? result.Roles.FirstOrDefault().Role.Name:null,
+            RoleId = result.Roles != null ? result.Roles.FirstOrDefault().RoleId:0,
+            CustomerId= result.Id,
+        } ;
     }
 
     public IEnumerable<Customer> GetCustomersByCountry(int countryId)
@@ -330,6 +335,23 @@ public class CustomerService : ICustomerService
         return customerList;
     }
 
+    public async Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
+    {
+        var customerList = new List<Customer>();
+
+        var customers = await _customerRepository.GetAllCustomerWithCourseQualificationRecords(email, pageNumber, pageSize, c => c.FirstName, true);
+
+        if (customers != null)
+        {
+            foreach (var customer in customers)
+            {
+                customerList.Add(customer);
+            }
+        }
+
+        return customerList;
+    }
+
     public async Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
     {
         var customerList = new List<Customer>();
@@ -346,6 +368,8 @@ public class CustomerService : ICustomerService
 
         return customerList;
     }
+
+
 
     public async Task<bool> DeleteCustomersWithCourseQualificationRecords(int id)
     {

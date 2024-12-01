@@ -10,10 +10,20 @@ import ClaimsDashboard from '../pages/claims/claims'
 
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
+
+// Candidates
 import Candidates from '../pages/backoffice/candidates';
 import TrainingCentres from '../pages/backoffice/trainingcentres';
+import Courses from '../pages/backoffice/courses';
+import Qualifications from '../pages/backoffice/qualifications';
+import Careers from '../pages/backoffice/careers';
 
+// Profile
 import CandidateProfile from 'pages/apps/profiles/candidate';
+
+// Develoment API
+import GettingStarted from '../pages/development/gettingstarted';
+import ApiReference from '../pages/development/apireference';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -164,6 +174,31 @@ const MainRoutes = {
               path: 'trainingcentres',
               element: <TrainingCentres />
             },
+            {
+              path: 'courses',
+              element: <Courses />
+            },
+            {
+              path: 'qualifications',
+              element: <Qualifications />
+            },
+            {
+              path: 'careers',
+              element: <Careers/>
+            },
+          ]
+        },
+        {
+          path: 'development',
+          children: [
+            {
+              path: 'gettingstarted',
+              element: <GettingStarted />
+            },
+            {
+              path: 'apireference',
+              element: <ApiReference />
+            }
           ]
         },
         {
