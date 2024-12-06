@@ -31,6 +31,7 @@ public class Customer : Audit, IModel
     public string EmploymentStatus { get; set; }
     public string Employer { get; set; }
     public string ePortfolio { get; set; }
+    public string Industry { get; set; }
     public int EthnicOriginId {  get; set; }
     public string? AvatarImage { get; set; }
     public int? TrainingCentreId { get; set; }

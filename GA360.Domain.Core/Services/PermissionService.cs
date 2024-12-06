@@ -108,4 +108,78 @@ public class PermissionService:IPermissionService
         return allowedQualifications;
     }
 
+    public async Task<PermissionModel> UpsertPermissions(PermissionModel permissionModel)
+    {
+        var userRoles = await _context
+            .UserRoles
+            .Include(x => x.Role)
+            .ThenInclude(x => x.Permissions)
+            .Where(x => x.Customer.Email.ToLower() == permissionModel.CustomerEmail.ToLower())
+            .Include(x => x.Customer)
+            .ToListAsync();
+
+        if (userRoles == null || !userRoles.Any())
+        {
+            throw new Exception("User roles not found for the given email.");
+        }
+
+        var roleId = userRoles.First().RoleId;
+        var trainingId = userRoles.First().Customer.TrainingCentreId;
+        var customerId = userRoles.First().Customer.Id;
+
+        var newPermissions = new List<PermissionEntity>();
+
+        foreach (var permissionEntity in permissionModel.PermissionEntities)
+        {
+            var existingPermission = await _context.ApplicationPermissions
+                .Where(ap => ap.RoleId == roleId && ap.Role.UserRoles.Any(x => x.CustomerId == customerId))
+                .Where(ap => (ap.TrainingCentreId == permissionEntity.TrainingCentreId && permissionEntity.TrainingCentreId != 0)
+                    || (ap.CourseId == permissionEntity.CourseId && permissionEntity.CourseId != 0)
+                    || (ap.QualificationId == permissionEntity.QualificationId && permissionEntity.QualificationId != 0)
+                    || (ap.CertificateId == permissionEntity.CertificateId && permissionEntity.CertificateId != 0))
+                .FirstOrDefaultAsync();
+
+            if (existingPermission != null)
+            {
+                // Update the existing permission
+                existingPermission.TrainingCentreId = permissionEntity.TrainingCentreId != 0 ? permissionEntity.TrainingCentreId : existingPermission.TrainingCentreId;
+                existingPermission.CourseId = permissionEntity.CourseId != 0 ? permissionEntity.CourseId : existingPermission.CourseId;
+                existingPermission.QualificationId = permissionEntity.QualificationId != 0 ? permissionEntity.QualificationId : existingPermission.QualificationId;
+                existingPermission.CertificateId = permissionEntity.CertificateId != 0 ? permissionEntity.CertificateId : existingPermission.CertificateId;
+
+                _context.ApplicationPermissions.Update(existingPermission);
+            }
+            else
+            {
+                // Add a new permission
+                var newPermission = new ApplicationPermission
+                {
+                    RoleId = roleId,
+                    TrainingCentreId = trainingId,
+                    CourseId = permissionEntity.CourseId != 0 ? permissionEntity.CourseId : (int?)null,
+                    QualificationId = permissionEntity.QualificationId != 0 ? permissionEntity.QualificationId : (int?)null,
+                    CertificateId = permissionEntity.CertificateId != 0 ? permissionEntity.CertificateId : (int?)null
+                };
+
+                await _context.ApplicationPermissions.AddAsync(newPermission);
+
+                // Add to new permissions list
+                newPermissions.Add(permissionEntity);
+            }
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Return a new PermissionModel with the new permissions added or updated
+        return new PermissionModel
+        {
+            CustomerId = permissionModel.CustomerId,
+            Role = permissionModel.Role,
+            CustomerEmail = permissionModel.CustomerEmail,
+            RoleId = roleId,
+            PermissionEntities = newPermissions
+        };
+    }
+
+
 }

@@ -28,25 +28,6 @@ import DynamicTableCustomersWithCourseQualificationRecords from 'sections/apps/c
 import DuendeContext from 'contexts/DuendeContext';
 import DynamicTableCustomerWithCourseQualificationRecords from 'sections/apps/course/DynamicTableCustomerWithCourseQualificationRecords';
 
-const DummyComponent = () => {
-  const { user, isLoggedIn } = useContext(DuendeContext);
-
-  if (!isLoggedIn) {
-      return <div>Please log in to view your details.</div>;
-  }
-
-  return (
-      <div>
-          <h1>Welcome, {user.name}</h1>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>ID:</strong> {user.id}</p>
-          <p><strong>Role:</strong> {user.role}</p>
-          <p><strong>Role ID:</strong> {user.roleId}</p>
-      </div>
-  );
-};
-
-
 // ==============================|| MAIN LAYOUT ||============================== //
 
 export default function DashboardLayout() {
@@ -73,7 +54,7 @@ export default function DashboardLayout() {
       <Box sx={{ display: 'flex', width: '100%' }}>
         <Header />
         {!isHorizontal ? <Drawer /> : <HorizontalBar />}
-        <DummyComponent></DummyComponent>
+        {/* <DummyComponent></DummyComponent> */}
         <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
           <></>
           <Toolbar sx={{ mt: isHorizontal ? 8 : 'inherit' }} />
@@ -88,7 +69,7 @@ export default function DashboardLayout() {
             }}
           >
             <Breadcrumbs />
-            <DynamicTableCustomerWithCourseQualificationRecords></DynamicTableCustomerWithCourseQualificationRecords>
+            {/* <DynamicTableCustomerWithCourseQualificationRecords></DynamicTableCustomerWithCourseQualificationRecords> */}
             <Outlet />
        
 

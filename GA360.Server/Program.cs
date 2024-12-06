@@ -45,6 +45,7 @@ builder.Services.AddScoped<IQualificationRepository, QualificationRepository>();
 
 builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 

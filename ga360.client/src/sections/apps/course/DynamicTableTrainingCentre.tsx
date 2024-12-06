@@ -44,7 +44,6 @@ function EditToolbar(props: EditToolbarProps) {
   const handleClick = () => {
     const id = Math.random().toString(36).substr(2, 9);
     setRows((oldRows) => [
-      ...oldRows,
       {
         id,
         name: "",
@@ -55,12 +54,14 @@ function EditToolbar(props: EditToolbarProps) {
         certification: null,
         isNew: true,
       },
+      ...oldRows,
     ]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
       [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
     }));
   };
+
 
   return (
     <GridToolbarContainer sx={{ justifyContent: 'flex-end', paddingBottom: 2, paddingRight: 2 }}>
@@ -334,6 +335,9 @@ export default function DynamicTableTrainingCentre() {
                 onRowModesModelChange={handleRowModesModelChange}
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
+                disableRowSelectionOnClick 
+                onCellDoubleClick={(params, event) => { event.stopPropagation(); }}
+        
                 slots={{
                   toolbar: EditToolbar as GridSlots['toolbar'],
                 }}

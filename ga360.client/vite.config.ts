@@ -138,6 +138,11 @@ export default defineConfig({
                 secure: false,
                 changeOrigin: true
             },
+            '^/api/dashboard': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
             '^/signin-oidc': {
                 target,
                 secure: false

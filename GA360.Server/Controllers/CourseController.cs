@@ -1,5 +1,6 @@
 ﻿using GA360.DAL.Entities.Entities;
 using GA360.Domain.Core.Interfaces;
+using GA360.Domain.Core.Models;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +50,20 @@ public class CourseController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddCourse([FromBody] CourseViewModel course)
     {
+        var emailClaim = User?.Claims?.FirstOrDefault (x => x.Type == "email")?.Value;
+
         var result = await _courseService.AddCourse(course.ToEntity());
+
+        var permission = await _permissionService.UpsertPermissions(new PermissionModel
+        {
+            CustomerEmail = emailClaim,
+            PermissionEntities = new List<PermissionEntity> { new PermissionEntity
+                {
+                      CourseId = result.Id
+                } 
+            }
+        });
+
         return CreatedAtAction(nameof(GetCourse), new { id = result.Id }, result);
     }
 

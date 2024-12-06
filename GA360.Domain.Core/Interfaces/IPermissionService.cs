@@ -10,6 +10,7 @@ namespace GA360.Domain.Core.Interfaces
 {
     public interface IPermissionService
     {
+        Task<PermissionModel> UpsertPermissions(PermissionModel permissionModel);
         Task<List<Course>> FilterPermissions(string email, List<Course> courses);
         Task<List<Qualification>> FilterPermissions(string email, List<Qualification> qualifications);
         Task<List<Certificate>> FilterPermissions(string email, List<Certificate> certificates);

@@ -11,6 +11,7 @@ public class PermissionModel
 {
     public int CustomerId { get; set; }
     public string Role { get; set; }
+    public string CustomerEmail { get; set; }
     public int RoleId { get; set; }
     public List<PermissionEntity> PermissionEntities { get; set; }
 }

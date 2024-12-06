@@ -412,6 +412,9 @@ const processRowUpdate = async (newRow: GridRowModel) => {
             onRowModesModelChange={handleRowModesModelChange}
             onRowEditStop={handleRowEditStop}
             processRowUpdate={processRowUpdate}
+            disableRowSelectionOnClick 
+            onCellDoubleClick={(params, event) => { event.stopPropagation(); }}
+        
             slots={{ toolbar: EditToolbar as GridSlots["toolbar"] }}
             slotProps={{ toolbar: { setRows, setRowModesModel } }}
             sx={{

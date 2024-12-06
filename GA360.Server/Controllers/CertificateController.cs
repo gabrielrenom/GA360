@@ -45,7 +45,5 @@ namespace GA360.Server.Controllers
 
             return Ok(certificatesPermissions);
         }
-
-    
     }
 }
