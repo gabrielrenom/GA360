@@ -164,6 +164,14 @@ const applications: NavItemType = {
           link: '/apps/profiles/account/:tab',
           url: '/apps/profiles/account/basic',
           breadcrumbs: false
+        },
+        {
+          id: 'candidate-profile',
+          title: <FormattedMessage id="candidate-profile" />,
+          type: 'item',
+          link: '/apps/profiles/candidate/:tab',
+          url: '/apps/profiles/candidate/profile',
+          breadcrumbs: false
         }
       ]
     },

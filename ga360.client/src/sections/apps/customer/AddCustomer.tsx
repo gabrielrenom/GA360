@@ -13,7 +13,7 @@ import CircularWithPath from 'components/@extended/progress/CircularWithPath';
 import { handlerCustomerDialog, useGetCustomer, useGetCustomerMaster } from 'api/customer';
 
 // types
-import { CustomerList } from 'types/customer';
+import { CustomerList, CustomerListExtended } from 'types/customer';
 
 const closeModal = () => handlerCustomerDialog(false);
 
@@ -28,7 +28,8 @@ export default function AddCustomer() {
   const isModal = customerMaster?.modal;
 
   useEffect(() => {
-    if (customerMaster?.modal && typeof customerMaster.modal === 'number') {
+      if (customerMaster?.modal && typeof customerMaster.modal === 'number') {
+          // @ts-ignore
       const newList = customers.filter((info) => info.id === isModal && info)[0];
       setList(newList);
     } else {
@@ -38,7 +39,7 @@ export default function AddCustomer() {
   }, [customerMaster]);
 
   const customerForm = useMemo(
-    () => !loading && !customerMasterLoading && <FormCustomerAdd customer={list} closeModal={closeModal} />,
+    () => !loading && !customerMasterLoading && <FormCustomerAdd customer={list as CustomerListExtended} closeModal={closeModal} />,
     [list, loading, customerMasterLoading]
   );
 

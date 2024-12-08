@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useState, useEffect, memo } from 'react';
 
 // material-ui

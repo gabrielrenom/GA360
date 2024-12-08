@@ -1,4 +1,6 @@
 import { Gender } from 'config';
+import { extend } from 'lodash';
+import { CertificateModel, CourseModel, DocumentFileModel, QualificationModel } from './customerApiModel';
 
 export interface CustomerProps {
   modal: boolean;
@@ -26,4 +28,42 @@ export interface CustomerList {
   skills: string[];
   time: string[];
   date: Date | string | number;
+}
+
+export interface CustomerListExtended extends CustomerList {
+
+
+  avatarImage: string | null;
+  dateOfBirth: string;
+  ethnicity: string;
+  disability: string;
+  employeeStatus: string;
+  employer: string;
+  trainingCentre: string;
+  nationalInsurance: string;
+  portfolio: string;
+  dob: string;
+  street: string;
+  city: string;
+  number: string;
+  postcode: string;
+  documents: string[];
+  fileDocuments: DocumentFileModel[];
+  courses: CourseModel [];
+  qualifications: QualificationModel [];
+  certificates: CertificateModel [];
+}
+
+export interface BasicCustomer {
+  id: number;
+  email: string;
+}
+
+export interface User {
+  firstName: string;
+  lastName: string;
+  email: string;
+  customerId: number;
+  role: string;
+  roleId: number;
 }

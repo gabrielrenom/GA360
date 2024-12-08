@@ -25,18 +25,18 @@ const loadingMenu: NavItemType = {
       id: 'dashboard1',
       title: <FormattedMessage id="dashboard" />,
       type: 'collapse',
-      icon: icons.loading,
+      icon: icons.dashboard,
       children: [
         {
           id: 'default1',
-          title: 'loading',
+          title: 'Default',
           type: 'item',
           url: '/dashboard/default',
           breadcrumbs: false
         },
         {
           id: 'analytics1',
-          title: 'loading',
+          title: 'Analytics',
           type: 'item',
           url: '/dashboard/analytics',
           breadcrumbs: false
@@ -49,6 +49,7 @@ const loadingMenu: NavItemType = {
 // ==============================|| MENU ITEMS - API ||============================== //
 
 export function MenuFromAPI() {
+  // @ts-ignore
   const { menu, menuLoading } = useGetMenu();
 
   if (menuLoading) return loadingMenu;

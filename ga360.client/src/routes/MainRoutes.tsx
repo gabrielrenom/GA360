@@ -11,6 +11,20 @@ import ClaimsDashboard from '../pages/claims/claims'
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
 
+// Candidates
+import Candidates from '../pages/backoffice/candidates';
+import TrainingCentres from '../pages/backoffice/trainingcentres';
+import Courses from '../pages/backoffice/courses';
+import Qualifications from '../pages/backoffice/qualifications';
+import Careers from '../pages/backoffice/careers';
+
+// Profile
+import CandidateProfile from 'pages/apps/profiles/candidate';
+
+// Develoment API
+import GettingStarted from '../pages/development/gettingstarted';
+import ApiReference from '../pages/development/apireference';
+
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
 const DashboardAnalytics = Loadable(lazy(() => import('pages/dashboard/analytics')));
@@ -50,6 +64,11 @@ const AccountTabAccount = Loadable(lazy(() => import('sections/apps/profiles/acc
 const AccountTabPassword = Loadable(lazy(() => import('sections/apps/profiles/account/TabPassword')));
 const AccountTabRole = Loadable(lazy(() => import('sections/apps/profiles/account/TabRole')));
 const AccountTabSettings = Loadable(lazy(() => import('sections/apps/profiles/account/TabSettings')));
+
+const CandidateTabCandidateProfile = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateProfile')));
+const CandidateTabQualifications = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateQualification')));
+const CandidateTabCandidateCourses = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateCourses')));
+const CandidateTabCandidateDocuments = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateDocuments')));
 
 const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
 const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
@@ -145,6 +164,44 @@ const MainRoutes = {
           ]
         },
         {
+          path: 'backoffice',
+          children: [
+            {
+              path: 'candidates',
+              element: <Candidates />
+            },
+            {
+              path: 'trainingcentres',
+              element: <TrainingCentres />
+            },
+            {
+              path: 'courses',
+              element: <Courses />
+            },
+            {
+              path: 'qualifications',
+              element: <Qualifications />
+            },
+            {
+              path: 'careers',
+              element: <Careers/>
+            },
+          ]
+        },
+        {
+          path: 'development',
+          children: [
+            {
+              path: 'gettingstarted',
+              element: <GettingStarted />
+            },
+            {
+              path: 'apireference',
+              element: <ApiReference />
+            }
+          ]
+        },
+        {
           path: 'widget',
           children: [
             {
@@ -227,6 +284,36 @@ const MainRoutes = {
             {
               path: 'profiles',
               children: [
+                {
+                  path: 'candidate',
+                  element: <CandidateProfile />,
+                  children: [
+                    {
+                      path: 'profile',
+                      element: <CandidateTabCandidateProfile />
+                    },
+                    {
+                      path: 'qualifications',
+                      element: <CandidateTabQualifications />
+                    },
+                    {
+                      path: 'courses',
+                      element: <CandidateTabCandidateCourses />
+                    },
+                    {
+                      path: 'documents',
+                      element: <CandidateTabCandidateDocuments />
+                    },
+                    {
+                      path: 'certificates',
+                      element: <CandidateTabCandidateProfile />
+                    },
+                    {
+                      path: 'notes',
+                      element: <AccountTabSettings />
+                    }
+                  ]
+                },
                 {
                   path: 'account',
                   element: <AccountProfile />,
@@ -500,7 +587,11 @@ const MainRoutes = {
         {
           path: 'claimsdashboard',
           element: <ClaimsDashboard />
-        },
+          },
+          {
+              path: 'componenttest',
+              element: <Candidates />
+          },
         {
           path: 'sample-page',
           element: <SamplePage />
@@ -572,6 +663,10 @@ const MainRoutes = {
           element: <AppContactUS />
         }
       ]
+    },
+    {
+      path: '/training',
+      element: <TrainingCentres />,
     }
   ]
 };

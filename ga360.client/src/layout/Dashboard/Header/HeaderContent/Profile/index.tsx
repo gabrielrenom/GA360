@@ -1,4 +1,4 @@
-import { useRef, useState, ReactNode, SyntheticEvent } from 'react';
+import { useRef, useState, ReactNode, SyntheticEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
 // material-ui
@@ -32,6 +32,8 @@ import LogoutOutlined from '@ant-design/icons/LogoutOutlined';
 import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
 import avatar1 from 'assets/images/users/avatar-1.png';
+import { CustomerListExtended } from 'types/customer';
+import { getBasicCandidate } from 'api/customer';
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -97,6 +99,28 @@ export default function Profile() {
 
   const iconBackColorOpen = theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100';
 
+  const [candidate,setCandidate] =  useState<CustomerListExtended>(null);
+
+  const [avatar, setAvatar] = useState<string | undefined>(
+    candidate?.avatarImage
+        ? candidate.avatarImage
+        : avatar1
+  );
+
+  useEffect(() => {
+    const fetchUser = async () => {
+        try {
+            const response = await getBasicCandidate();
+            setAvatar(response.avatarImage);
+            setCandidate(response);
+        } catch (error) {
+            console.error("Error fetching basic user:", error);
+        }
+    };
+
+    fetchUser();
+}, []);
+
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
       <ButtonBase
@@ -114,7 +138,7 @@ export default function Profile() {
         onClick={handleToggle}
       >
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ p: 0.5 }}>
-          <Avatar alt="profile user" src={avatar1} size="sm" />
+          <Avatar alt="profile user" src={avatar} size="sm" />
           <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
             {user?.name}
           </Typography>
@@ -147,7 +171,7 @@ export default function Profile() {
                     <Grid container justifyContent="space-between" alignItems="center">
                       <Grid item>
                         <Stack direction="row" spacing={1.25} alignItems="center">
-                          <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
+                          <Avatar alt="profile user" src={avatar} sx={{ width: 32, height: 32 }} />
                           <Stack>
                             <Typography variant="h6">{user?.name}</Typography>
                             <Typography variant="body2" color="text.secondary">

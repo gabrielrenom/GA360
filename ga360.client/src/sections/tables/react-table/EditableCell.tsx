@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useMemo, useState } from 'react';
 
 // material-ui
@@ -32,7 +34,7 @@ interface ReactTableProps {
 
 function ReactTable({ columns, data, setData }: ReactTableProps) {
   const table = useReactTable({
-    data,
+      data,
     columns,
     defaultColumn: {
       cell: CellEditable

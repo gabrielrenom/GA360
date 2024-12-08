@@ -2,6 +2,7 @@ import { Grid, Paper, Typography } from "@mui/material";
 import Box from "@mui/system/Box";
 import { useEffect, useState } from "react";
 import { styled } from '@mui/material/styles';
+import { CustomerList } from "../../types/customer";
 
 interface DataObject {
     type: string;
@@ -20,6 +21,7 @@ export default function ClaimsDashboard() {
     const [logoutUrl, setLogoutUrl] = useState<string>();
     const [authNEndpoint, setAuthNEndpoint] = useState<string>();
     const [allowedMenu, setAllowedMenu] = useState<string>();
+    const [allowedCustomers, setAllowedCustomers] = useState<CustomerList[]>();
 
     useEffect(() => {
         fetchUserSessionInfo();
@@ -28,8 +30,11 @@ export default function ClaimsDashboard() {
     useEffect(() => {
         const fetchData = async () => {
           try {
-           const result = await fetchAllowedLandingMenu();
-            setAllowedMenu(result);
+              const result = await fetchAllowedLandingMenu();
+              const customers = await fetchCustomerList();
+              setAllowedMenu(result);
+
+              setAllowedCustomers(customers);
           } catch (error) {
             console.error('Error fetching data:', error);
           }
@@ -42,7 +47,9 @@ export default function ClaimsDashboard() {
             } catch (error) {
               console.error('Error fetching data:', error);
             }
-          };
+        };
+
+
         fetchData();
         fetchAuthzData();
       }, []);
@@ -100,13 +107,21 @@ export default function ClaimsDashboard() {
                 <Item>Annonymous Menu</Item>
             </Grid>
             <Grid item xs={8}>
-                <Item>{allowedMenu}</Item>
+                        <Item>{allowedMenu  ? allowedMenu:"Loading..."}</Item>
             </Grid>
             <Grid item xs={4}>
                 <Item>Authorize Menu</Item>
             </Grid>
             <Grid item xs={8}>
                 <Item>{authNEndpoint}</Item>
+            </Grid>
+            <Grid item xs={4}>
+               <Item>Customers Menu</Item>
+            </Grid>
+            <Grid item xs={8}>
+                        <Item>{allowedCustomers?.map(x => {
+                            return <Grid>{x.name}</Grid>
+                        })}</Item>
             </Grid>
         </Grid>
     </Box>
@@ -159,6 +174,18 @@ export default function ClaimsDashboard() {
         });
 
         const result = await response.text();
+
+        return result;
+    }
+
+    async function fetchCustomerList() {
+        const response = await fetch("api/customer/list", {
+            headers: {
+                "X-CSRF": "Dog",
+            },
+        });
+
+        const result = await response.json();
 
         return result;
     }

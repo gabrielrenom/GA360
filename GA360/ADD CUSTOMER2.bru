@@ -1,0 +1,20 @@
+meta {
+  name: ADD CUSTOMER2
+  type: http
+  seq: 5
+}
+
+post {
+  url: https://localhost:7030/api/Customer/create
+  body: json
+  auth: none
+}
+
+headers {
+  accept: */*
+  Content-Type: application/json
+}
+
+body:json {
+  { "id": 0, "firstName": "string", "lastName": "string", "name": "string", "gender": "string", "age": 0, "contact": "string", "email": "string", "country": "string", "location": "string", "fatherName": "string", "role": "string", "about": "string", "orderStatus": "string", "orders": 0, "progress": 0, "status": 0, "skills": [ "string" ], "time": "2024-09-01T17:09:28.830Z", "date": "string", "avatar": 0 }
+}

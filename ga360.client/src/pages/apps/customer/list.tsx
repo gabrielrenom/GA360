@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { MouseEvent, useMemo, useState } from 'react';
 
 // material-ui
@@ -180,7 +182,7 @@ export default function CustomerListPage() {
     <>
       <CustomerTable
         {...{
-          data: lists,
+          data: lists as CustomerList,
           columns,
           modalToggler: () => {
             setCustomerModal(true);

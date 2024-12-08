@@ -9,10 +9,27 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "ga360.client", "ga360.clien
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0- Solution Items", "0- Solution Items", "{CCF3EBBB-8834-4C76-B049-D97ADA41A178}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\Users\Gabriel\OneDrive\Documents\GA360Logo_Dark.png = ..\..\Users\Gabriel\OneDrive\Documents\GA360Logo_Dark.png
+		db.txt = db.txt
+		..\..\Users\Gabriel\OneDrive\Documents\GA360Logo_White.png = ..\..\Users\Gabriel\OneDrive\Documents\GA360Logo_White.png
 		vite_tricks.txt = vite_tricks.txt
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.DAL.Entities", "GA360.DAL.Entities\GA360.DAL.Entities.csproj", "{4B294432-FF86-4D11-983C-FFC499195997}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.DAL.Infrastructure", "GA360.DAL.Infrastructure\GA360.DAL.Infrastructure.csproj", "{9CEDD67F-4850-419D-BADC-B8C7B566AD96}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.Domain.Core", "GA360.Domain.Core\GA360.Domain.Core.csproj", "{F63CC020-3E2C-48EB-8203-0A170B1BBE37}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1- Presentation Layer", "1- Presentation Layer", "{42114946-1950-4DAC-9991-C82E19C86090}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2- Domain Layer", "2- Domain Layer", "{CD22558E-4D1D-47EB-85E8-6E254C507270}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3- DAL", "3- DAL", "{06E146B2-FE19-4318-B358-4D54FA4E5000}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.DAL.Migrations", "GA360.DAL.Migrations\GA360.DAL.Migrations.csproj", "{63D83D0A-03CD-4BC6-8867-891911EAAC1F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GA360.Commons", "GA360.Commons\GA360.Commons.csproj", "{285EBB64-B555-41D4-AE7C-5F694FDCEF23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,9 +51,34 @@ Global
 		{4B294432-FF86-4D11-983C-FFC499195997}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B294432-FF86-4D11-983C-FFC499195997}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B294432-FF86-4D11-983C-FFC499195997}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CEDD67F-4850-419D-BADC-B8C7B566AD96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CEDD67F-4850-419D-BADC-B8C7B566AD96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CEDD67F-4850-419D-BADC-B8C7B566AD96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CEDD67F-4850-419D-BADC-B8C7B566AD96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F63CC020-3E2C-48EB-8203-0A170B1BBE37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F63CC020-3E2C-48EB-8203-0A170B1BBE37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F63CC020-3E2C-48EB-8203-0A170B1BBE37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F63CC020-3E2C-48EB-8203-0A170B1BBE37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63D83D0A-03CD-4BC6-8867-891911EAAC1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63D83D0A-03CD-4BC6-8867-891911EAAC1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63D83D0A-03CD-4BC6-8867-891911EAAC1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63D83D0A-03CD-4BC6-8867-891911EAAC1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{285EBB64-B555-41D4-AE7C-5F694FDCEF23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{285EBB64-B555-41D4-AE7C-5F694FDCEF23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{285EBB64-B555-41D4-AE7C-5F694FDCEF23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{285EBB64-B555-41D4-AE7C-5F694FDCEF23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5FDB8B0E-F97A-46CC-9373-5C44D70E71C7} = {42114946-1950-4DAC-9991-C82E19C86090}
+		{6ADDBB41-765D-4D4E-876E-1AFA88C67D16} = {42114946-1950-4DAC-9991-C82E19C86090}
+		{4B294432-FF86-4D11-983C-FFC499195997} = {06E146B2-FE19-4318-B358-4D54FA4E5000}
+		{9CEDD67F-4850-419D-BADC-B8C7B566AD96} = {06E146B2-FE19-4318-B358-4D54FA4E5000}
+		{F63CC020-3E2C-48EB-8203-0A170B1BBE37} = {CD22558E-4D1D-47EB-85E8-6E254C507270}
+		{63D83D0A-03CD-4BC6-8867-891911EAAC1F} = {06E146B2-FE19-4318-B358-4D54FA4E5000}
+		{285EBB64-B555-41D4-AE7C-5F694FDCEF23} = {CCF3EBBB-8834-4C76-B049-D97ADA41A178}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3CA6F4CF-FF77-4582-9145-0AC7294B47C0}

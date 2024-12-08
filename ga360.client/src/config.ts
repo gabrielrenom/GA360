@@ -39,7 +39,9 @@ export enum NavActionType {
 
 export enum Gender {
   MALE = 'Male',
-  FEMALE = 'Female'
+  FEMALE = 'Female',
+  NONBINARY = 'Nonbinary',
+  PREFERNOTTOSAY= 'Prefer not to say'
 }
 
 export enum DropzopType {

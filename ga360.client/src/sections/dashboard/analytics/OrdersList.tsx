@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Link as RouterLink } from 'react-router-dom';
 
 // material-ui

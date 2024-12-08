@@ -1,4 +1,6 @@
-import { useState, MouseEvent } from 'react';
+// @ts-nocheck
+
+import { useState, MouseEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // material-ui
@@ -20,6 +22,8 @@ import { useGetMenuMaster } from 'api/menu';
 // assets
 import RightOutlined from '@ant-design/icons/RightOutlined';
 import avatar1 from 'assets/images/users/avatar-1.png';
+
+
 
 interface ExpandMoreProps extends IconButtonProps {
   theme: Theme;
@@ -76,12 +80,36 @@ export default function NavUser() {
     setAnchorEl(null);
   };
 
+  const [candidate,setCandidate] =  useState<CustomerListExtended>(null);
+
+
+  const [avatar, setAvatar] = useState<string | undefined>(
+    candidate?.avatarImage
+        ? candidate.avatarImage
+        : avatar1
+  );
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+        try {
+            const response = await getBasicCandidate();
+            setAvatar(response.avatarImage);
+            setCandidate(response);
+        } catch (error) {
+            console.error("Error fetching basic user:", error);
+        }
+    };
+
+    fetchUser();
+}, []);
+
   return (
     <Box sx={{ p: 1.25, px: !drawerOpen ? 1.25 : 3, borderTop: '2px solid', borderTopColor: 'divider' }}>
       <List disablePadding>
         <ListItem
           disablePadding
-          secondaryAction={
+                  secondaryAction={
             <ExpandMore
               theme={theme}
               expand={open}
@@ -99,7 +127,7 @@ export default function NavUser() {
           sx={{ '& .MuiListItemSecondaryAction-root': { right: !drawerOpen ? -20 : -16 } }}
         >
           <ListItemAvatar>
-            <Avatar alt="Avatar" src={avatar1} sx={{ ...(drawerOpen && { width: 46, height: 46 }) }} />
+            <Avatar alt="Avatar" src={avatar} sx={{ ...(drawerOpen && { width: 46, height: 46 }) }} />
           </ListItemAvatar>
           <ListItemText primary={user?.name} secondary="UI/UX Designer" />
         </ListItem>
