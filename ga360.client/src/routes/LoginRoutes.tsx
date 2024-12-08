@@ -16,8 +16,9 @@ const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/code-verific
 // ==============================|| AUTH ROUTING ||============================== //
 const ExternalRedirect = () => {
   useEffect(() => {
-    window.location.href = 'https://localhost:5173/bff/login';
+    //window.location.href = 'https://localhost:5173/bff/login';
     //window.location.href = 'https://app-ga360portal-dev-eastus.azurewebsites.net/bff/login';
+    window.location.href = 'https://app-ga360core-prod-uksouth.azurewebsites.net/bff/login';
 
   }, []);
 

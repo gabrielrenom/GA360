@@ -274,6 +274,10 @@ export const mapCustomerListToCustomerApiModelExtended = (
     city: user.city || "",
     number: user.number || "",
     postcode: user.postcode || "",
+    fileDocuments: [],
+    courses: [],
+    qualifications: [],
+    certificates: []
   };
 };
 

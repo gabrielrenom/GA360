@@ -75,4 +75,4 @@ const EmailDropdownTest: React.FC<EmailDropdownProps> = ({ value, onChange }) =>
   );
 };
 
-export default EmailDropdown;
+export default EmailDropdownTest;

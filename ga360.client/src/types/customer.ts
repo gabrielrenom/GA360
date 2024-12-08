@@ -31,6 +31,8 @@ export interface CustomerList {
 }
 
 export interface CustomerListExtended extends CustomerList {
+
+
   avatarImage: string | null;
   dateOfBirth: string;
   ethnicity: string;

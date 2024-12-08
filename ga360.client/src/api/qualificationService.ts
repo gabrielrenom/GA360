@@ -1,4 +1,5 @@
 export interface CustomersWithCourseQualificationRecordsViewModel {
+  isNew: any;
   id: number;
   customerId: number;
   email: string;

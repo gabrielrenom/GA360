@@ -66,12 +66,14 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
 }).AddOpenIdConnect("oidc", options =>
 {
+    options.Authority = "https://app-ga360authn-prod-uksouth.azurewebsites.net";
     //options.Authority = "https://www.auth.signos.io";
-    options.Authority = "https://localhost:5443";
+    //options.Authority = "https://localhost:5443";
     //options.Authority = "https://demo.duendesoftware.com";
     //options.ClientId = "interactive";
     //options.ClientId = "interactive.bff.lms.portal.prod";
-    options.ClientId = "interactive.bff.lms.portal";
+    //ANTEoptions.ClientId = "interactive.bff.lms.portal";
+    options.ClientId = "interactive.ga360.portal.prod";
     //options.ClientId = "IgnacioTest2";
     options.ClientSecret = "J6atmybilSHWwL9RRLakEA==";
     options.ResponseType = "code";

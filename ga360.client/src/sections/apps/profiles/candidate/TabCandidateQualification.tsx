@@ -66,7 +66,7 @@ export default function TabCandidateQualification() {
             name: certificate.name,
             regDate: new Date(certificate.registrationDate).toLocaleDateString('en-GB'), // Format date to UK format
             status: certificate.status.toString(), // Assuming status is converted to string
-            progress: certificate.progression,
+            progress: certificate.progression.toString(),
         }));
     };
 
