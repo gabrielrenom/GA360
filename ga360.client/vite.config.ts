@@ -29,6 +29,8 @@ if (env.NODE_ENV !== 'production' && (!fs.existsSync(certFilePath) || !fs.exists
     }
 }
 
+console.log("HAZEL GROVE", env.NODE_ENV)
+
 const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
     env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7030';
 
