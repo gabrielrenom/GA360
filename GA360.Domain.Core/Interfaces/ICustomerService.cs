@@ -15,11 +15,17 @@ namespace GA360.Domain.Core.Interfaces
         Task<Customer> AddCustomer(CustomerModel customerModel);
         Task DeleteCustomer(int id);
         Task<List<Customer>> GetAll();
-        Customer GetCustomerByEmail(string email);
+        Task<CustomerModel> GetCustomerByEmail(string email);
         Customer GetCustomerById(int id);
         IEnumerable<Customer> GetCustomersByCountry(int countryId);
         Task<Customer> UpdateCustomer(int id, Customer customer);
         Task<Customer> UpdateCustomer(int id, CustomerModel customer);
         Task<List<CustomerModel>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        Task<object> GetBasicCustomerByEmail(string email);
+        Task<bool> DeleteCustomersWithCourseQualificationRecords(int id);
+        Task<CustomersWithCourseQualificationRecordsModel> UpdateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer);
+        Task<CustomersWithCourseQualificationRecordsModel> CreateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer);
+        Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
     }
 }

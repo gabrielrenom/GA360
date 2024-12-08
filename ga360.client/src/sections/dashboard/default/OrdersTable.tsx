@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 // material-ui
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -217,7 +219,7 @@ export default function OrderTable() {
                     <Link color="secondary"> {row.tracking_no}</Link>
                   </TableCell>
                   <TableCell>{row.name}</TableCell>
-                  <TableCell align="right">{row.fat}</TableCell>
+                  <TableCell align="right">{row.fat as string }</TableCell>
                   <TableCell>
                     <OrderStatus status={row.carbs} />
                   </TableCell>

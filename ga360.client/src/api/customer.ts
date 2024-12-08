@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { fetcher } from 'utils/axios';
 
 // types
-import { CustomerList, CustomerListExtended, CustomerProps } from 'types/customer';
+import { BasicCustomer, CustomerList, CustomerListExtended, CustomerProps, User } from 'types/customer';
 import { mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel, mapCustomerListToCustomerApiModelExtended } from 'types/customerApiModel';
 
 const initialState: CustomerProps = {
@@ -18,8 +18,26 @@ export const endpoints = {
   modal: '/modal', // server URL
   insert: '/insert', // server URL
   update: '/update', // server URL
-  delete: '/delete' // server URL
+  delete: '/delete', // server URL
+  get: '/get',
+  user:'/user'
 };
+
+export async function getUser(): Promise<User> {
+  const response = await fetch("/api/customer/user", {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+
+  if (!response.ok) {
+      throw new Error('Network response was not ok');
+  }
+
+  const result: User = await response.json();
+  return result;
+}
+
 
 export function useGetCustomer() {
   const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.list, fetcher, {
@@ -41,7 +59,6 @@ export function useGetCustomer() {
 
   return memoizedValue;
 }
-
 
 //export function useGetCustomer() {
 //    const [data, setData] = useState<any>(null);
@@ -114,24 +131,165 @@ export async function insertCustomer(newCustomer: CustomerListExtended) {
   //   await axios.post(endpoints.key + endpoints.insert, data);
 }
 
+// export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]) {
+
+//   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
+
+//   const formData = new FormData();
+//   formData.append('Customer', JSON.stringify(mappedCustomer));
+//   documents.forEach((file) => formData.append('Files', file));
+
+//   //formData.append('Files', new File([''], '133694255036516995.jpg', { type: 'image/jpeg' }));
+
+// const options: RequestInit = {
+//   method: 'PUT',
+//   headers: {
+//     'accept': '*/*',
+//     // 'Content-Type' should not be set when sending FormData
+//   },
+//   body: formData,
+// };
+
+// // fetch('/api/customer/updatewithdocuments/'+customerId, options)
+// //   .then(response => response.json())
+// //   .then(data => console.log(data))
+// //   .catch(error => console.error('Error:', error));
+ 
+// }
+
+export async function getBasicCandidates(): Promise<BasicCustomer[]> {
+  const response = await fetch("/api/customer/list/basic", {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+
+  if (!response.ok) {
+      throw new Error('Network response was not ok');
+  }
+
+  const result: BasicCustomer[] = await response.json();
+  return result;
+}
+
+export async function getCandidate() {
+
+  const response = await fetch("/api/customer/get", {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+  const result = await response.json();
+  
+  return result;
+}
+
+export async function getBasicCandidate() {
+
+  const response = await fetch("/api/customer/get/basic", {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+  const result = await response.json();
+  
+  return result;
+}
+
+export async function insertCustomerWithDocuments(newCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
+  const mappedCustomer = mapCustomerListToCustomerApiModelExtended(newCustomer);
+
+  const formData = new FormData();
+  formData.append('Customer', JSON.stringify(mappedCustomer));
+
+  console.log("FILES",documents)
+
+  if (documents && documents.length > 0) {
+    documents.forEach((file) => formData.append('Files', file));
+  }
+  else
+  {
+    formData.append('Files', JSON.stringify([]));
+  }
+
+  const options: RequestInit = {
+    method: 'POST',
+    headers: {
+      'accept': '*/*',
+    },
+    body: formData,
+  };
+
+  try {
+    const response = await fetch(`/api/customer/create`, options);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    console.log(data);
+    return true; // Return true if the operation was successful
+  } catch (error) {
+    console.error('Error:', error);
+    return false; // Return false if there was an error
+  }
+
+  return true;
+}
+
+export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
+  const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
+
+  const formData = new FormData();
+  formData.append('Customer', JSON.stringify(mappedCustomer));
+
+  console.log("FIKELS", documents)
+  if (documents && documents.length > 0) {
+    documents.forEach((file) => formData.append('Files', file));
+  }
+  else
+  {
+    formData.append('Files', JSON.stringify([]));
+  }
+
+  const options: RequestInit = {
+    method: 'PUT',
+    headers: {
+      'accept': '*/*',
+      // 'Content-Type' should not be set when sending FormData
+    },
+    body: formData,
+  };
+
+  try {
+    const response = await fetch(`/api/customer/updatewithdocuments/${customerId}`, options);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    console.log(data);
+    return true; // Return true if the operation was successful
+  } catch (error) {
+    console.error('Error:', error);
+    return false; // Return false if there was an error
+  }
+
+  return true;
+}
+
+  // try {
+  //   const response = await fetch(`/api/customer/updatewithdocuments/${customerId}`, options);
+  //   if (!response.ok) {
+  //     throw new Error('Network response was not ok');
+  //   }
+  //   const data = await response.json();
+  //   console.log(data);
+  // } catch (error) {
+  //   console.error('Error:', error);
+  //   throw error; // Re-throw the error to be caught in the calling function
+  // }
+
+
 export async function updateCustomer(customerId: number, updatedCustomer: CustomerListExtended) {
-  // to update local state based on key
-
-  // mutate(
-  //   endpoints.key + endpoints.list,
-  //   (currentCustomer: any) => {
-  //     const newCustomer: CustomerList[] = currentCustomer.customers.map((customer: CustomerList) =>
-  //       customer.id === customerId ? { ...customer, ...updatedCustomer } : customer
-  //     );
-
-  //     return {
-  //       ...currentCustomer,
-  //       customers: newCustomer
-  //     };
-  //   },
-  //   false
-  // );
-
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
   console.log(customerId, "UPDATE", mappedCustomer);
 
@@ -145,11 +303,6 @@ export async function updateCustomer(customerId: number, updatedCustomer: Custom
     body: JSON.stringify(mappedCustomer)
   });
   const data = response.json();
-
-  // to hit server
-  // you may need to refetch latest data after server hit and based on your logic
-  //   const data = { list: updatedCustomer };
-  //   await axios.post(endpoints.key + endpoints.update, data);
 }
 
 export async function deleteCustomer(customerId: number) {

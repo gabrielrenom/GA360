@@ -17,4 +17,11 @@ public class TrainingCentreRepository : Repository<TrainingCentre>, ITrainingCen
 
         return result;
     }
+
+    public async Task<TrainingCentre> GetTrainingCentreByIdWithAddresses(int id)
+    {
+        var result = await _dbContext.Set<TrainingCentre>().Include(x => x.Address).FirstOrDefaultAsync(x=>x.Id == id);
+
+        return result;
+    }
 }

@@ -1,7 +1,7 @@
 import { Ethnicity } from 'types/ethnicity';
 
 export const endpoints = {
-  key: 'api/ethnicity',
+  key: '/api/ethnicity',
   list: '/list',
 };
 

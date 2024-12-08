@@ -65,6 +65,10 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/customer/user': {
+                target,
+                secure: false
+            },
             '^/api/customer/create': {
                 target,
                 secure: false
@@ -74,6 +78,22 @@ export default defineConfig({
                 secure: false
             },
             '^/api/customer/update': {
+                target,
+                secure: false
+            },
+             '^/api/customer/get': {
+                target,
+                secure: false
+            },
+            '^/api/customer/get/basic': {
+                target,
+                secure: false
+            },
+            '^/api/customer/updatewithdocuments': {
+                target,
+                secure: false
+            },
+            '^/api/customer/customerwithcoursequalificationrecords': {
                 target,
                 secure: false
             },
@@ -92,6 +112,36 @@ export default defineConfig({
             '^/api/country/list': {
                 target,
                 secure: false
+            },
+            '^/api/course': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/qualification': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/trainingcentre': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/customer/customerswithcoursequalificationrecords': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/certificate': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/dashboard': {
+                target,
+                secure: false,
+                changeOrigin: true
             },
             '^/signin-oidc': {
                 target,

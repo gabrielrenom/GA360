@@ -204,7 +204,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.ToTable("Addresses");
                 });
 
-            modelBuilder.Entity("GA360.DAL.Entities.Entities.Certificate", b =>
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.ApplicationPermission", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -212,8 +212,61 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AddressId")
+                    b.Property<int?>("CertificateId")
                         .HasColumnType("int");
+
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("QualificationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("TrainingCentreId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("ApplicationPermissions");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.Certificate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Charge")
                         .IsRequired()
@@ -248,6 +301,10 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -314,8 +371,9 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<DateTime>("CertificateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CertificateNumber")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("CertificateNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -330,6 +388,13 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("ExpectedDate")
                         .HasColumnType("datetime2");
 
@@ -340,6 +405,10 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -430,6 +499,10 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Industry")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -542,6 +615,10 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BlobId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -652,6 +729,55 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.ToTable("DocumentCertificates");
                 });
 
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.DocumentCustomer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("DocumentCustomer");
+                });
+
             modelBuilder.Entity("GA360.DAL.Entities.Entities.DocumentTrainingCentre", b =>
                 {
                     b.Property<int>("Id")
@@ -699,6 +825,57 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.HasIndex("TrainingCentreId");
 
                     b.ToTable("DocumentTrainingCentres");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.EntityPermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("EntityPermissions");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.EthnicOrigin", b =>
@@ -822,6 +999,53 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.ToTable("Leads");
                 });
 
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permissions");
+                });
+
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Qualification", b =>
                 {
                     b.Property<int>("Id")
@@ -888,10 +1112,17 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Assesor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("CertificateId")
                         .HasColumnType("int");
 
                     b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CourseProgression")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -923,6 +1154,12 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<int?>("QualificationId")
                         .HasColumnType("int");
 
+                    b.Property<int>("QualificationProgression")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("QualificationStatusId")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
@@ -936,7 +1173,152 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     b.HasIndex("QualificationId");
 
+                    b.HasIndex("QualificationStatusId");
+
                     b.ToTable("QualificationCustomerCourseCertificates");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.QualificationStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QualificationStatuses");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.RolePermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Skill", b =>
@@ -1034,6 +1416,104 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.ToTable("TrainingCentres");
                 });
 
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.TrainingCentrePermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("TrainingCentreId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("TrainingCentreId");
+
+                    b.ToTable("TrainingCentrePermissions");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModyfiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("UserRoles");
+                });
+
             modelBuilder.Entity("CRM.Entities.Client", b =>
                 {
                     b.HasOne("GA360.DAL.Entities.Entities.Country", "Country")
@@ -1067,6 +1547,17 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Navigation("Client");
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.ApplicationPermission", b =>
+                {
+                    b.HasOne("GA360.DAL.Entities.Entities.Role", "Role")
+                        .WithMany("Permissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Customer", b =>
@@ -1140,6 +1631,25 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Navigation("Document");
                 });
 
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.DocumentCustomer", b =>
+                {
+                    b.HasOne("GA360.DAL.Entities.Entities.Customer", "Customer")
+                        .WithMany("DocumentCustomers")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GA360.DAL.Entities.Entities.Document", "Document")
+                        .WithMany("DocumentCustomers")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Document");
+                });
+
             modelBuilder.Entity("GA360.DAL.Entities.Entities.DocumentTrainingCentre", b =>
                 {
                     b.HasOne("GA360.DAL.Entities.Entities.Document", "Document")
@@ -1157,6 +1667,17 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Navigation("Document");
 
                     b.Navigation("TrainingCentre");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.EntityPermission", b =>
+                {
+                    b.HasOne("GA360.DAL.Entities.Entities.Permission", "Permission")
+                        .WithMany("EntityPermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Lead", b =>
@@ -1186,6 +1707,10 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .WithMany("QualificationCustomerCourseCertificates")
                         .HasForeignKey("QualificationId");
 
+                    b.HasOne("GA360.DAL.Entities.Entities.QualificationStatus", "QualificationStatus")
+                        .WithMany("QualificationCustomerCourseCertificates")
+                        .HasForeignKey("QualificationStatusId");
+
                     b.Navigation("Certificate");
 
                     b.Navigation("Course");
@@ -1193,6 +1718,27 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Qualification");
+
+                    b.Navigation("QualificationStatus");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.RolePermission", b =>
+                {
+                    b.HasOne("GA360.DAL.Entities.Entities.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GA360.DAL.Entities.Entities.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.TrainingCentre", b =>
@@ -1204,6 +1750,44 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Address");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.TrainingCentrePermission", b =>
+                {
+                    b.HasOne("GA360.DAL.Entities.Entities.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GA360.DAL.Entities.Entities.TrainingCentre", "TrainingCentre")
+                        .WithMany("TrainingCentrePermission")
+                        .HasForeignKey("TrainingCentreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("TrainingCentre");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.UserRole", b =>
+                {
+                    b.HasOne("GA360.DAL.Entities.Entities.Customer", "Customer")
+                        .WithMany("Roles")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GA360.DAL.Entities.Entities.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("CRM.Entities.Client", b =>
@@ -1229,7 +1813,16 @@ namespace GA360.DAL.Infrastructure.Migrations
                 {
                     b.Navigation("CustomerSkills");
 
+                    b.Navigation("DocumentCustomers");
+
                     b.Navigation("QualificationCustomerCourseCertificates");
+
+                    b.Navigation("Roles");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.Document", b =>
+                {
+                    b.Navigation("DocumentCustomers");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.EthnicOrigin", b =>
@@ -1237,9 +1830,30 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Navigation("Customers");
                 });
 
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.Permission", b =>
+                {
+                    b.Navigation("EntityPermissions");
+
+                    b.Navigation("RolePermissions");
+                });
+
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Qualification", b =>
                 {
                     b.Navigation("QualificationCustomerCourseCertificates");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.QualificationStatus", b =>
+                {
+                    b.Navigation("QualificationCustomerCourseCertificates");
+                });
+
+            modelBuilder.Entity("GA360.DAL.Entities.Entities.Role", b =>
+                {
+                    b.Navigation("Permissions");
+
+                    b.Navigation("RolePermissions");
+
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Skill", b =>
@@ -1250,6 +1864,8 @@ namespace GA360.DAL.Infrastructure.Migrations
             modelBuilder.Entity("GA360.DAL.Entities.Entities.TrainingCentre", b =>
                 {
                     b.Navigation("Customers");
+
+                    b.Navigation("TrainingCentrePermission");
                 });
 #pragma warning restore 612, 618
         }

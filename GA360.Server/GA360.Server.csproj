@@ -32,6 +32,7 @@
     <ProjectReference Include="..\ga360.client\ga360.client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\GA360.Commons\GA360.Commons.csproj" />
     <ProjectReference Include="..\GA360.DAL.Infrastructure\GA360.DAL.Infrastructure.csproj" />
     <ProjectReference Include="..\GA360.Domain.Core\GA360.Domain.Core.csproj" />
   </ItemGroup>

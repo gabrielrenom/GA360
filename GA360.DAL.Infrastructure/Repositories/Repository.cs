@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.DAL.Entities.BaseEntities;
 using GA360.DAL.Infrastructure.Contexts;
+using System.Reflection.Metadata.Ecma335;
 
 namespace GA360.DAL.Infrastructure.Repositories
 {
@@ -10,6 +11,9 @@ namespace GA360.DAL.Infrastructure.Repositories
         where T : class, IModel
     {
         public readonly CRMDbContext _dbContext;
+
+        public CRMDbContext Context { get => _dbContext; }
+
         public Repository(CRMDbContext dbContext)
         {
             this._dbContext = dbContext;
@@ -17,6 +21,9 @@ namespace GA360.DAL.Infrastructure.Repositories
 
         protected CRMDbContext GetDbContext() { return _dbContext; }
         public T Get(int key) => _dbContext.Set<T>().Where(p => p.Id == key).Single();
+
+        public async Task<T> GetAsync(int key) => await _dbContext.Set<T>().Where(p => p.Id == key).SingleAsync();
+
         public async Task<T> Get<T>(Expression<Func<T, bool>> predicate) where T : class
         {
             return await _dbContext.Set<T>().FirstOrDefaultAsync(predicate);
@@ -57,12 +64,27 @@ namespace GA360.DAL.Infrastructure.Repositories
 
         public void Update(T entity) => _dbContext.Update<T>(entity);
 
+
         public void Delete(T entity) => _dbContext.Remove<T>(entity);
 
         public int Count(Expression<Func<T, bool>> expression) => _dbContext.Set<T>().Where(expression).Count();
 
         public void SaveChanges() => _dbContext.SaveChanges();
         public async Task SaveChangesAsync() => await _dbContext.SaveChangesAsync();
+
+        public async Task<T> AddAsync(T entity) 
+        { 
+            await _dbContext.AddAsync(entity);
+            await _dbContext.SaveChangesAsync();
+            return entity; 
+        }
+
+        public async Task<T> UpdateAsync(T entity) 
+        {
+            _dbContext.Update(entity);
+            await _dbContext.SaveChangesAsync();
+            return entity;
+        }
     }
 
 }

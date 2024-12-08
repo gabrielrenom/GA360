@@ -31,6 +31,7 @@ public class Customer : Audit, IModel
     public string EmploymentStatus { get; set; }
     public string Employer { get; set; }
     public string ePortfolio { get; set; }
+    public string Industry { get; set; }
     public int EthnicOriginId {  get; set; }
     public string? AvatarImage { get; set; }
     public int? TrainingCentreId { get; set; }
@@ -38,6 +39,7 @@ public class Customer : Audit, IModel
     public virtual EthnicOrigin EthnicOrigin { get; set; }
     public virtual List<CustomerSkills> CustomerSkills { get; set; }
     public virtual List<QualificationCustomerCourseCertificate>? QualificationCustomerCourseCertificates { get; set; }
+    public virtual List<DocumentCustomer>? DocumentCustomers { get; set; }
+    public virtual List<UserRole>? Roles { get; set; }
     public virtual TrainingCentre TrainingCentre { get; set; }
-
 }

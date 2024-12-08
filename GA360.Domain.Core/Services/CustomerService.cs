@@ -2,8 +2,11 @@
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
+using System.Security.Cryptography.X509Certificates;
 
 namespace GA360.Domain.Core.Services;
 
@@ -15,8 +18,11 @@ public class CustomerService : ICustomerService
     private readonly ISkillRepository _skillRepository;
     private readonly IEthnicityRepository _ethnicityRepository;
     private readonly ILogger<CustomerService> _logger;
+    private readonly IFileService _fileService;
+    private readonly IDocumentRepository _documentRepository;
+    private readonly IConfiguration _configuration;
 
-    public CustomerService(ICustomerRepository customerRepository, ILogger<CustomerService> logger, ICountryRepository countryrepository, ISkillRepository skillRepository, IEthnicityRepository ethnicityRepository, ITrainingCentreRepository trainingCentreRepository)
+    public CustomerService(ICustomerRepository customerRepository, ILogger<CustomerService> logger, ICountryRepository countryrepository, ISkillRepository skillRepository, IEthnicityRepository ethnicityRepository, ITrainingCentreRepository trainingCentreRepository, IFileService fileService, IDocumentRepository documentRepository, IConfiguration configuration)
     {
         _customerRepository = customerRepository;
         _logger = logger;
@@ -24,16 +30,37 @@ public class CustomerService : ICustomerService
         _skillRepository = skillRepository;
         _ethnicityRepository = ethnicityRepository;
         _trainingCentreRepository = trainingCentreRepository;
+        _fileService = fileService;
+        _documentRepository = documentRepository;
+        _configuration = configuration;
     }
 
-    public Customer GetCustomerById(int id)
+    public DAL.Entities.Entities.Customer GetCustomerById(int id)
     {
         return _customerRepository.Get(id);
     }
 
-    public Customer GetCustomerByEmail(string email)
+    public async Task<CustomerModel> GetCustomerByEmail(string email)
     {
-        return _customerRepository.GetCustomerByEmail(email);
+        var result = await _customerRepository.GetCustomerByEmail(email);
+        CustomerModel destination = new CustomerModel();
+        Map(result, destination);
+
+        return destination;
+    }
+
+    public async Task<object> GetBasicCustomerByEmail(string email)
+    {
+        var result = await _customerRepository.GetBasicCustomerByEmail(email);
+        return new
+        {
+            Email = result.Email,
+            FirstName = result.FirstName,
+            LastName = result.LastName,
+            Role = result.Roles!=null? result.Roles.FirstOrDefault().Role.Name:null,
+            RoleId = result.Roles != null ? result.Roles.FirstOrDefault().RoleId:0,
+            CustomerId= result.Id,
+        } ;
     }
 
     public IEnumerable<Customer> GetCustomersByCountry(int countryId)
@@ -63,7 +90,7 @@ public class CustomerService : ICustomerService
         return null;
     }
 
-    public async Task<Customer> AddCustomer(CustomerModel customerModel)
+    public async Task<Customer> AddCustomer(Models.CustomerModel customerModel)
     {
         try
         {
@@ -109,7 +136,7 @@ public class CustomerService : ICustomerService
                 AvatarImage = customerModel.AvatarImage,
             };
 
-            if (customerModel.TrainingCentre != null || customerModel.TrainingCentre>0)
+            if (customerModel.TrainingCentre != null || customerModel.TrainingCentre > 0)
             {
                 customer.TrainingCentreId = customerModel.TrainingCentre;
             }
@@ -134,6 +161,20 @@ public class CustomerService : ICustomerService
 
             var result = await _skillRepository.AddCustomerSkills(skills);
 
+            // FILES
+            var fileResult = await _fileService.UploadDocumentsAsync(customerModel.Files, customer.Id.ToString());
+
+            var documents = new List<DocumentCustomer>();
+            var documentEntities = fileResult.Select(x => new Document
+            {
+                BlobId = x.BlobId,
+                Title = x.Name,
+                Path = x.Url,
+                FileSize = x.ByteArrayContent != null ? x.ByteArrayContent.Length.ToString() : null,
+            }).ToList();
+
+            await _documentRepository.UpsertDocuments(customer.Id, documentEntities);
+
             return customer;
         }
         catch (Exception ex)
@@ -144,7 +185,7 @@ public class CustomerService : ICustomerService
         return null;
     }
 
-    public async Task<Customer> UpdateCustomer(int id, Customer customer)
+    public async Task<DAL.Entities.Entities.Customer> UpdateCustomer(int id, DAL.Entities.Entities.Customer customer)
     {
         var customerdb = _customerRepository.Get(id);
 
@@ -157,6 +198,11 @@ public class CustomerService : ICustomerService
         customerdb.FirstName = customer.FirstName;
         customerdb.LastName = customer.LastName;
         customerdb.Role = customer.Role;
+        
+        if (customer.TrainingCentreId != null && customer.TrainingCentreId >1)
+        {
+            customerdb.TrainingCentreId = customer.TrainingCentreId;
+        }
 
         _customerRepository.Update(customerdb);
         await _customerRepository.SaveChangesAsync();
@@ -164,12 +210,11 @@ public class CustomerService : ICustomerService
         return customerdb;
     }
 
-    public async Task<Customer> UpdateCustomer(int id, CustomerModel customer)
+    public async Task<Customer> UpdateCustomer(int id, Models.CustomerModel customer)
     {
         var ethnicOrigin = await _ethnicityRepository.Get<EthnicOrigin>(x => x.Name.ToLower() == customer.Ethnicity.ToLower());
 
         var customerdb = await _customerRepository.GetWithAllEntitiesById(id);
-
 
         if (customer.TrainingCentre != null || customer.TrainingCentre > 0)
         {
@@ -217,6 +262,7 @@ public class CustomerService : ICustomerService
         _customerRepository.Update(customerdb);
         await _customerRepository.SaveChangesAsync();
 
+
         var skills = new List<CustomerSkills>();
         await _skillRepository.Remove(customerdb.Id);
         var dbSkills = await _skillRepository.GetAll();
@@ -233,6 +279,22 @@ public class CustomerService : ICustomerService
         }
 
         var result = await _skillRepository.AddCustomerSkills(skills);
+
+        var fileResult = await _fileService.UploadDocumentsAsync(customer.Files, customerdb.Id.ToString());
+
+        var documents = new List<DocumentCustomer>();
+        var documentEntities = fileResult.Select(x => new Document
+        {
+            BlobId = x.BlobId,
+            Title = x.Name,
+            Path = x.Url,
+            FileSize = x.ByteArrayContent != null ? x.ByteArrayContent.Length.ToString() : null,
+        }).ToList();
+
+        await _documentRepository.UpsertDocuments(customerdb.Id, documentEntities);
+
+        var docOrphansRemoved = await _fileService.CleanOrphans(customer.Files, customerdb.Id.ToString());
+        var haveOrphansRemovedFromDb = await _documentRepository.CleanOrphans(customerdb.Id, documentEntities);
 
         return customerdb;
     }
@@ -254,7 +316,7 @@ public class CustomerService : ICustomerService
         return result;
     }
 
-    public async Task<List<CustomerModel>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
+    public async Task<List<CustomerModel>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<DAL.Entities.Entities.Customer, TOrderKey>> orderBy, bool ascending = true)
     {
         var customerList = new List<CustomerModel>();
 
@@ -264,7 +326,7 @@ public class CustomerService : ICustomerService
         {
             foreach (var customer in customers)
             {
-                CustomerModel destination = new CustomerModel();
+                Models.CustomerModel destination = new Models.CustomerModel();
                 Map(customer, destination);
                 customerList.Add(destination);
             }
@@ -273,7 +335,137 @@ public class CustomerService : ICustomerService
         return customerList;
     }
 
-    public static void Map(Customer source, CustomerModel destination)
+    public async Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
+    {
+        var customerList = new List<Customer>();
+
+        var customers = await _customerRepository.GetAllCustomerWithCourseQualificationRecords(email, pageNumber, pageSize, c => c.FirstName, true);
+
+        if (customers != null)
+        {
+            foreach (var customer in customers)
+            {
+                customerList.Add(customer);
+            }
+        }
+
+        return customerList;
+    }
+
+    public async Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
+    {
+        var customerList = new List<Customer>();
+
+        var customers = await _customerRepository.GetAllCustomersWithCourseQualificationRecords(pageNumber, pageSize, c => c.FirstName, true);
+
+        if (customers != null)
+        {
+            foreach (var customer in customers)
+            {
+                customerList.Add(customer);
+            }
+        }
+
+        return customerList;
+    }
+
+
+
+    public async Task<bool> DeleteCustomersWithCourseQualificationRecords(int id)
+    {
+        var result = await _customerRepository.DeleteCustomersWithCourseQualificationRecords(id);
+
+        return result;
+    }
+
+    public async Task<CustomersWithCourseQualificationRecordsModel> UpdateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer)
+    {
+        var result = await _customerRepository.UpdateCustomersWithCourseQualificationRecords(new QualificationCustomerCourseCertificate
+        {
+            CertificateId = customer.CertificateId,
+            QualificationStatusId = customer.QualificationStatusId,
+            QualificationId = customer.QualificationId,
+            QualificationProgression = customer.Progression,
+            CustomerId = customer.CustomerId,
+            CourseId = customer.CourseId,
+            Id = customer.Id
+        });
+
+        if (result == null)
+            return null;
+
+        var qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
+
+        int trainingCentreId;
+        if (int.TryParse(customer.TrainingCentre, out trainingCentreId))
+        {
+            qualificationRecord.TrainingCentreId = trainingCentreId;
+
+            await UpdateCustomer(qualificationRecord.Id, qualificationRecord);
+
+            qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
+        }
+
+        var customerRecord = new CustomersWithCourseQualificationRecordsModel();
+        customerRecord.CustomerId = customer.CustomerId;
+        customerRecord.CourseId = customer?.CourseId;
+        customerRecord.QualificationId = customer?.QualificationId;
+        customerRecord.Email = qualificationRecord?.Email;
+        customerRecord.CertificateId = customer?.CertificateId;
+        customerRecord.TrainingCentre = qualificationRecord?.TrainingCentre?.Name ?? string.Empty;
+        customerRecord.CertificateName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Certificate?.Name;
+        customerRecord.CourseName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Course?.Name;
+        customerRecord.Progression = customer.Progression;
+        customerRecord.QualificationName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Qualification?.Name;
+        customerRecord.TrainingCentreId = customer?.TrainingCentreId;
+        customerRecord.Id = result.Id;
+        customerRecord.QualificationStatus = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.QualificationStatus?.Name ?? string.Empty;
+        customerRecord.QualificationStatusId = result?.QualificationStatusId;
+
+        return customerRecord;
+    }
+
+    public async Task<CustomersWithCourseQualificationRecordsModel> CreateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer)
+    {
+        var entity = (new QualificationCustomerCourseCertificate
+        {
+            QualificationId = customer.QualificationId,
+            CertificateId = customer.CertificateId,
+            CourseProgression = customer.Progression,
+            CustomerId = customer.CustomerId,
+            QualificationStatusId = customer.QualificationStatusId,
+            CourseId = customer.CourseId
+        });
+
+        var result = await _customerRepository.CreateCustomersWithCourseQualificationRecords(entity);
+
+        if (result == null)
+            return null;
+        var qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
+        qualificationRecord.TrainingCentreId = Convert.ToInt32(customer.TrainingCentre);
+        await UpdateCustomer(qualificationRecord.Id, qualificationRecord);
+        qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
+
+        var customerRecord = new CustomersWithCourseQualificationRecordsModel();
+        customerRecord.CustomerId = customer.CustomerId;
+        customerRecord.CourseId = customer?.CourseId;
+        customerRecord.QualificationId = customer?.QualificationId;
+        customerRecord.Email = qualificationRecord?.Email;
+        customerRecord.CertificateId = customer?.CertificateId;
+        customerRecord.TrainingCentre = qualificationRecord?.TrainingCentre?.Name ?? string.Empty;
+        customerRecord.CertificateName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Certificate?.Name;
+        customerRecord.CourseName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Course?.Name;
+        customerRecord.Progression = customer.Progression;
+        customerRecord.QualificationName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Qualification?.Name;
+        customerRecord.TrainingCentreId = customer?.TrainingCentreId;
+        customerRecord.Id = result.Id;
+        customerRecord.QualificationStatus = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.QualificationStatus?.Name ?? string.Empty;
+        customerRecord.QualificationStatusId = result?.QualificationStatusId;
+
+        return customerRecord;
+    }
+
+    public void Map(Customer source, CustomerModel destination)
     {
         destination.FirstName = source.FirstName;
         destination.LastName = source.LastName;
@@ -308,5 +500,57 @@ public class CustomerService : ICustomerService
         destination.Number = source.Address?.Number;
         destination.Postcode = source.Address?.Postcode;
         destination.Skills = source.CustomerSkills?.Select(cs => cs.Skill.Name).ToArray();
+
+        //TOdo
+        destination.Qualifications = source.QualificationCustomerCourseCertificates != null ?
+            source.QualificationCustomerCourseCertificates.Where(x => x.QualificationId != null)
+            .Select(x => new QualificationModel
+            {
+                CertificateDate = x.Qualification.CertificateDate,
+                CertificateNumber = x.Qualification.CertificateNumber,
+                ExpectedDate = x.Qualification.ExpectedDate,
+                Id = x.Qualification.Id,
+                Name = x.Qualification.Name,
+                RegistrationDate = x.Qualification.RegistrationDate,
+                Status = x.QualificationStatus == null ? string.Empty : x.QualificationStatus.Name,
+                Progression = x.QualificationProgression
+
+            }).ToList() : new List<QualificationModel>();
+
+        destination.Files = source.DocumentCustomers?.Select(x => new FileModel
+        {
+            BlobId = x.Document.BlobId,
+            Url = $"{x.Document.Path}?{_configuration.GetSection("BlobStorageSettings:SharedAccessSignature").Value}",
+            Name = x.Document.Title
+        }).ToList();
+
+        destination.Certificates = source.QualificationCustomerCourseCertificates != null ?
+            source.QualificationCustomerCourseCertificates
+            .Where(x => x.CertificateId != null)
+            .Select(x => new CertificateModel
+            {
+                Charge = x.Certificate.Charge,
+                Id = x.Certificate.Id,
+                Name = x.Certificate.Name,
+                Type = x.Certificate.Type,
+                Date = x.CreatedAt
+            }).ToList()
+            : new List<CertificateModel>();
+
+        destination.Courses = source.QualificationCustomerCourseCertificates != null ?
+            source.QualificationCustomerCourseCertificates
+            .Where(x => x.CourseId != null)
+            .Select(x => new CourseModel
+            {
+                Description = x.Course.Description,
+                Id = x.Course.Id,
+                Name = x.Course.Name,
+                Status = x.Course.Status,
+                Progression = x.CourseProgression,
+                Assesor = x.Assesor,
+                Duration = x.Course.Duration,
+                Date = x.Course.RegistrationDate != null ? x.Course.RegistrationDate.ToShortDateString() : string.Empty,
+            }).ToList()
+            : new List<CourseModel>();
     }
 }

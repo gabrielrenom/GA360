@@ -1,5 +1,6 @@
 import { Gender } from "config";
 import { CustomerList, CustomerListExtended } from "./customer";
+import { i, S } from "vite/dist/node/types.d-aGj9QkWt";
 
 export interface CustomerApiModel {
   id?: number;
@@ -23,6 +24,37 @@ export interface CustomerApiModel {
   time: string;
   date: string;
   avatar: number;
+}
+
+export interface DocumentFileModel
+{
+    name: string;
+    content: Blob | null;
+    url: string;
+    blobId: string;
+}
+
+export interface CourseModel
+{
+    id: number;
+    name: string;
+    description: string;
+    status: number;
+    progression: number;
+    duration: number;
+    assesor: string;
+    date: string;
+    card: string;
+    certification:string;
+}
+
+export interface CertificateModel
+{
+    id: number;
+    name: string;
+    charge: string;
+    type: string;
+    date: string;
 }
 
 export interface CustomerApiModelExtended {
@@ -60,6 +92,10 @@ export interface CustomerApiModelExtended {
   number: string;
   postcode: string;
   street: string;
+  fileDocuments: DocumentFileModel[]
+  courses: CourseModel []
+  qualifications: QualificationModel []
+  certificates: CertificateModel []
 }
 
 export const mapCustomerApiModelToCustomerListExtended = (
@@ -118,6 +154,11 @@ export const mapCustomerApiModelToCustomerListExtended = (
     city: source.city,
     number: source.number,
     postcode: source.postcode,
+    documents: [],
+    fileDocuments: source.fileDocuments,
+    courses: source.courses,
+    qualifications: source.qualifications,
+    certificates: source.certificates
   };
 };
 
@@ -229,10 +270,24 @@ export const mapCustomerListToCustomerApiModelExtended = (
     trainingCentre: user.trainingCentre || "",
     nationalInsurance: user.nationalInsurance || "",
     portfolio: user.portfolio || "",
-    dob: user.dob || "",
     street: user.street || "",
     city: user.city || "",
     number: user.number || "",
     postcode: user.postcode || "",
+    fileDocuments: [],
+    courses: [],
+    qualifications: [],
+    certificates: []
   };
 };
+
+export interface QualificationModel {
+  certificateDate: string; // ISO date string
+  certificateNumber: number;
+  expectedDate: string; // ISO date string
+  id: number;
+  name: string;
+  progression: number; // Assuming this is a percentage
+  registrationDate: string; // ISO date string
+  status: string; // You might want to use an enum for status if there are predefined values
+}

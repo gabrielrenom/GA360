@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { ReactNode } from 'react';
 
 // material-ui

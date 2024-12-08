@@ -13,5 +13,4 @@ public class Qualification: Audit, IModel
     public int Status { get; set; }
 
     public virtual List<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
-
 }

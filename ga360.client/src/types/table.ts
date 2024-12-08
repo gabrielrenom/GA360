@@ -60,4 +60,36 @@ export type TableDataProps = {
   avatar: number;
   skills: string[];
   time: string[];
+
+  coursename: string;
+
 };
+
+export type CourseViewDataProps = {
+  coursename: string;
+  date: string;
+  duration: number;
+  assesor: string;
+  card: string;
+  certification: string;
+};
+
+export type DocumentViewDataProps = {
+  name: string;
+  url: string;
+}
+
+export type QualificationViewDataProps ={
+  name: string;
+  regDate: string;
+  status: string;
+  progress: string;
+}
+
+export type CertificationViewDataProps ={
+  name: string;
+  // id: number;
+  charge: string;
+  type: string;
+  regDate: string;
+}

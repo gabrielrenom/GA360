@@ -1,7 +1,7 @@
 import { Country } from "types/country";
 
 export const endpoints = {
-  key: 'api/country',
+  key: '/api/country',
   list: '/list',
 };
 

@@ -1,39 +1,87 @@
-﻿using GA360.Domain.Core.Interfaces;
+﻿using GA360.DAL.Entities.Entities;
+using GA360.Domain.Core.Interfaces;
+using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GA360.Server.Controllers
+namespace GA360.Server.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class TrainingCentreController:ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class TrainingCentreController:ControllerBase
+    private readonly ILogger<TrainingCentreController> _logger;
+    private readonly ITrainingCentreService _trainingCentreService;
+
+    public TrainingCentreController(ILogger<TrainingCentreController> logger, ITrainingCentreService trainingCentreService)
     {
-        private readonly ILogger<TrainingCentreController> _logger;
-        private readonly ITrainingCentreService _trainingCentreService;
+        _logger = logger;
+        _trainingCentreService = trainingCentreService;
+    }
 
-        public TrainingCentreController(ILogger<TrainingCentreController> logger, ITrainingCentreService trainingCentreService)
+    [AllowAnonymous]
+    [HttpGet("list")]
+    public async Task<IActionResult> GetAllTrainingCentres()
+    {
+        try
         {
-            _logger = logger;
-            _trainingCentreService = trainingCentreService;
-        }
+            var result = await _trainingCentreService.GetTrainingCentresAsync();
 
-        [AllowAnonymous]
-        [HttpGet("list")]
-        public async Task<IActionResult> GetAllTrainingCentres()
+            return Ok(result);
+        }
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await _trainingCentreService.GetTrainingCentresAsync();
+            _logger.LogError("Error getting training centres: {error}", ex.Message);
 
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error getting training centres: {error}", ex.Message);
-
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> GetTrainingCentres()
+    {
+        var trainingCentres = await _trainingCentreService.GetAllTrainingCentres();
+        return Ok(trainingCentres);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("{id}")]
+    public IActionResult GetTrainingCentre(int id)
+    {
+        var trainingCentre = _trainingCentreService.GetTrainingCentre(id);
+        if (trainingCentre == null)
+        {
+            return NotFound();
+        }
+        return Ok(trainingCentre);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddTrainingCentre([FromBody] TrainingCentreViewModel trainingCentre)
+    {
+        var result = await _trainingCentreService.AddTrainingCentre(trainingCentre.ToEntity());
+        return CreatedAtAction(nameof(GetTrainingCentre), new { id = result.Id }, result.ToViewModel());
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateTrainingCentre(int id, [FromBody] TrainingCentreViewModel trainingCentre)
+    {
+        
+        var result = await _trainingCentreService.UpdateTrainingCentre(trainingCentre.ToEntity());
+
+        return Ok(result.ToViewModel());
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteTrainingCentre(int id)
+    {
+        var existingTrainingCentre = _trainingCentreService.GetTrainingCentre(id);
+        if (existingTrainingCentre == null)
+        {
+            return NotFound();
+        }
+        _trainingCentreService.DeleteTrainingCentre(id);
+        return NoContent();
     }
 }

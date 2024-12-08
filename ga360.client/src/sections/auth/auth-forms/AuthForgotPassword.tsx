@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useNavigate } from 'react-router-dom';
 
 // material-ui

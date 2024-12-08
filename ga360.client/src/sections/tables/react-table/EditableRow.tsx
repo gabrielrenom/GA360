@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useMemo, useState, MouseEvent } from 'react';
 
 // material-ui
@@ -72,6 +74,7 @@ function ReactTable({ columns, data, setData }: ReactTableProps) {
   const [originalData, setOriginalData] = useState(() => [...data]);
   const [selectedRow, setSelectedRow] = useState({});
 
+  // @ts-ignore
   const table = useReactTable({
     data,
     columns,

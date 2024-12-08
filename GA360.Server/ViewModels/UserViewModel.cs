@@ -1,4 +1,7 @@
-﻿namespace GA360.Server.ViewModels
+﻿using GA360.DAL.Entities.Entities;
+using GA360.Domain.Core.Models;
+
+namespace GA360.Server.ViewModels
 {
     public class UserViewModel
     {
@@ -37,5 +40,24 @@
         public string Employer { get; set; }
         public int TrainingCentre { get; set; }
         public string NationalInsurance { get; set; }
+        public List<FileModel>? FileDocuments { get; internal set; }
+    }
+
+    public class BasicUserViewModel
+    {
+        public int Id { get; set; }
+        public string Email { get; set; }
+    }
+
+    public static class UserMapper
+    {
+        public static BasicUserViewModel ToBasicViewModel(this Customer customer)
+        {
+            return new()
+            {
+                Id = customer.Id,
+                Email = customer.Email
+            };
+        }
     }
 }

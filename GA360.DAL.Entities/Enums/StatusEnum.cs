@@ -114,9 +114,9 @@ public class StatusEnum
     {
         RequestCome = 0,
         ProcessingRequest = 1,
-        ProjectInProgress = 2,
-        ProjectWin = 3,
-        ProjectFail = 4,
+        CustomerInProgress = 2,
+        CustomerWin = 3,
+        CustomerFail = 4,
         DealLost = 5
     }
 

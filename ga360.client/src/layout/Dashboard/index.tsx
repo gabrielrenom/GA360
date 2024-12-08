@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 
 // material-ui
@@ -21,6 +21,12 @@ import AuthGuard from 'utils/route-guard/AuthGuard';
 import { MenuOrientation } from 'config';
 import useConfig from 'hooks/useConfig';
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import DynamicTableCourse from 'sections/apps/course/DynamicTableCourse';
+import DynamicTableQualification from 'sections/apps/course/DynamicTableQualifications';
+import DynamicTableTrainingCentre from 'sections/apps/course/DynamicTableTrainingCentre';
+import DynamicTableCustomersWithCourseQualificationRecords from 'sections/apps/course/DynamicTableCustomersWithCourseQualificationRecords';
+import DuendeContext from 'contexts/DuendeContext';
+import DynamicTableCustomerWithCourseQualificationRecords from 'sections/apps/course/DynamicTableCustomerWithCourseQualificationRecords';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -48,8 +54,9 @@ export default function DashboardLayout() {
       <Box sx={{ display: 'flex', width: '100%' }}>
         <Header />
         {!isHorizontal ? <Drawer /> : <HorizontalBar />}
-
+        {/* <DummyComponent></DummyComponent> */}
         <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
+          <></>
           <Toolbar sx={{ mt: isHorizontal ? 8 : 'inherit' }} />
           <Container
             maxWidth={container ? 'xl' : false}
@@ -62,12 +69,17 @@ export default function DashboardLayout() {
             }}
           >
             <Breadcrumbs />
+            {/* <DynamicTableCustomerWithCourseQualificationRecords></DynamicTableCustomerWithCourseQualificationRecords> */}
             <Outlet />
+       
+
             <Footer />
           </Container>
         </Box>
-        <AddCustomer />
+        {/* <AddCustomer /> */}
       </Box>
     </AuthGuard>
   );
 }
+
+
