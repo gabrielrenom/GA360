@@ -33,14 +33,14 @@ const backOffice: NavItemType = {
       icon: icons.UserOutlined,
       children: [
         {
-          id: 'group-back-office-candidates',
+          id: 'group-back-office-candidates-candidate',
           title: <FormattedMessage id="Candidate Details" />,
           type: 'item',
           icon: icons.ProfileOutlined,
           url: '/backoffice/candidates'
         },
         {
-          id: 'group-back-office-candidates',
+          id: 'group-back-office-candidates-career',
           title: <FormattedMessage id="Career Assigment" />,
           type: 'item',
           icon: icons.SolutionOutlined,
@@ -49,21 +49,21 @@ const backOffice: NavItemType = {
       ]
     },
     {
-      id: 'group-back-office-collapse',
+      id: 'group-back-office-collapse-training-centres',
       title: <FormattedMessage id="Training Centres" />,
       type: 'item',
       icon: icons.TeamOutlined,
       url: '/backoffice/trainingcentres'
     },
     {
-      id: 'group-back-office-collapse',
+      id: 'group-back-office-collapse-courses',
       title: <FormattedMessage id="Courses" />,
       type: 'item',
       icon: icons.BookOutlined,
       url: '/backoffice/courses'
     },
     {
-      id: 'group-back-office-collapse',
+      id: 'group-back-office-collapse-qualifications',
       title: <FormattedMessage id="Qualifications" />,
       type: 'item',
       icon: icons.SafetyCertificateOutlined,

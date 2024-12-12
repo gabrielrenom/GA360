@@ -15,26 +15,54 @@ public class DashboardService : IDashboardService
         _cRMDbContext = cRMDbContext;
     }
 
-    public async Task<List<IndustriesModel>> GetIndustryPercentageAsync()
+    public async Task<List<IndustriesModel>> GetIndustryPercentageAsync(string email)
     {
-        var customers = await _cRMDbContext.Customers.ToListAsync();
+        const string query = @"
+            SELECT
+                c.[Sector] AS Industry,
+                COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY tc.Id) AS Percentage
+            FROM
+                [dbo].[QualificationCustomerCourseCertificates] qccc
+            JOIN
+                [dbo].[Courses] c ON qccc.CourseId = c.Id
+            JOIN
+                [dbo].[Customers] cust ON qccc.CustomerId = cust.Id
+            JOIN
+                [dbo].[TrainingCentres] tc ON cust.TrainingCentreId = tc.Id
+            WHERE
+                cust.Email = @Email
+            GROUP BY
+                c.[Sector],
+                tc.Id
+            ORDER BY
+                Percentage DESC;
+        ";
 
-        if (!customers.Any())
+        var industryList = new List<IndustriesModel>();
+
+        using (var connection = new SqlConnection(_cRMDbContext.Database.GetConnectionString()))
         {
-            return new List<IndustriesModel>();
+            await connection.OpenAsync();
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@Email", email);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        industryList.Add(new IndustriesModel
+                        {
+                            Industry = reader["Industry"].ToString(),
+                            Percentage = Convert.ToDouble(reader["Percentage"])
+                        });
+                    }
+                }
+            }
         }
 
-        var totalCustomers = customers.Count();
-        var industryGroups = customers
-            .GroupBy(c => c.Industry)
-            .Select(g => new IndustriesModel
-            {
-                Industry = g.Key,
-                Percentage = ((double)g.Count() / totalCustomers) * 100
-            })
-            .ToList();
-
-        return industryGroups;
+        return industryList;
     }
 
     public async Task<List<DashboardModel>> GetAllStats()

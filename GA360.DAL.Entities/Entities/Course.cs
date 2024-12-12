@@ -14,6 +14,7 @@ public class Course:Audit, IModel
     public DateTime CertificateDate { get; set; }
     public string CertificateNumber { get; set; }
     public int Status { get; set; }
+    public string Sector { get; set; }
 
     public virtual List<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
 }

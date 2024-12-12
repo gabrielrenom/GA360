@@ -37,7 +37,7 @@ namespace GA360.Server.Controllers
         public async Task<IActionResult> GetAllContacts()
         {
 
-            var result = await _customerService.GetAllCustomersWithEntities(null, null, c => c.Email, true);
+            var result = await _customerService.GetAllCustomersWithEntities(1, 10, c => c.Email, true);
 
             return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromUserModelToViewModel(x)).ToList());
         }

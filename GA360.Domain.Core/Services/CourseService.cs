@@ -42,6 +42,7 @@ public class CourseService : ICourseService
         courseentity.Name = course.Name;
         courseentity.Status = course.Status;
         courseentity.RegistrationDate = course.RegistrationDate;
+        courseentity.Sector = course.Sector;
 
         var result = await _courseRepository.UpdateAsync(courseentity);
 

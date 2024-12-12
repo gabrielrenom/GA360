@@ -11,6 +11,7 @@ import LogoIcon from './LogoIcon';
 import { APP_DEFAULT_PATH } from 'config';
 import useAuth from 'hooks/useAuth';
 import GA360LogoIcon from './GA360LogoIcon';
+import { Typography } from '@mui/material';
 
 // ==============================|| MAIN LOGO ||============================== //
 
@@ -25,11 +26,14 @@ export default function LogoSection({ reverse, isIcon, sx, to }: Props) {
   const { isLoggedIn } = useAuth();
 
   return (
-    <div style ={{paddingRight:'13px'}}>
+    <div style ={{paddingRight:'13px', paddingTop:'0.5rem'}}>
     <ButtonBase disableRipple {...(isLoggedIn && { component: Link, to: !to ? APP_DEFAULT_PATH : to, sx })}>
       {isIcon ? <GA360LogoIcon /> : <Logo reverse={reverse} />}
       {/* {isIcon ? <LogoIcon /> : <Logo reverse={reverse} />} */}
     </ButtonBase>
+    <Typography variant="caption" display="block" align="left" sx={{ mt: 1.5, fontSize: '0.45rem' }}>
+        v0.2 Alpha-12/12/2024
+    </Typography>
     </div>
   );
 }

@@ -178,8 +178,8 @@ const MainRoutes = {
               path: 'courses',
               element: <Courses />
             },
-            {
-              path: 'qualifications',
+              {
+                path: 'qualifications',
               element: <Qualifications />
             },
             {

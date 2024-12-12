@@ -8,6 +8,7 @@ export interface Course {
     certificateDate: Date;
     certificateNumber: string;
     status: number;
+    sector: string;
   }
 
 export const endpoints = {

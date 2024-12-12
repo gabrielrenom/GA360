@@ -8,6 +8,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import ListItemText from "@mui/material/ListItemText";
+import CircularProgress from '@mui/material/CircularProgress';
 
 // project import
 import MainCard from "components/MainCard";
@@ -39,7 +40,7 @@ import {
   Typography,
 } from "@mui/material";
 import Box from "@mui/system/Box";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState, lazy } from "react";
 import { styled } from "@mui/material/styles";
 import { CustomerList } from "../../types/customer";
 import CustomerTable from "../../sections/apps/customer/CustomerTable";
@@ -54,6 +55,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { color } from "framer-motion";
 import { getDashboardStatuses } from "api/dashboardService";
 import LabelledIndustries from 'sections/dashboard/analytics/LabelledIndustries';
+
+const Candidates = lazy(() => import('pages/backoffice/candidates'));
 
 // avatar style
 const avatarSX = {
@@ -454,8 +457,7 @@ export default function DashboardDefault() {
         md={8}
         sx={{ display: { sm: "none", md: "block", lg: "none" } }}
       />
-    <LabelledIndustries></LabelledIndustries>
-
+    <LabelledIndustries/>
       {/* row 2 */}
       {/* <Grid item xs={12} md={7} lg={8}>
         <UniqueVisitorCard />
@@ -488,7 +490,10 @@ export default function DashboardDefault() {
           </Grid>
           <Grid item />
         </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
+        <Suspense fallback={<CircularProgress />}>          
+            <Candidates/>
+        </Suspense>
+        {/* <MainCard sx={{ mt: 2 }} content={false}>
           {allowedCustomers === undefined ? (
             <>Loading...</>
           ) : (
@@ -501,7 +506,7 @@ export default function DashboardDefault() {
               }}
             />
           )}
-        </MainCard>
+        </MainCard> */}
         {/*<MainCard sx={{ mt: 2 }} content={false}>*/}
         {/*    <OrdersTable />*/}
         {/*</MainCard>*/}

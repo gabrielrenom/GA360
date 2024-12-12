@@ -1,4 +1,4 @@
-import { lazy, useEffect } from 'react';
+import { lazy, useEffect, useState } from 'react';
 
 // project import
 import AuthLayout from 'layout/Auth';
@@ -16,14 +16,54 @@ const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/code-verific
 // ==============================|| AUTH ROUTING ||============================== //
 const ExternalRedirect = () => {
   useEffect(() => {
-    //window.location.href = 'https://localhost:5173/bff/login';
+    window.location.href = 'https://localhost:5173/bff/login';
     //window.location.href = 'https://app-ga360portal-dev-eastus.azurewebsites.net/bff/login';
-    window.location.href = 'https://app-ga360core-prod-uksouth.azurewebsites.net/bff/login';
+    //window.location.href = 'https://app-ga360core-prod-uksouth.azurewebsites.net/bff/login';
 
   }, []);
 
   return null;
 };
+
+// const ExternalRedirect = () => {
+//   const [redirectUrl, setRedirectUrl] = useState('');
+
+//   useEffect(() => {
+//     const fetchRedirectUrl = async () => {
+//       try {
+//         const response = await fetch('/api/configuration/redirect-url' , {
+//           method: 'GET',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             'X-CSRF': 'Dog',
+//           },
+//         });
+//         if (response.ok) {
+
+//           const data = await response.json();
+
+//           setRedirectUrl(data.RedirectUrl);
+//         } else {
+//           console.error('Failed to fetch redirect URL', response.statusText);
+//         }
+//       } catch (error) {
+//         console.error('Failed to fetch redirect URL', error);
+//       }
+//     };
+//     fetchRedirectUrl();
+//   }, []);
+
+//   useEffect(() => {
+//     if (redirectUrl) {
+//       console.log("AMIGOS",redirectUrl)
+
+//       window.location.href = "https://localhost:5173/bff/login";
+//     }
+//   }, [redirectUrl]);
+
+//   return null;
+// };
+
 
 const LoginRoutes = {
   path: '/',

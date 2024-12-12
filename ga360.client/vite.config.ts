@@ -46,110 +46,114 @@ export default defineConfig({
     },
     server: {
         proxy: {
-       
-                '^/menu': {
-                    target: 'https://localhost:7030/',
-                    secure: false
-                },
-                '^/api/customer/list': {
-                    target,
-                    secure: false
-                },
-                '^/api/customer/user': {
-                    target,
-                    secure: false
-                },
-                '^/api/customer/create': {
-                    target,
-                    secure: false
-                },
-                '^/api/customer/delete': {
-                    target,
-                    secure: false
-                },
-                '^/api/customer/update': {
-                    target,
-                    secure: false
-                },
-                '^/api/customer/get': {
-                    target,
-                    secure: false
-                },
-                '^/api/customer/get/basic': {
-                    target,
-                    secure: false
-                },
-                '^/api/customer/updatewithdocuments': {
-                    target,
-                    secure: false
-                },
-                '^/api/customer/customerwithcoursequalificationrecords': {
-                    target,
-                    secure: false
-                },
-                '^/api/trainingcentre/list': {
-                    target,
-                    secure: false
-                },
-                '^/api/ethnicity/list': {
-                    target,
-                    secure: false
-                },
-                '^/api/skill/list': {
-                    target,
-                    secure: false
-                },
-                '^/api/country/list': {
-                    target,
-                    secure: false
-                },
-                '^/api/course': {
-                    target,
-                    secure: false,
-                    changeOrigin: true
-                },
-                '^/api/qualification': {
-                    target,
-                    secure: false,
-                    changeOrigin: true
-                },
-                '^/api/trainingcentre': {
-                    target,
-                    secure: false,
-                    changeOrigin: true
-                },
-                '^/api/customer/customerswithcoursequalificationrecords': {
-                    target,
-                    secure: false,
-                    changeOrigin: true
-                },
-                '^/api/certificate': {
-                    target,
-                    secure: false,
-                    changeOrigin: true
-                },
-                '^/api/dashboard': {
-                    target,
-                    secure: false,
-                    changeOrigin: true
-                },
-                '^/signin-oidc': {
-                    target,
-                    secure: false
-                },
-                '^/bff/login': {
-                    target,
-                    secure: false
-                },
-                '^/bff/user': {
-                    target,
-                    secure: false
-                },
-                '^/signout-callback-oidc': {
-                    target,
-                    secure: false
-                },
-            
+
+            '^/menu': {
+                target: 'https://localhost:7030/',
+                secure: false
+            },
+            '^/api/customer/list': {
+                target,
+                secure: false
+            },
+            '^/api/customer/user': {
+                target,
+                secure: false
+            },
+            '^/api/customer/create': {
+                target,
+                secure: false
+            },
+            '^/api/customer/delete': {
+                target,
+                secure: false
+            },
+            '^/api/customer/update': {
+                target,
+                secure: false
+            },
+            '^/api/customer/get': {
+                target,
+                secure: false
+            },
+            '^/api/customer/get/basic': {
+                target,
+                secure: false
+            },
+            '^/api/customer/updatewithdocuments': {
+                target,
+                secure: false
+            },
+            '^/api/customer/customerwithcoursequalificationrecords': {
+                target,
+                secure: false
+            },
+            '^/api/trainingcentre/list': {
+                target,
+                secure: false
+            },
+            '^/api/ethnicity/list': {
+                target,
+                secure: false
+            },
+            '^/api/skill/list': {
+                target,
+                secure: false
+            },
+            '^/api/country/list': {
+                target,
+                secure: false
+            },
+            '^/api/course': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/qualification': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/trainingcentre': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/customer/customerswithcoursequalificationrecords': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/certificate': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/dashboard': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/api/configuration': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
+            '^/signin-oidc': {
+                target,
+                secure: false
+            },
+            '^/bff/login': {
+                target,
+                secure: false
+            },
+            '^/bff/user': {
+                target,
+                secure: false
+            },
+            '^/signout-callback-oidc': {
+                target,
+                secure: false
+            },
         },
         port: 5173,
         https: env.NODE_ENV !== 'production' ? {

@@ -12,6 +12,12 @@ using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<IdentitySettings>(builder.Configuration.GetSection("IdentitySettings")); 
+
+// Add Authentication services
+var identitySettings = new IdentitySettings();
+builder.Configuration.GetSection("IdentitySettings").Bind(identitySettings);
+
 // Add memory cache services
 builder.Services.AddMemoryCache();
 
@@ -66,16 +72,9 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
 }).AddOpenIdConnect("oidc", options =>
 {
-    options.Authority = "https://app-ga360authn-prod-uksouth.azurewebsites.net";
-    //options.Authority = "https://www.auth.signos.io";
-    //options.Authority = "https://localhost:5443";
-    //options.Authority = "https://demo.duendesoftware.com";
-    //options.ClientId = "interactive";
-    //options.ClientId = "interactive.bff.lms.portal.prod";
-    //ANTEoptions.ClientId = "interactive.bff.lms.portal";
-    options.ClientId = "interactive.ga360.portal.prod";
-    //options.ClientId = "IgnacioTest2";
-    options.ClientSecret = "J6atmybilSHWwL9RRLakEA==";
+    options.Authority = identitySettings.Authority;
+    options.ClientId = identitySettings.ClientId;
+    options.ClientSecret = identitySettings.ClientSecret;
     options.ResponseType = "code";
     options.ResponseMode = "query";
 
@@ -99,6 +98,10 @@ builder.Services.AddAuthentication(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddApplicationInsightsTelemetry(new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions
+{
+    ConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
+});
 
 var app = builder.Build();
 

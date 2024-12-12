@@ -34,7 +34,9 @@ namespace GA360.Server.Controllers
         [HttpGet("industriesstats")]
         public async Task<IActionResult> GetIndustriesStats()
         {
-            return Ok(await _dashboardService.GetIndustryPercentageAsync());
+            var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+
+            return Ok(await _dashboardService.GetIndustryPercentageAsync(emailClaim));
         }
     }
 }

@@ -13,6 +13,7 @@ namespace GA360.Server.ViewModels
         public int Duration { get; set; }
         public DateTime CertificateDate { get; set; }
         public string CertificateNumber { get; set; }
+        public string Sector { get; set; }
         public int Status { get; set; }
     }
 
@@ -30,7 +31,8 @@ namespace GA360.Server.ViewModels
                 Duration = course.Duration,
                 CertificateDate = course.CertificateDate,
                 CertificateNumber = course.CertificateNumber,
-                Status = course.Status
+                Status = course.Status,
+                Sector = course.Sector
             };
         }
 
@@ -47,7 +49,8 @@ namespace GA360.Server.ViewModels
                 CertificateDate = courseViewModel.CertificateDate,
                 CertificateNumber = courseViewModel.CertificateNumber,
                 Status = courseViewModel.Status,
-                QualificationCustomerCourseCertificates = new List<QualificationCustomerCourseCertificate>() // Initialize with an empty list or map accordingly
+                QualificationCustomerCourseCertificates = new List<QualificationCustomerCourseCertificate>(), // Initialize with an empty list or map accordingly,
+                Sector = courseViewModel.Sector
             };
         }
     }

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useContext, useLayoutEffect, useState } from 'react';
 
 // material-ui
 import { Theme } from '@mui/material/styles';
@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 // project import
 import NavItem from './NavItem';
 import NavGroup from './NavGroup';
-import menuItem from 'menu-items';
+import menuItem, { getMenuItemsByRole } from 'menu-items';
 import { MenuFromAPI } from 'menu-items/dashboard';
 
 import useConfig from 'hooks/useConfig';
@@ -20,6 +20,7 @@ import { useGetMenu, useGetMenuMaster } from 'api/menu';
 
 // types
 import { NavItemType } from 'types/menu';
+import DuendeContext from 'contexts/DuendeContext';
 
 
 
@@ -36,6 +37,8 @@ export default function Navigation() {
   const [selectedItems, setSelectedItems] = useState<string | undefined>('');
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
   const [menuItems, setMenuItems] = useState<{ items: NavItemType[] }>({ items: [] });
+
+  const { user, isLoggedIn } = useContext(DuendeContext);
 
   //let dashboardMenu = MenuFromAPI();
 
@@ -79,10 +82,49 @@ export default function Navigation() {
     // } else {
     //   setMenuItems({ items: [...menuItem.items] });
     // }
+    console.log("OH USER", user)
+    console.log("MENU ITEMS",menuItem.items )
     setMenuItems({ items: [...menuItem.items] });
+
+    if (user && user.role) {
+      const updatedMenuItems = getMenuItemsByRole(user.role);
+      setMenuItems(updatedMenuItems);
+    }
 
     // eslint-disable-next-line
   }, [menuLoading]);
+
+  // const filterMenuItems = (role, menuItems) => {
+  //   switch (role) {
+  //     case 'Training Centre':
+  //       return menuItems.items.filter(item => 
+  //         item.id === 'group-dashboards-collapse' || 
+  //         item.id === 'group-back-office' ||
+  //         item.id === 'group-back-office-collapse'
+  //       );
+  //     case 'Super Admin':
+  //       return menuItems.items; // All items for Super Admin
+  //     case 'Candidate':
+  //       return menuItems.items.filter(item => item.id === 'group-profile');
+  //     case 'Assessor':
+  //       return menuItems.items.filter(item => item.id === 'group-profile');
+  //     default:
+  //       return [];
+  //   }
+  // };
+  
+  // // Example usage in useLayoutEffect
+  // useLayoutEffect(() => {
+  //   if (user && user.role) {
+  //     console.log("user",user)
+
+  //     const filteredMenuItems = filterMenuItems(user.role, menuItems);
+  //     console.log("MENU ITEMS", filteredMenuItems)
+  //     //setMenuItems({ items: filteredMenuItems });
+  //     setMenuItems({ items: [...menuItem.items] })
+  //   }
+  // }, [menuLoading]);
+  
 
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downLG;
 

@@ -358,15 +358,7 @@ public class CustomerService : ICustomerService
 
         var customers = await _customerRepository.GetAllCustomersWithCourseQualificationRecords(pageNumber, pageSize, c => c.FirstName, true);
 
-        if (customers != null)
-        {
-            foreach (var customer in customers)
-            {
-                customerList.Add(customer);
-            }
-        }
-
-        return customerList;
+        return customers;
     }
 
 

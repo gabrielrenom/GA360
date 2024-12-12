@@ -148,7 +148,8 @@ export default function DynamicTableCourse() {
       expectedDate: row.expectedDate ? new Date(row.expectedDate as string) : null,
       certificateDate: row.certificateDate ? new Date(row.certificateDate as string) : null,
       certificateNumber: row.certificateNumber as string,
-      status: row.status as number
+      status: row.status as number,
+      sector: row.sector as string
     };
   };
   
@@ -248,6 +249,25 @@ export default function DynamicTableCourse() {
         { value: 2, label: "Not Active" },
       ],
     },
+    {
+      field: "sector",
+      headerName: "SECTOR",
+      flex: 1,
+      editable: true,
+      type: "singleSelect",
+      valueOptions: [
+          { value: "Technology", label: "Technology" },
+          { value: "Healthcare", label: "Healthcare" },
+          { value: "Finance", label: "Finance" },
+          { value: "Education", label: "Education" },
+          { value: "Engineering", label: "Engineering" },
+          { value: "Marketing", label: "Marketing" },
+          { value: "Hospitality", label: "Hospitality" },
+          { value: "Retail", label: "Retail" },
+          { value: "Manufacturing", label: "Manufacturing" },
+          { value: "Construction", label: "Construction" },
+      ],
+  },
     {
         field: "actions",
         type: "actions",

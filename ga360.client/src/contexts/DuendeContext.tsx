@@ -82,8 +82,6 @@ export  const DuendeProvider = ({ children }) => {
                             user
                         }
                     });
-                    console.log("MY USER",user);
-
                 } else {
                     dispatch({
                         type: LOGOUT

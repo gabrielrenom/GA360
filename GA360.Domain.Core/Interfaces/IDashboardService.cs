@@ -9,5 +9,5 @@ public interface IDashboardService
     Task<DashboardModel> GetActiveLearners();
     Task<DashboardModel> GetCompletedLearners();
     Task<List<DashboardModel>> GetAllStats();
-    Task<List<IndustriesModel>> GetIndustryPercentageAsync();
+    Task<List<IndustriesModel>> GetIndustryPercentageAsync(string email);
 }
