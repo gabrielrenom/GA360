@@ -185,6 +185,7 @@ const CSVCandidatesUploader = () => {
                     pageSize: 5,
                   },
                 },
+                //@ts-ignore
                 selection: {
                   selectedRows: customers.map((_, index) => index), // Select all rows
                 },

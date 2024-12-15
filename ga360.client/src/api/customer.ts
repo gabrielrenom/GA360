@@ -93,7 +93,7 @@ export const endpoints = {
   batchupload:'/api/customer/batchupload'
 };
 
-export async function batchUploadCustomers(customers: CustomerUpload[]): Promise<CustomerBatchUpload> {
+export async function batchUploadCustomers(customers: CustomerUpload[]): Promise<CustomerBatchUploadResponse> {
 
   const response = await fetch(endpoints.batchupload, {
     method: 'POST',
