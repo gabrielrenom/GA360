@@ -9,7 +9,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import ListItemText from "@mui/material/ListItemText";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 // project import
 import MainCard from "components/MainCard";
 import AnalyticEcommerce from "components/cards/statistics/AnalyticEcommerce";
@@ -56,8 +56,7 @@ import { color } from "framer-motion";
 import { getDashboardStatuses } from "api/dashboardService";
 import LabelledIndustries from "sections/dashboard/analytics/LabelledIndustries";
 // import ButtonBase from "themes/overrides/ButtonBase";
-import { ButtonBase } from '@mui/material';
-
+import { ButtonBase } from "@mui/material";
 
 const Candidates = lazy(() => import("pages/backoffice/candidates"));
 
@@ -88,10 +87,18 @@ export default function DashboardDefault() {
   const [open, setOpen] = useState<boolean>(false);
 
   const [stats, setStats] = useState<DashboardStats>(null);
-  const [triggerAddCandidate, setTriggerAddCandidate] = useState<boolean>(false);
-  const navigate = useNavigate(); 
-  
-  const handleNavigate = () => { navigate('/backoffice/candidatebatchuploader');}
+  const [triggerAddCandidate, setTriggerAddCandidate] =
+    useState<boolean>(false);
+  const navigate = useNavigate();
+
+  const handleNavigateBatchUpload = () => {
+    navigate("/backoffice/candidatebatchuploader");
+  };
+
+  const handleNavigateQualifications = () => {
+    navigate("/backoffice/qualifications");
+  };
+
   const handleClose = () => {
     setOpen(!open);
   };
@@ -270,14 +277,13 @@ export default function DashboardDefault() {
     []
   );
 
-  const handleAddCandidate = () => { 
-    setTriggerAddCandidate(true); 
+  const handleAddCandidate = () => {
+    setTriggerAddCandidate(true);
   };
 
   const resetTriggerAddCandidate = () => {
     setTriggerAddCandidate(false);
   };
-  
 
   useEffect(() => {
     const fetchCustomerData = async () => {
@@ -344,7 +350,7 @@ export default function DashboardDefault() {
           </Grid> */}
 
           {/* 2x2 grid of cards on the right */}
-          <Grid item xs={12} >
+          <Grid item xs={12}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={3}>
                 <MainCard
@@ -355,10 +361,10 @@ export default function DashboardDefault() {
                 >
                   <Stack spacing={2}>
                     <ButtonBase onClick={handleAddCandidate}>
-                    <Typography  variant="body1" noWrap>
-                      {" "}
-                      Add New Learner{" "}
-                    </Typography>
+                      <Typography variant="body1" noWrap>
+                        {" "}
+                        Add New Learner{" "}
+                      </Typography>
                     </ButtonBase>
                   </Stack>
                 </MainCard>
@@ -372,13 +378,12 @@ export default function DashboardDefault() {
                   }}
                 >
                   <Stack spacing={2}>
-                  <ButtonBase onClick={handleNavigate}>
-                    <Typography variant="body1" noWrap>
-                      {" "}
-                      Batch Upload (csv){" "}
-                    </Typography>
+                    <ButtonBase onClick={handleNavigateBatchUpload}>
+                      <Typography variant="body1" noWrap>
+                        {" "}
+                        Batch Upload (csv){" "}
+                      </Typography>
                     </ButtonBase>
-
                   </Stack>
                 </MainCard>
               </Grid>
@@ -391,10 +396,12 @@ export default function DashboardDefault() {
                   }}
                 >
                   <Stack spacing={2}>
-                    <Typography variant="body1" noWrap>
-                      {" "}
-                      Qualifications{" "}
-                    </Typography>
+                    <ButtonBase onClick={handleNavigateQualifications}>
+                      <Typography variant="body1" noWrap>
+                        {" "}
+                        Qualifications{" "}
+                      </Typography>
+                    </ButtonBase>
                   </Stack>
                 </MainCard>
               </Grid>
@@ -403,13 +410,16 @@ export default function DashboardDefault() {
                   sx={{
                     backgroundColor: "#2E5A88",
                     color: "white",
+                    opacity: 0.5, // Reduce the opacity to give a disabled look
+                    pointerEvents: "none", // Disable any pointer events
                   }}
                 >
                   <Stack spacing={2}>
-                    <Typography variant="body1" noWrap>
-                      {" "}
-                      Reports{" "}
-                    </Typography>
+                    <ButtonBase>
+                      <Typography variant="body1" noWrap>
+                        Reports
+                      </Typography>
+                    </ButtonBase>
                   </Stack>
                 </MainCard>
               </Grid>
@@ -599,7 +609,10 @@ export default function DashboardDefault() {
           <Grid item />
         </Grid>
         <Suspense fallback={<CircularProgress />}>
-          <Candidates triggerAddCandidate={triggerAddCandidate} onModalClose={resetTriggerAddCandidate}/>
+          <Candidates
+            triggerAddCandidate={triggerAddCandidate}
+            onModalClose={resetTriggerAddCandidate}
+          />
         </Suspense>
         {/* <MainCard sx={{ mt: 2 }} content={false}>
           {allowedCustomers === undefined ? (
