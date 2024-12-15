@@ -11,15 +11,17 @@ const Input = styled('input')({
 });
 
 const MAX_FILE_SIZE_MB = 25;
-const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/csv'];
+
 
 interface MultipleFileUploaderProps {
   onFilesUpload: (files: File[]) => void;
   detailedFiles?: DocumentFileModel[];
   initialFiles?: File[]; // Add initialFiles prop
+  acceptedFiles: string;
 }
 
-const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUpload,detailedFiles = [], initialFiles = [] }) => {
+const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUpload,detailedFiles = [], initialFiles = [], acceptedFiles = "image/*" }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>(initialFiles);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -88,7 +90,7 @@ const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUplo
         <Input
           id="file-input"
           type="file"
-          accept="image/*"
+          accept={acceptedFiles}
           multiple
           onChange={handleFileChange}
         />

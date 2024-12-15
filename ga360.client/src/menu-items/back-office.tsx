@@ -10,13 +10,13 @@ import { SafetyCertificateOutlined } from '@ant-design/icons';
 import { UserOutlined } from '@ant-design/icons';
 import { ProfileOutlined } from '@ant-design/icons';
 import { SolutionOutlined } from '@ant-design/icons';
-
+import { UploadOutlined } from '@ant-design/icons'; // Import the UploadOutlined icon
 
 // type
 import { NavItemType } from 'types/menu';
 
 // icons
-const icons = { PieChartOutlined, EnvironmentOutlined, BookOutlined, TeamOutlined, SafetyCertificateOutlined, UserOutlined, ProfileOutlined, SolutionOutlined };
+const icons = { PieChartOutlined, EnvironmentOutlined, BookOutlined, TeamOutlined, SafetyCertificateOutlined, UserOutlined, ProfileOutlined, SolutionOutlined, UploadOutlined };
 
 // ==============================|| MENU ITEMS - FORMS & TABLES ||============================== //
 
@@ -45,6 +45,13 @@ const backOffice: NavItemType = {
           type: 'item',
           icon: icons.SolutionOutlined,
           url: '/backoffice/careers'
+        },
+        {
+          id: 'group-back-office-candidates-batch-upload',
+          title: <FormattedMessage id="Candidate Batch Upload" />,
+          type: 'item',
+          icon: icons.UploadOutlined,
+          url: '/backoffice/candidatebatchuploader'
         },
       ]
     },

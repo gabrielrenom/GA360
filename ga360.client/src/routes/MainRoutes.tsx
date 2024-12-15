@@ -24,6 +24,7 @@ import CandidateProfile from 'pages/apps/profiles/candidate';
 // Develoment API
 import GettingStarted from '../pages/development/gettingstarted';
 import ApiReference from '../pages/development/apireference';
+import CSVCandidatesUploader from 'sections/apps/customer/CSVCandidatesUploader';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -185,6 +186,10 @@ const MainRoutes = {
             {
               path: 'careers',
               element: <Careers/>
+            },
+            {
+              path: 'candidatebatchuploader',
+              element: <CSVCandidatesUploader/>
             },
           ]
         },

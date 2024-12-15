@@ -20,7 +20,7 @@ import AlertCustomerDelete from "sections/apps/customer/AlertCustomerDelete";
 
 
 
-export default function Candidates() {
+export default function Candidates({ triggerAddCandidate = false, onModalClose = () => {} }) {
     const [open, setOpen] = useState<boolean>(false);
     const [allowedCustomers, setAllowedCustomers] = useState<CustomerListExtended[] | undefined>(undefined);
     const [customerModal, setCustomerModal] = useState<boolean>(false);
@@ -161,6 +161,15 @@ export default function Candidates() {
     );
 
     useEffect(() => {
+        if (triggerAddCandidate) {
+            setCustomerModal(true)
+        }
+      }, [triggerAddCandidate]);
+
+    useEffect(() => {
+        if (open==false)
+            onModalClose();
+
         const fetchCustomerData = async () => {
             try {
                 const customers = await fetchCustomerList();

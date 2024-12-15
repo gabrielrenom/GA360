@@ -87,6 +87,10 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/customer/batchupload': {
+                target,
+                secure: false
+            },
             '^/api/trainingcentre/list': {
                 target,
                 secure: false

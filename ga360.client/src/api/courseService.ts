@@ -32,6 +32,43 @@ export async function getCourses(): Promise<Course[]> {
   return data;
 }
 
+// export async function getCsrfToken(): Promise<string> {
+//   const response = await fetch('/api/csrf/get-csrf-token', {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//   });
+
+//   if (!response.ok) {
+//     throw new Error('Failed to fetch CSRF token');
+//   }
+
+//   const data = await response.json();
+//   return data.csrfToken;
+// }
+
+// export async function getCourses(): Promise<Course[]> {
+//   const csrfToken = await getCsrfToken();
+
+//   const response = await fetch(endpoints.key, {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'X-CSRF-TOKEN': csrfToken,
+//     },
+//   });
+
+//   if (!response.ok) {
+//     throw new Error('Network response was not ok');
+//   }
+
+//   const data: Course[] = await response.json();
+//   return data;
+// }
+
+
+
 export async function getCourse(id: number): Promise<Course> {
   const response = await fetch(`${endpoints.key}/${id}`, {
     method: 'GET',

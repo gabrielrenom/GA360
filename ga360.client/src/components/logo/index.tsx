@@ -31,9 +31,10 @@ export default function LogoSection({ reverse, isIcon, sx, to }: Props) {
       {isIcon ? <GA360LogoIcon /> : <Logo reverse={reverse} />}
       {/* {isIcon ? <LogoIcon /> : <Logo reverse={reverse} />} */}
     </ButtonBase>
+    {isIcon ?<></>:
     <Typography variant="caption" display="block" align="left" sx={{ mt: 1.5, fontSize: '0.45rem' }}>
-        v0.2 Alpha-12/12/2024
-    </Typography>
+        v0.3 Alpha-15/12/2024
+    </Typography>}
     </div>
   );
 }

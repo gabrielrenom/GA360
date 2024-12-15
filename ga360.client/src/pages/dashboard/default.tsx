@@ -8,8 +8,8 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import ListItemText from "@mui/material/ListItemText";
-import CircularProgress from '@mui/material/CircularProgress';
-
+import CircularProgress from "@mui/material/CircularProgress";
+import { useNavigate } from 'react-router-dom';
 // project import
 import MainCard from "components/MainCard";
 import AnalyticEcommerce from "components/cards/statistics/AnalyticEcommerce";
@@ -54,9 +54,12 @@ import { IndeterminateCheckbox } from "../../components/third-party/react-table"
 import { ColumnDef } from "@tanstack/react-table";
 import { color } from "framer-motion";
 import { getDashboardStatuses } from "api/dashboardService";
-import LabelledIndustries from 'sections/dashboard/analytics/LabelledIndustries';
+import LabelledIndustries from "sections/dashboard/analytics/LabelledIndustries";
+// import ButtonBase from "themes/overrides/ButtonBase";
+import { ButtonBase } from '@mui/material';
 
-const Candidates = lazy(() => import('pages/backoffice/candidates'));
+
+const Candidates = lazy(() => import("pages/backoffice/candidates"));
 
 // avatar style
 const avatarSX = {
@@ -85,7 +88,10 @@ export default function DashboardDefault() {
   const [open, setOpen] = useState<boolean>(false);
 
   const [stats, setStats] = useState<DashboardStats>(null);
-
+  const [triggerAddCandidate, setTriggerAddCandidate] = useState<boolean>(false);
+  const navigate = useNavigate(); 
+  
+  const handleNavigate = () => { navigate('/backoffice/candidatebatchuploader');}
   const handleClose = () => {
     setOpen(!open);
   };
@@ -264,6 +270,15 @@ export default function DashboardDefault() {
     []
   );
 
+  const handleAddCandidate = () => { 
+    setTriggerAddCandidate(true); 
+  };
+
+  const resetTriggerAddCandidate = () => {
+    setTriggerAddCandidate(false);
+  };
+  
+
   useEffect(() => {
     const fetchCustomerData = async () => {
       try {
@@ -296,82 +311,83 @@ export default function DashboardDefault() {
     if (percentage > 10) return "success";
     if (percentage > 0 && percentage <= 10) return "warning";
     return "error";
-};
+  };
 
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       {/* row 0 */}
-      <Box sx={{ flexGrow: 1, paddingLeft: 3, paddingTop:2 }}>
+      <Box sx={{ flexGrow: 1, paddingLeft: 3, paddingTop: 2 }}>
         <Grid container spacing={2}>
           {/* Main Card on the left */}
-          <Grid item xs={12} sm={6} md={5} lg={4}>
-              <Grid container>
-                {/* Main Card with Navy Blue Background */}
-                <Grid item>
-                  <MainCard
-                    sx={{
-                      height: "100%",
-                      backgroundColor: "navy",
-                      color: "white",
-                    }}
-                  >
-                    <Stack spacing={2}>
-                      <Typography variant="h1">Latest news from CQG</Typography>
-                      <Typography variant="body1" noWrap>
-                        New qualification Alert: Level 4 Shop Fitting
-                      </Typography>
-                      <Button variant="outlined" color="info">
-                        Apply Now
-                      </Button>
-                    </Stack>
-                  </MainCard>
-                </Grid>
+          {/* <Grid item xs={12} sm={6} md={5} lg={4}>
+            <Grid container>
+              <Grid item>
+                <MainCard
+                  sx={{
+                    height: "100%",
+                    backgroundColor: "navy",
+                    color: "white",
+                  }}
+                >
+                  <Stack spacing={2}>
+                    <Typography variant="h1">Latest news from CQG</Typography>
+                    <Typography variant="body1" noWrap>
+                      New qualification Alert: Level 4 Shop Fitting
+                    </Typography>
+                    <Button variant="outlined" color="info">
+                      Apply Now
+                    </Button>
+                  </Stack>
+                </MainCard>
               </Grid>
-          </Grid>
+            </Grid>
+          </Grid> */}
 
           {/* 2x2 grid of cards on the right */}
-          <Grid item xs={12} sm={6} md={7} lg={8}>
+          <Grid item xs={12} >
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={3}>
                 <MainCard
                   sx={{
                     backgroundColor: "#2E5A88",
                     color: "white",
-                    minHeight: "80px",
                   }}
                 >
                   <Stack spacing={2}>
-                    <Typography variant="body1" noWrap>
+                    <ButtonBase onClick={handleAddCandidate}>
+                    <Typography  variant="body1" noWrap>
                       {" "}
                       Add New Learner{" "}
                     </Typography>
+                    </ButtonBase>
                   </Stack>
                 </MainCard>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={3}>
                 <MainCard
                   sx={{
                     backgroundColor: "#2E5A88",
                     color: "white",
-                    minHeight: "80px",
                   }}
                 >
                   <Stack spacing={2}>
+                  <ButtonBase onClick={handleNavigate}>
                     <Typography variant="body1" noWrap>
                       {" "}
                       Batch Upload (csv){" "}
                     </Typography>
+                    </ButtonBase>
+
                   </Stack>
                 </MainCard>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={3}>
                 <MainCard
                   sx={{
                     backgroundColor: "#2E5A88",
                     color: "white",
-                    minHeight: "80px",
                   }}
                 >
                   <Stack spacing={2}>
@@ -382,12 +398,11 @@ export default function DashboardDefault() {
                   </Stack>
                 </MainCard>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={3}>
                 <MainCard
                   sx={{
                     backgroundColor: "#2E5A88",
                     color: "white",
-                    minHeight: "80px",
                   }}
                 >
                   <Stack spacing={2}>
@@ -402,62 +417,155 @@ export default function DashboardDefault() {
           </Grid>
         </Grid>
       </Box>
-      <Grid item md={8} sx={{ display: { sm: 'none', md: 'block' } }} />
+      <Grid item md={8} sx={{ display: { sm: "none", md: "block" } }} />
 
       {/* row 1 */}
 
       <Grid container spacing={3} sx={{ flexGrow: 1, paddingLeft: 3 }}>
-        {stats && stats.find(stat => stat.statisticTypeDescription === "CANDIDATE_REGISTRATIONS") && (
+        {stats &&
+          stats.find(
+            (stat) =>
+              stat.statisticTypeDescription === "CANDIDATE_REGISTRATIONS"
+          ) && (
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce
-                    title="Candidate Registrations"
-                    count={stats.find(stat => stat.statisticTypeDescription === "CANDIDATE_REGISTRATIONS")?.total}
-                    percentage={stats.find(stat => stat.statisticTypeDescription === "CANDIDATE_REGISTRATIONS")?.percentage}
-                    extra={stats.find(stat => stat.statisticTypeDescription === "CANDIDATE_REGISTRATIONS")?.totalYear}
-                    color={getColor(stats.find(stat => stat.statisticTypeDescription === "CANDIDATE_REGISTRATIONS")?.percentage)}
-                />
+              <AnalyticEcommerce
+                title="Candidate Registrations"
+                count={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription ===
+                      "CANDIDATE_REGISTRATIONS"
+                  )?.total
+                }
+                percentage={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription ===
+                      "CANDIDATE_REGISTRATIONS"
+                  )?.percentage
+                }
+                extra={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription ===
+                      "CANDIDATE_REGISTRATIONS"
+                  )?.totalYear
+                }
+                color={getColor(
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription ===
+                      "CANDIDATE_REGISTRATIONS"
+                  )?.percentage
+                )}
+              />
             </Grid>
-        )}
-        {stats && stats.find(stat => stat.statisticTypeDescription === "NEW_LEARNERS") && (
+          )}
+        {stats &&
+          stats.find(
+            (stat) => stat.statisticTypeDescription === "NEW_LEARNERS"
+          ) && (
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce
-                    title="New Learners"
-                    count={stats.find(stat => stat.statisticTypeDescription === "NEW_LEARNERS")?.total}
-                    percentage={stats.find(stat => stat.statisticTypeDescription === "NEW_LEARNERS")?.percentage}
-                    extra={stats.find(stat => stat.statisticTypeDescription === "NEW_LEARNERS")?.totalYear}
-                    color={getColor(stats.find(stat => stat.statisticTypeDescription === "NEW_LEARNERS")?.percentage)}
-                />
+              <AnalyticEcommerce
+                title="New Learners"
+                count={
+                  stats.find(
+                    (stat) => stat.statisticTypeDescription === "NEW_LEARNERS"
+                  )?.total
+                }
+                percentage={
+                  stats.find(
+                    (stat) => stat.statisticTypeDescription === "NEW_LEARNERS"
+                  )?.percentage
+                }
+                extra={
+                  stats.find(
+                    (stat) => stat.statisticTypeDescription === "NEW_LEARNERS"
+                  )?.totalYear
+                }
+                color={getColor(
+                  stats.find(
+                    (stat) => stat.statisticTypeDescription === "NEW_LEARNERS"
+                  )?.percentage
+                )}
+              />
             </Grid>
-        )}
-        {stats && stats.find(stat => stat.statisticTypeDescription === "ACTIVE_LEARNERS") && (
+          )}
+        {stats &&
+          stats.find(
+            (stat) => stat.statisticTypeDescription === "ACTIVE_LEARNERS"
+          ) && (
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce
-                    title="Active Learners"
-                    count={stats.find(stat => stat.statisticTypeDescription === "ACTIVE_LEARNERS")?.total}
-                    percentage={stats.find(stat => stat.statisticTypeDescription === "ACTIVE_LEARNERS")?.percentage}
-                    extra={stats.find(stat => stat.statisticTypeDescription === "ACTIVE_LEARNERS")?.totalYear}
-                    color={getColor(stats.find(stat => stat.statisticTypeDescription === "ACTIVE_LEARNERS")?.percentage)}
-                />
+              <AnalyticEcommerce
+                title="Active Learners"
+                count={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription === "ACTIVE_LEARNERS"
+                  )?.total
+                }
+                percentage={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription === "ACTIVE_LEARNERS"
+                  )?.percentage
+                }
+                extra={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription === "ACTIVE_LEARNERS"
+                  )?.totalYear
+                }
+                color={getColor(
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription === "ACTIVE_LEARNERS"
+                  )?.percentage
+                )}
+              />
             </Grid>
-        )}
-        {stats && stats.find(stat => stat.statisticTypeDescription === "COMPLETED_LEARNERS") && (
+          )}
+        {stats &&
+          stats.find(
+            (stat) => stat.statisticTypeDescription === "COMPLETED_LEARNERS"
+          ) && (
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce
-                    title="Completed Learners"
-                    count={stats.find(stat => stat.statisticTypeDescription === "COMPLETED_LEARNERS")?.total}
-                    percentage={stats.find(stat => stat.statisticTypeDescription === "COMPLETED_LEARNERS")?.percentage}
-                    extra={stats.find(stat => stat.statisticTypeDescription === "COMPLETED_LEARNERS")?.totalYear}
-                    color={getColor(stats.find(stat => stat.statisticTypeDescription === "COMPLETED_LEARNERS")?.percentage)}
-                />
+              <AnalyticEcommerce
+                title="Completed Learners"
+                count={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription === "COMPLETED_LEARNERS"
+                  )?.total
+                }
+                percentage={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription === "COMPLETED_LEARNERS"
+                  )?.percentage
+                }
+                extra={
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription === "COMPLETED_LEARNERS"
+                  )?.totalYear
+                }
+                color={getColor(
+                  stats.find(
+                    (stat) =>
+                      stat.statisticTypeDescription === "COMPLETED_LEARNERS"
+                  )?.percentage
+                )}
+              />
             </Grid>
-        )}
-    </Grid>
+          )}
+      </Grid>
       <Grid
         item
         md={8}
         sx={{ display: { sm: "none", md: "block", lg: "none" } }}
       />
-    <LabelledIndustries/>
+      <LabelledIndustries />
       {/* row 2 */}
       {/* <Grid item xs={12} md={7} lg={8}>
         <UniqueVisitorCard />
@@ -490,8 +598,8 @@ export default function DashboardDefault() {
           </Grid>
           <Grid item />
         </Grid>
-        <Suspense fallback={<CircularProgress />}>          
-            <Candidates/>
+        <Suspense fallback={<CircularProgress />}>
+          <Candidates triggerAddCandidate={triggerAddCandidate} onModalClose={resetTriggerAddCandidate}/>
         </Suspense>
         {/* <MainCard sx={{ mt: 2 }} content={false}>
           {allowedCustomers === undefined ? (

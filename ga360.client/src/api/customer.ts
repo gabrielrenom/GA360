@@ -1,6 +1,75 @@
 import useSWR, { mutate } from 'swr';
 import { useMemo } from 'react';
 
+export interface CustomerBatchUploadResponse { customers: CustomerUploadResponse[]; }
+export interface CustomerUpload {
+  id: number;
+  FirstName: string;
+  LastName: string;
+  Name: string;
+  Gender: string;
+  Age: number;
+  Contact: string;
+  Email: string;
+  Country: string;
+  Location: string;
+  FatherName: string;
+  Role: string;
+  About: string;
+  Status: number;
+  Time: string;
+  Date: string;
+  CountryName: string;
+  Portfolio: string;
+  DOB: string;
+  Street: string;
+  City: string;
+  Number: string;
+  Postcode: string;
+  DateOfBirth: string;
+  Ethnicity: string;
+  Disability: string;
+  EmployeeStatus: string;
+  Employer: string;
+  TrainingCentre: string;
+  NationalInsurance: string;
+}
+
+export interface CustomerUploadResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+  name: string;
+  gender: string;
+  age: number;
+  contact: string;
+  email: string;
+  country: string;
+  location: string;
+  fatherName: string;
+  role: string;
+  about: string;
+  status: number;
+  time: string;
+  date: string;
+  countryName: string;
+  portfolio: string;
+  dob: string;
+  street: string;
+  city: string;
+  number: number;
+  postcode: string;
+  dateOfBirth: string;
+  ethnicity: string;
+  disability: string;
+  employeeStatus: string;
+  employer: string;
+  trainingCentre: string;
+  nationalInsurance: string;
+}
+
+
+
 // utils
 import { fetcher } from 'utils/axios';
 
@@ -20,8 +89,30 @@ export const endpoints = {
   update: '/update', // server URL
   delete: '/delete', // server URL
   get: '/get',
-  user:'/user'
+  user:'/user',
+  batchupload:'/api/customer/batchupload'
 };
+
+export async function batchUploadCustomers(customers: CustomerUpload[]): Promise<CustomerBatchUpload> {
+
+  const response = await fetch(endpoints.batchupload, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      "X-CSRF": "Dog",
+    },
+    body: JSON.stringify({ customers }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  var data = response.json();
+
+  return data;
+}
+
 
 export async function getUser(): Promise<User> {
   const response = await fetch("/api/customer/user", {
