@@ -7,6 +7,7 @@ using GA360.DAL.Infrastructure.Interfaces;
 using GA360.DAL.Infrastructure.Repositories;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Services;
+using GA360.Server.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -108,6 +109,8 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
+
+//app.UseMiddleware<CsrfMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

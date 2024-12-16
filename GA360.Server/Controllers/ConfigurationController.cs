@@ -21,4 +21,12 @@ public class ConfigurationController : ControllerBase
         var redirectUrl = _configuration["ReactApp:RedirectUrl"];
         return Ok(new { RedirectUrl = redirectUrl });
     }
+
+    [HttpGet("get-csrf-token")]
+    public IActionResult GetCsrfToken()
+    {
+        var token = Guid.NewGuid().ToString();
+        HttpContext.Session.SetString("CSRF-TOKEN", token);
+        return Ok(new { csrfToken = token });
+    }
 }

@@ -1,5 +1,7 @@
 ﻿using GA360.DAL.Entities.BaseEntities;
 using GA360.DAL.Entities.Entities;
+using GA360.DAL.Infrastructure.Contexts;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,5 +26,6 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Task<Customer> GetCustomerWithCourseQualificationRecordById(int id);
         Task<Customer> GetBasicCustomerByEmail(string email);
         Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        CRMDbContext GetDbContext();
     }
 }

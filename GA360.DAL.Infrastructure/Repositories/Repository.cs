@@ -19,7 +19,7 @@ namespace GA360.DAL.Infrastructure.Repositories
             this._dbContext = dbContext;
         }
 
-        protected CRMDbContext GetDbContext() { return _dbContext; }
+        public CRMDbContext GetDbContext() { return _dbContext; }
         public T Get(int key) => _dbContext.Set<T>().Where(p => p.Id == key).Single();
 
         public async Task<T> GetAsync(int key) => await _dbContext.Set<T>().Where(p => p.Id == key).SingleAsync();

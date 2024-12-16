@@ -27,5 +27,6 @@ namespace GA360.Domain.Core.Interfaces
         Task<CustomersWithCourseQualificationRecordsModel> UpdateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer);
         Task<CustomersWithCourseQualificationRecordsModel> CreateCustomersWithCourseQualificationRecords(CustomersWithCourseQualificationRecordsModel customer);
         Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        Task<CustomerBatchModel> UploadBatchCandidates(CustomerBatchModel batch, string trainincCentreUser);
     }
 }

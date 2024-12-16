@@ -255,6 +255,24 @@ namespace GA360.Server.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
+        [HttpPost("batchupload")]
+        public async Task<IActionResult> BatchUpload([FromBody] CustomerBatchViewModel contacts)
+        {
+            try
+            {
+                var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+                var result = await _customerService.UploadBatchCandidates(contacts.ToModel(), emailClaim);
+
+                return Ok(result?.ToViewModel());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error doing the batch upload");
+            }
+        }
+
         private UserViewModel FromUserModelToViewModel(CustomerModel source)
         {
             var destination = new UserViewModel();
