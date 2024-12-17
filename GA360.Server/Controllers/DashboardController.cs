@@ -30,7 +30,7 @@ namespace GA360.Server.Controllers
             return Ok(await _dashboardService.GetAllStats()); 
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpGet("industriesstats")]
         public async Task<IActionResult> GetIndustriesStats()
         {

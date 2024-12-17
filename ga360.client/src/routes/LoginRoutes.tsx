@@ -4,6 +4,7 @@ import { lazy, useEffect, useState } from 'react';
 import AuthLayout from 'layout/Auth';
 import Loadable from 'components/Loadable';
 import { Navigate } from 'react-router';
+import { getRedirectUrl } from 'api/configurationService';
 
 // render - login
 const AuthLogin = Loadable(lazy(() => import('pages/auth/login')));
@@ -14,12 +15,26 @@ const AuthResetPassword = Loadable(lazy(() => import('pages/auth/reset-password'
 const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/code-verification')));
 
 // ==============================|| AUTH ROUTING ||============================== //
-const ExternalRedirect = () => {
-  useEffect(() => {
-    //window.location.href = 'https://localhost:5173/bff/login';
-    window.location.href = 'https://app-ga360core-prod-uksouth.azurewebsites.net/bff/login';
+// const ExternalRedirect = () => {
+//   useEffect(() => {
+//     window.location.href = 'https://localhost:5173/bff/login';
+//     //window.location.href = 'https://app-ga360core-prod-uksouth.azurewebsites.net/bff/login';
 
-  }, []);
+//   }, []);
+
+//   return null;
+// };
+
+const ExternalRedirect = () => {
+     const fetchRedirectUrl = async () => {
+        console.log("GETIING re")
+        const response = await getRedirectUrl();
+
+        console.log("DATA", response)
+        window.location.href = response;
+          //setRedirectUrl(data.RedirectUrl);
+    };
+    fetchRedirectUrl();
 
   return null;
 };

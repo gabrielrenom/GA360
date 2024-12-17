@@ -63,7 +63,9 @@ export  const DuendeProvider = ({ children }) => {
                     const name = userResult.find((x: { type: string; }) => x.type === 'name').value;
                     const id = userResult.find((x: { type: string; }) => x.type === 'sid').value;
                     const email = userResult.find((x: { type: string; }) => x.type === 'email').value;
-                    
+                    const logouturl: (string | number | undefined) = userResult.find((x: { type: string; }) => x.type === 'bff:logout_url')?.value as string;
+
+                    console.log("LOGOUT",logout)
                     const userDetails: User = await getUser(); 
                     
                     const user = {

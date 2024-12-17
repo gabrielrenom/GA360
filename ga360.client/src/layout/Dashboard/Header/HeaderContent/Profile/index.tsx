@@ -1,5 +1,7 @@
-import { useRef, useState, ReactNode, SyntheticEvent, useEffect } from 'react';
+import { useRef, useState, ReactNode, SyntheticEvent, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router';
+import Cookies from "js-cookie";
+
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -34,6 +36,7 @@ import UserOutlined from '@ant-design/icons/UserOutlined';
 import avatar1 from 'assets/images/users/avatar-1.png';
 import { CustomerListExtended } from 'types/customer';
 import { getBasicCandidate } from 'api/customer';
+import DuendeContext from 'contexts/DuendeContext';
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -64,19 +67,19 @@ export default function Profile() {
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const { logout, user } = useAuth();
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate(`/login`, {
-        state: {
-          from: ''
-        }
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // const { logout, user } = useAuth();
+  // const handleLogout = async () => {
+  //   try {
+  //     await logout();
+  //     navigate(`/login`, {
+  //       state: {
+  //         from: ''
+  //       }
+  //     });
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   const anchorRef = useRef<any>(null);
   const [open, setOpen] = useState(false);
@@ -107,6 +110,9 @@ export default function Profile() {
         : avatar1
   );
 
+  const { user, isLoggedIn } = useContext(DuendeContext);
+
+
   useEffect(() => {
     const fetchUser = async () => {
         try {
@@ -121,6 +127,31 @@ export default function Profile() {
     fetchUser();
 }, []);
 
+const handleLogout = async () => {
+      await fetch("/api/configuration/sessionout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF": "Dog",
+      },
+    });
+  const allCookies = Cookies.get();
+  console.log(allCookies,"before for")
+  for (let cookie in allCookies) 
+    { 
+      console.log(cookie,"before cookies")
+
+      Cookies.remove(cookie); 
+
+    }
+
+  Cookies.remove('__Host-bff', { path: '/', domain: 'localhost' });
+  Cookies.remove('__Host-bffC1', { path: '/', domain: 'localhost' })
+  Cookies.remove('__Host-bffC2', { path: '/', domain: 'localhost' })
+ console.log("Removing cookies")
+ 
+  window.location.href = "https://app-ga360authn-prod-uksouth.azurewebsites.net/Account/Logout";
+};
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
       <ButtonBase
@@ -175,7 +206,7 @@ export default function Profile() {
                           <Stack>
                             <Typography variant="h6">{user?.name}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                              UI/UX Designer
+                               {user.role}
                             </Typography>
                           </Stack>
                         </Stack>
@@ -190,7 +221,7 @@ export default function Profile() {
                     </Grid>
                   </CardContent>
 
-                  <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                  {/* <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs variant="fullWidth" value={value} onChange={handleChange} aria-label="profile tabs">
                       <Tab
                         sx={{
@@ -223,7 +254,7 @@ export default function Profile() {
                   </TabPanel>
                   <TabPanel value={value} index={1} dir={theme.direction}>
                     <SettingTab />
-                  </TabPanel>
+                  </TabPanel> */}
                 </MainCard>
               </ClickAwayListener>
             </Paper>

@@ -32,7 +32,8 @@ namespace GA360.Server.Controllers
             _memoryCache = memoryCache;
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
+        [Authorize]
         [HttpGet("list")]
         public async Task<IActionResult> GetAllContacts()
         {
@@ -42,7 +43,7 @@ namespace GA360.Server.Controllers
             return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromUserModelToViewModel(x)).ToList());
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpGet("list/basic")]
         public async Task<IActionResult> GetAllBasicContacts()
         {
@@ -143,7 +144,7 @@ namespace GA360.Server.Controllers
             return Ok();
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpGet("get")]
         public async Task<IActionResult> GetCustomer()
         {
@@ -154,7 +155,7 @@ namespace GA360.Server.Controllers
             return Ok(result);
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpGet("user")]
         public async Task<IActionResult> GetUser()
         {

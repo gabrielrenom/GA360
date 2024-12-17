@@ -61,8 +61,8 @@ export default function ClaimsDashboard() {
         : <span>
             <Grid>
             <Grid item xs={6}>
-            <a className="text-dark nav-link" href={logoutUrl}>
-                Log out
+            <a className="text-dark nav-link" href={"https://localhost:5173"+logoutUrl}>
+                Log out {"https://localhost:5173"+logoutUrl}
             </a>
             </Grid>
             <Grid>

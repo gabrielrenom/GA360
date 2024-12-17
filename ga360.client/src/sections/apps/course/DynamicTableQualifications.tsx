@@ -192,7 +192,7 @@ export default function DynamicTableQualifications() {
 const columns: GridColDef[] = [
   {
     field: "id",
-    headerName: "#",
+    headerName: "QAN",
     editable: true,
     type: "number",
     headerAlign: 'center', // Aligns the header text to the center
@@ -200,7 +200,7 @@ const columns: GridColDef[] = [
   },
   {
     field: 'name',
-    headerName: 'NAME',
+    headerName: 'QUALIFICATION NAME',
     flex: 1,
     editable: true,
   },
@@ -217,7 +217,7 @@ const columns: GridColDef[] = [
   },
   {
     field: 'expectedDate',
-    headerName: 'EXPECTED DATE',
+    headerName: 'EXP DATE',
     type: 'date',
     flex: 1,
     editable: true,
@@ -228,7 +228,7 @@ const columns: GridColDef[] = [
   },
   {
     field: 'certificateDate',
-    headerName: 'CERTIFICATE DATE',
+    headerName: 'CERTIFICATE DATE?',
     type: 'date',
     flex: 1,
     editable: true,

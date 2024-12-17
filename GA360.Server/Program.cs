@@ -59,6 +59,8 @@ builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddBff(x =>
 {
     x.AntiForgeryHeaderValue = "Dog";
+    //x.RequireLogoutSessionId = false;
+    //x.BackchannelLogoutAllUserSessions = true;
 })
 .AddRemoteApis();
 

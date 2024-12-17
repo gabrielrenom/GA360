@@ -137,10 +137,17 @@ export default defineConfig({
                 secure: false,
                 changeOrigin: true
             },
-            '^/api/configuration': {
+            '^/api/configuration/redirecturl': {
                 target,
                 secure: false,
-                changeOrigin: true
+            },
+            '^/api/configuration/logouturl': {
+                target,
+                secure: false,
+            },
+            '^/api/configuration/sessionout': {
+                target,
+                secure: false,
             },
             '^/signin-oidc': {
                 target,

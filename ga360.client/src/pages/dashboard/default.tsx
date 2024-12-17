@@ -40,7 +40,7 @@ import {
   Typography,
 } from "@mui/material";
 import Box from "@mui/system/Box";
-import { Suspense, useEffect, useMemo, useState, lazy } from "react";
+import { Suspense, useEffect, useMemo, useState, lazy,useContext } from "react";
 import { styled } from "@mui/material/styles";
 import { CustomerList } from "../../types/customer";
 import CustomerTable from "../../sections/apps/customer/CustomerTable";
@@ -59,7 +59,9 @@ import LabelledIndustries from "sections/dashboard/analytics/LabelledIndustries"
 import { ButtonBase } from "@mui/material";
 
 const Candidates = lazy(() => import("pages/backoffice/candidates"));
+import DuendeContext from 'contexts/DuendeContext';
 
+import ClaimsDashboard from 'pages/claims/claims'
 // avatar style
 const avatarSX = {
   width: 36,
@@ -80,16 +82,23 @@ const actionSX = {
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
 export default function DashboardDefault() {
-  const [allowedCustomers, setAllowedCustomers] = useState<
-    CustomerList[] | undefined
-  >(undefined);
+  const [allowedCustomers, setAllowedCustomers] = useState<CustomerList[] | undefined>(undefined);
 
   const [open, setOpen] = useState<boolean>(false);
 
   const [stats, setStats] = useState<DashboardStats>(null);
-  const [triggerAddCandidate, setTriggerAddCandidate] =
-    useState<boolean>(false);
+
+  const [triggerAddCandidate, setTriggerAddCandidate] = useState<boolean>(false);
+
+  const { user, isLoggedIn } = useContext(DuendeContext);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user.role === 'Candidate') {
+      navigate('/apps/profiles/candidate/profile');
+    }
+  }, [user, navigate]);
 
   const handleNavigateBatchUpload = () => {
     navigate("/backoffice/candidatebatchuploader");
@@ -320,7 +329,9 @@ export default function DashboardDefault() {
   };
 
   return (
+    
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+      <ClaimsDashboard></ClaimsDashboard>
       {/* row 0 */}
       <Box sx={{ flexGrow: 1, paddingLeft: 3, paddingTop: 2 }}>
         <Grid container spacing={2}>
