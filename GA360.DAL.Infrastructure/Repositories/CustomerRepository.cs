@@ -8,6 +8,7 @@ using GA360.DAL.Infrastructure.Contexts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
 using static GA360.DAL.Entities.Enums.StatusEnum;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace GA360.DAL.Infrastructure.Repositories
 {
@@ -88,6 +89,32 @@ namespace GA360.DAL.Infrastructure.Repositories
             return result;
         }
 
+        public async Task<Customer> GetWithAllPossibleEntitiesById(int id)
+        {
+            var result = await GetDbContext()
+                .Set<Customer>()
+                .Include(x => x.Address)
+                .Include(x => x.Country)
+                .Include(x => x.TrainingCentre)
+                .Include(x => x.EthnicOrigin)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .Include(x => x.CustomerSkills)
+                .ThenInclude(x => x.Skill)
+                .Include(x => x.DocumentCustomers)
+                .ThenInclude(x => x.Document)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Course)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Qualification)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Certificate)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.QualificationStatus)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            return result;
+        }
+
         public async Task<List<Customer>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
         {
             var query = GetDbContext()
@@ -111,6 +138,27 @@ namespace GA360.DAL.Infrastructure.Repositories
                 .ThenInclude(x => x.QualificationStatus)
 
                 .AsQueryable();
+
+            // Apply sorting
+            query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+
+            // Apply pagination if pageNumber and pageSize are provided
+            if (pageNumber.HasValue && pageSize.HasValue)
+            {
+                query = query.Skip((pageNumber.Value - 1) * pageSize.Value).Take(pageSize.Value);
+            }
+
+            return await query.ToListAsync();
+        }
+
+
+        public async Task<List<Customer>> GetAllCustomersWithEntitiesFast<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
+        {
+            var query = GetDbContext()
+                           .Set<Customer>()
+                           .Include(x => x.Country)
+                           .Include(x => x.TrainingCentre)
+                           .AsQueryable();
 
             // Apply sorting
             query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);

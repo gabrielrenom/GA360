@@ -16,6 +16,7 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Task<List<ApplicationPermission>> GetApplicationPermissions(string email);
         IEnumerable<Customer> GetCustomersByCountry(int countryId);
         Task<List<Customer>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        Task<List<Customer>> GetAllCustomersWithEntitiesFast<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
         Task<Customer> GetWithAllEntitiesById(int id);
         Task<Customer> GetCustomerByEmail(string email);
         Task<Customer> GetCustomerBasicByEmail(string email);
@@ -26,6 +27,7 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Task<Customer> GetCustomerWithCourseQualificationRecordById(int id);
         Task<Customer> GetBasicCustomerByEmail(string email);
         Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        Task<Customer> GetWithAllPossibleEntitiesById(int id);
         CRMDbContext GetDbContext();
     }
 }

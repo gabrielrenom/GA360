@@ -46,7 +46,7 @@ public class ConfigurationController : ControllerBase
             //await HttpContext.SignOutAsync((AuthenticationProperties..DefaultCookieAuthenticationScheme);
 
             // Optionally clear session data
-            HttpContext.Session.Clear();
+            //HttpContext.Session.Clear();
 
             // Clear cookies manually if necessary
             foreach (var cookie in Request.Cookies.Keys)

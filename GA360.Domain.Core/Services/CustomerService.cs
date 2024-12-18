@@ -2,6 +2,7 @@
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -319,23 +320,24 @@ public class CustomerService : ICustomerService
         return result;
     }
 
-    public async Task<List<CustomerModel>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<DAL.Entities.Entities.Customer, TOrderKey>> orderBy, bool ascending = true)
+    public async Task<List<Customer>> GetAllCustomersWithEntities<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<DAL.Entities.Entities.Customer, TOrderKey>> orderBy, bool ascending = true)
     {
         var customerList = new List<CustomerModel>();
 
-        var customers = await _customerRepository.GetAllCustomersWithEntities(null, null, c => c.FirstName, true);
+        //var customers = await _customerRepository.GetAllCustomersWithEntities(null, null, c => c.FirstName, true);
+        var customers = await _customerRepository.GetAllCustomersWithEntitiesFast(pageNumber, pageSize, c => c.FirstName, true);
 
-        if (customers != null)
-        {
-            foreach (var customer in customers)
-            {
-                Models.CustomerModel destination = new Models.CustomerModel();
-                Map(customer, destination);
-                customerList.Add(destination);
-            }
-        }
+        //if (customers != null)
+        //{
+        //    foreach (var customer in customers)
+        //    {
+        //        Models.CustomerModel destination = new Models.CustomerModel();
+        //        Map(customer, destination);
+        //        customerList.Add(destination);
+        //    }
+        //}
 
-        return customerList;
+        return customers;
     }
 
     public async Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
@@ -353,6 +355,16 @@ public class CustomerService : ICustomerService
         }
 
         return customerList;
+    }
+
+    public async Task<CustomerModel> GetCustomerByIdWithAllEntities(int id)
+    {
+        var destination = new Models.CustomerModel();
+        var customer =  await _customerRepository.GetWithAllPossibleEntitiesById(id);
+
+        Map(customer, destination);
+
+        return destination;
     }
 
     public async Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
@@ -647,4 +659,69 @@ public class CustomerService : ICustomerService
 
         return result;
     }
+
+    public async Task<List<CustomerModelHighPerformance>> GetAllUltraHighPerfomance()
+    {
+        var customers = new List<CustomerModelHighPerformance>();
+
+        using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
+        {
+            var query = @"
+        SELECT 
+            c.Id,
+            c.FirstName,
+            c.LastName,
+            CONCAT(c.FirstName, ' ', c.LastName) AS Name,
+            c.Contact,
+            c.Email,
+            co.Name AS Country,
+            c.Location,
+            c.Status,
+            c.CountryId,
+            c.DOB,
+            c.DOB AS DateOfBirth,
+            c.TrainingCentreId,
+            tc.Name AS TrainingCentreName
+        FROM 
+            Customers c
+        LEFT JOIN 
+            Countries co ON c.CountryId = co.Id
+        LEFT JOIN 
+            TrainingCentres tc ON c.TrainingCentreId = tc.Id
+        ORDER BY c.Id";
+
+            var command = new SqlCommand(query, connection);
+
+            await connection.OpenAsync();
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    var customer = new CustomerModelHighPerformance
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                        LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                        Name = reader.GetString(reader.GetOrdinal("Name")),
+                        Contact = reader.GetString(reader.GetOrdinal("Contact")),
+                        Email = reader.GetString(reader.GetOrdinal("Email")),
+                        Country = reader.GetString(reader.GetOrdinal("Country")),
+                        Location = reader.GetString(reader.GetOrdinal("Location")),
+                        Status = reader.GetInt32(reader.GetOrdinal("Status")),
+                        Avatar = 0, // Assuming Avatar is not mapped from Customer
+                        CountryId = reader.GetInt32(reader.GetOrdinal("CountryId")),
+                        DOB = reader.GetString(reader.GetOrdinal("DOB")),
+                        DateOfBirth = reader.GetString(reader.GetOrdinal("DateOfBirth")),
+                        TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),                       
+                        TrainingCentre = reader.IsDBNull(reader.GetOrdinal("TrainingCentreName")) ? null : reader.GetString(reader.GetOrdinal("TrainingCentreName"))
+                    };
+
+                    customers.Add(customer);
+                }
+            }
+        }
+
+        return customers;
+    }
+
 }

@@ -12,6 +12,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using static GA360.Commons.Helpers.JsonHelper;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Data.SqlClient;
+using GA360.DAL.Infrastructure.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace GA360.Server.Controllers
 {
@@ -23,25 +26,60 @@ namespace GA360.Server.Controllers
         private readonly ICustomerService _customerService;
         private readonly IConfiguration _configuration;
         private readonly IMemoryCache _memoryCache;
+        private readonly ICustomerRepository _customerRepository;
 
-        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService, IConfiguration configuration, IMemoryCache memoryCache)
+
+        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService, IConfiguration configuration, IMemoryCache memoryCache, ICustomerRepository customerRepository)
         {
             _logger = logger;
             _customerService = customerService;
             _configuration = configuration;
             _memoryCache = memoryCache;
+            _customerRepository = customerRepository;
         }
 
         //[AllowAnonymous]
+        //[Authorize]
+        //[HttpGet("list")]
+        //public async Task<IActionResult> GetAllContacts()
+        //{
+
+        //    var result = await _customerService.GetAllCustomersWithEntities(1, 10, c => c.Email, true);
+
+        //    return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromUserModelToViewModel(x)).ToList());
+        //}
+        //[Authorize]
+        //[HttpGet("list")]
+        //public async Task<IActionResult> GetAllContacts(int page = 1, int pageSize = 10)
+        //{
+        //    //var result = await _customerService.GetAllCustomersWithEntities(page, pageSize, c => c.Email, true);
+        //    _logger.LogError($"STARTING GetAllContacts :: {DateTime.Now}");
+        //    var result = await _customerService.GetAllCustomersWithEntities(null, null, c => c.Email, true);
+        //    _logger.LogError($"AFTER DB CALL GetAllContacts :: {DateTime.Now}");
+
+        //    var final = result == null ? new List<UserViewModel>() : result.Select(x => x.ToUserViewModel()).ToList();
+        //    _logger.LogError($"END GetAllContacts :: {DateTime.Now}");
+
+        //    return Ok(final);
+        //}
+
         [Authorize]
         [HttpGet("list")]
-        public async Task<IActionResult> GetAllContacts()
+        public async Task<IActionResult> GetAllContacts(int page = 1, int pageSize = 10)
+        {
+            return Ok(await _customerService.GetAllUltraHighPerfomance());
+        }
+
+        [Authorize]
+        [HttpGet("get/full/{id}")]
+        public async Task<IActionResult> GetCustomerById(int id)
         {
 
-            var result = await _customerService.GetAllCustomersWithEntities(1, 10, c => c.Email, true);
+            var result = await _customerService.GetCustomerByIdWithAllEntities(id);
 
-            return Ok(result == null ? new List<UserViewModel>() : result.Select(x => FromUserModelToViewModel(x)).ToList());
+            return Ok(FromUserModelToViewModel(result));
         }
+
 
         //[AllowAnonymous]
         [HttpGet("list/basic")]

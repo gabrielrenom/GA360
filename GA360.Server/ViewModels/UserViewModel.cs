@@ -60,4 +60,49 @@ namespace GA360.Server.ViewModels
             };
         }
     }
+
+    public static class CustomerExtensions
+    {
+        public static UserViewModel ToUserViewModel(this Customer customer)
+        {
+            return new UserViewModel
+            {
+                Id = customer.Id,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Name = $"{customer.FirstName} {customer.LastName}",
+                Age = 11,
+                Contact = customer.Contact,
+                Email = customer.Email,
+                Country = customer.Country.Name,
+                Location = customer.Location,
+                Status = (int)customer.Status,
+                Time = DateTime.Now.ToString("HH:mm:ss"), // Assuming current time
+                Date = DateTime.Now.ToString("yyyy-MM-dd"), // Assuming current date
+                Avatar = 0, // Assuming Avatar is not mapped from Customer
+                CountryId = customer.CountryId,
+                DOB = customer.DOB,
+                Street = customer.Address?.Street,
+                City = customer.Address?.City,
+                Number = customer.Address?.Number,
+                Postcode = customer.Address?.Postcode,
+                //AvatarImage = customer.AvatarImage,
+                DateOfBirth = customer.DOB,
+                TrainingCentre = customer.TrainingCentreId ?? 0,               
+            };
+        }
+
+        private static int CalculateAge(string dob)
+        {
+            if (DateTime.TryParse(dob, out DateTime birthDate))
+            {
+                var today = DateTime.Today;
+                var age = today.Year - birthDate.Year;
+                if (birthDate.Date > today.AddYears(-age)) age--;
+                return age;
+            }
+            return 0;
+        }
+    }
+
 }

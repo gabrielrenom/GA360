@@ -129,7 +129,9 @@ app.UseAuthorization();
 app.MapBffManagementEndpoints();
 
 app.MapControllers();
-
+//app.MapControllers()
+//    .RequireAuthorization()
+//    .AsBffApiEndpoint();
 //app.UseEndpoints(endpoints =>
 //{
 //    endpoints.MapRemoteBffApiEndpoint("/customers", "https://localhost:7168/Customers")
