@@ -141,7 +141,7 @@ export default function ClaimsDashboard() {
             const id: (string | number | undefined) = data.find((x: { type: string; }) => x.type === 'id')?.value;
             const email: (string | number | undefined) = data.find((x: { type: string; }) => x.type === 'email')?.value;
             const logouturl: (string | number | undefined) = data.find((x: { type: string; }) => x.type === 'bff:logout_url')?.value as string;
-
+            console.log(logouturl)
             const user = {
                 name: name,
                 id: id,

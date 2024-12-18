@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 
 // material-ui
 import Box from '@mui/material/Box';
@@ -11,10 +12,9 @@ import MainCard from 'components/MainCard';
 import SimpleBar from 'components/third-party/SimpleBar';
 import CircularWithPath from 'components/@extended/progress/CircularWithPath';
 
-import { useGetCustomer } from 'api/customer';
-
 // types
 import { CustomerList, CustomerListExtended } from 'types/customer';
+import { getUserById } from 'api/customer';
 
 interface Props {
   open: boolean;
@@ -25,15 +25,32 @@ interface Props {
 // ==============================|| CUSTOMER ADD / EDIT ||============================== //
 
 export default function CustomerModal({ open, modalToggler, customer }: Props) {
-  const { customersLoading: loading } = useGetCustomer();
+  const [customerDetails, setCustomerDetails] = useState<CustomerListExtended | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const closeModal = () => modalToggler(false);
-  console.log("OPENING MODAL")
+
+  useEffect(() => {
+    if (customer?.id) {
+      setLoading(true);
+      getUserById(customer.id)
+        .then((customerData) => {
+          setCustomerDetails(customerData);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch customer:', error);
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [customer]);
 
   const customerForm = useMemo(
-    () => !loading && <FormCustomerAdd customer={customer as CustomerListExtended|| null} closeModal={closeModal} />,
-    // eslint-disable-next-line
-    [customer, loading]
+    () => !loading && <FormCustomerAdd customer={customerDetails} closeModal={closeModal} />,
+    [customerDetails, loading, closeModal]
   );
 
   return (

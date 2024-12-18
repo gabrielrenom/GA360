@@ -31,6 +31,14 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
         setOpen(!open);
     };
 
+    const formatDateUK = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      };
+      
     const columns = useMemo<ColumnDef<CustomerListExtended>[]>(
         () => [
             {
@@ -56,14 +64,14 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
                 )
             },
             {
-                header: '#',
+                header: 'ULR',
                 accessorKey: 'id',
                 meta: {
                     className: 'cell-center'
                 }
             },
             {
-                header: 'User Info',
+                header: 'NAME',
                 accessorKey: 'name',
                 cell: ({ row, getValue }) => (
                     <Stack direction="row" spacing={1.5} alignItems="center">
@@ -84,10 +92,13 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
                 cell: ({ getValue }) => <PatternFormat displayType="text" format="+1 (###) ###-####" mask="_" defaultValue={getValue() as number} />
             },
             {
-                header: 'Age',
-                accessorKey: 'age',
+                header: 'DOB',
+                accessorKey: 'dob',
                 meta: {
                     className: 'cell-right'
+                },
+                cell: ({ row }) => {
+                    return formatDateUK(row.original.dob);
                 }
             },
             {

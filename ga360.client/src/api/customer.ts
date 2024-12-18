@@ -129,6 +129,20 @@ export async function getUser(): Promise<User> {
   return result;
 }
 
+export async function getUserById(id: number): Promise<CustomerListExtended> {
+  const response = await fetch(`/api/customer/get/full/${id}`, {
+      headers: {
+          "X-CSRF": "Dog",
+      },
+  });
+
+  if (!response.ok) {
+      throw new Error('Network response was not ok');
+  }
+
+  const result: CustomerListExtended = await response.json();
+  return result;
+}
 
 export function useGetCustomer() {
   const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.list, fetcher, {

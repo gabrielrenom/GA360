@@ -308,19 +308,19 @@ export default function DashboardDefault() {
     fetchCustomerData();
   }, []);
 
-  useEffect(() => {
-    const fetchDashboardStats = async () => {
-      try {
-        const data = await getDashboardStats();
-        setStats(data);
-        console.log(data);
-      } catch (error) {
-        console.error("Failed to fetch for the dashboard", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchDashboardStats = async () => {
+  //     try {
+  //       const data = await getDashboardStats();
+  //       setStats(data);
+  //       console.log(data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch for the dashboard", error);
+  //     }
+  //   };
 
-    fetchDashboardStats();
-  }, []);
+  //   fetchDashboardStats();
+  // }, []);
 
   const getColor = (percentage) => {
     if (percentage > 10) return "success";
@@ -331,7 +331,6 @@ export default function DashboardDefault() {
   return (
     
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      <ClaimsDashboard></ClaimsDashboard>
       {/* row 0 */}
       <Box sx={{ flexGrow: 1, paddingLeft: 3, paddingTop: 2 }}>
         <Grid container spacing={2}>
