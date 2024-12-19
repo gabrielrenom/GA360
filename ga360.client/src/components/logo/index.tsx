@@ -26,7 +26,7 @@ export default function LogoSection({ reverse, isIcon, sx, to }: Props) {
   const { isLoggedIn } = useAuth();
 
   return (
-    <div style ={{paddingRight:'13px', paddingTop:'0.5rem'}}>
+    <div style ={{paddingRight:'13px', paddingTop:'0.9rem'}}>
     <ButtonBase disableRipple {...(isLoggedIn && { component: Link, to: !to ? APP_DEFAULT_PATH : to, sx })}>
       {isIcon ? <GA360LogoIcon /> : <Logo reverse={reverse} />}
       {/* {isIcon ? <LogoIcon /> : <Logo reverse={reverse} />} */}
