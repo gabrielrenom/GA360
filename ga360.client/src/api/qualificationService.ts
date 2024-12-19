@@ -60,8 +60,26 @@ export const endpoints = {
   singlerecord: '/api/customer/customerwithcoursequalificationrecords',
   qualificationstatuses: '/api/qualification/qualificationstatuses',
   qualificationstrainingcentres: '/api/qualification/getqualificationsbytrainingId',
-
+  qualificationsbyuser: '/api/qualification/getqualificationsbyUser',
 };
+
+export async function GetQualificationsByUser(): Promise<Qualification[]> {
+  const response = await fetch(`${endpoints.qualificationsbyuser}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF': 'Dog',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data: Qualification[] = await response.json();
+
+  return data;
+}
 
 export async function getQualificationsTrainingCentres(trainingCentreId: number): Promise<QualificationTrainingModel[]> {
   const response = await fetch(`${endpoints.qualificationstrainingcentres}/${trainingCentreId}`, {

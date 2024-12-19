@@ -148,4 +148,64 @@ public class QualificationService : IQualificationService
         return qualificationTrainingModels;
     }
 
+    public async Task<List<Qualification>> GetAllQualificationsByEmail(string email)
+    {
+        var qualifications = new List<Qualification>();
+
+        using (var connection = new SqlConnection(_qualificationRepository.Context.Database.GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            var query = @"
+        SELECT 
+            q.Id,
+            q.Name,
+            q.RegistrationDate,
+            q.ExpectedDate,
+            q.CertificateDate,
+            q.CertificateNumber,
+            q.Status,
+            q.AwardingBody,
+            q.InternalReference
+        FROM 
+            [dbo].[Qualifications] q
+        JOIN 
+            [dbo].[QualificationCustomerCourseCertificates] qc ON q.Id = qc.QualificationId
+        JOIN 
+            [dbo].[Customers] c ON qc.CustomerId = c.Id
+        WHERE 
+            c.Email = @Email
+        ORDER BY 
+            q.Name;";
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@Email", email);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var qualification = new Qualification
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            RegistrationDate = reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            ExpectedDate = reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
+                            CertificateDate = reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
+                            CertificateNumber = reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
+                            Status = reader.GetInt32(reader.GetOrdinal("Status")),
+                            AwardingBody = reader.IsDBNull(reader.GetOrdinal("AwardingBody")) ? null : reader.GetString(reader.GetOrdinal("AwardingBody")),
+                            InternalReference = reader.IsDBNull(reader.GetOrdinal("InternalReference")) ? null : reader.GetString(reader.GetOrdinal("InternalReference"))
+                        };
+
+                        qualifications.Add(qualification);
+                    }
+                }
+            }
+        }
+
+        return qualifications;
+    }
+
 }

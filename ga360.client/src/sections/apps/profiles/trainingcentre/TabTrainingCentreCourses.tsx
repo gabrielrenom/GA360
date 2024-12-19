@@ -39,18 +39,18 @@ import { getCoursesByTrainingCentreId } from 'api/courseService';
 import CourseProgressions from './CourseTrainingCentreProfile';
 
 interface ReactTableProps {
-  columns: ColumnDef<CourseViewDataProps>[];
-  data: CourseViewDataProps[];
+  columns: ColumnDef<CourseTrainingViewDataProps>[];
+  data: CourseTrainingViewDataProps[];
 }
 export default function TabTrainingCentreCourses() {
-  const [courseData,setCourseData] =  useState<CourseViewDataProps[]>([]);
+  const [courseData,setCourseData] =  useState<CourseTrainingViewDataProps[]>([]);
   
   const { user, isLoggedIn } = useContext(DuendeContext);
 
 
   const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   
-  const columns = useMemo<ColumnDef<CourseViewDataProps>[]>(
+  const columns = useMemo<ColumnDef<CourseTrainingViewDataProps>[]>(
     () => [
       {
         header: 'COURSE NAME',
@@ -245,9 +245,9 @@ export default function TabTrainingCentreCourses() {
           <Grid item xs={12}>
           <TrainingCentreProfile></TrainingCentreProfile>
           </Grid>
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
           <CourseProgressions />
-          </Grid>
+          </Grid> */}
         </Grid>
       </Grid>
       <Grid item xs={12} sm={7} md={8} xl={9}>

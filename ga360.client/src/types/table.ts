@@ -77,7 +77,7 @@ export type CourseViewDataProps = {
 export type CourseTrainingViewDataProps = {
   coursename: string;
   date: string;
-  duration: number;
+  duration: string;
   assesor: string;
   card: string;
   certification: string;

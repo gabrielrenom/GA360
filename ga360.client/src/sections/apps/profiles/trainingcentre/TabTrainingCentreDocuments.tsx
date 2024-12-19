@@ -316,27 +316,9 @@ export default function TabTrainingCentreDocuments() {
       <Grid item xs={12} sm={5} md={4} xl={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <TrainingCentreProfile candidate={candidate} defaultImages={avatar}></TrainingCentreProfile>
+            <TrainingCentreProfile/>
           </Grid>
-          <Grid item xs={12}>
-          <MainCard title="Course Progressions">
-              <Grid container spacing={1.25}>
-                {candidate!==null && candidate.courses!==null?
-                candidate.courses.map((data, index) => (
-                  <>
-                    <Grid item xs={6}>
-                      <Typography color="secondary">{data.name}</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <LinearWithLabel value={data.progression} />
-                    </Grid>
-                  </>
-                ))
-                :<></>}
-               
-              </Grid>
-            </MainCard>
-          </Grid>
+
         </Grid>
       </Grid>
       <Grid item xs={12} sm={7} md={8} xl={9}>

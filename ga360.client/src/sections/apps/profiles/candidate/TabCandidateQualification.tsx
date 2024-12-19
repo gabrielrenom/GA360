@@ -44,6 +44,7 @@ import { getCandidate } from 'api/customer';
 import CandidateProfile from './CandidateProfile';
 import { QualificationModel } from 'types/customerApiModel';
 import CourseProgressions from './CourseProfile';
+import MyQualificationsProfile from './MyQualificationsProfile';
 
 interface ReactTableProps {
     columns: ColumnDef<QualificationViewDataProps>[];
@@ -250,7 +251,8 @@ export default function TabCandidateQualification() {
 
                     </Grid>
                     <Grid item xs={12}>
-                        <CourseProgressions candidate={candidate} />
+                        {/* <CourseProgressions candidate={candidate} /> */}
+                        <MyQualificationsProfile/>
                     </Grid>
                 </Grid>
             </Grid>

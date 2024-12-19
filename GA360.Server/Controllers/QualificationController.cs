@@ -22,6 +22,8 @@ namespace GA360.Server.Controllers
 
         private const string QualificationsCacheKey = "qualificationsCache";
         private const string QualificationsTrainingCentreCacheKey = "qualificationsTrainingCentreCache";
+        private const string UserQualifications = "userqualifications";
+
 
         public QualificationController(
             ILogger<QualificationController> logger,
@@ -63,20 +65,40 @@ namespace GA360.Server.Controllers
             return Ok(qualifications);
         }
 
+
+        [AllowAnonymous]
+        [HttpGet("GetQualificationsByUser")]
+        public async Task<IActionResult> GetQualificationsByUser()
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            if (!_cache.TryGetValue($"{UserQualifications}{emailClaim}", out List<Qualification> qualifications))
+            {
+                qualifications = await _qualificationService.GetAllQualificationsByEmail(emailClaim);
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+                _cache.Set($"{UserQualifications}{emailClaim}", qualifications, cacheEntryOptions);
+            }
+
+            return Ok(qualifications);
+        }
+
         [AllowAnonymous]
         [HttpGet("GetQualificationsByTrainingId/{trainingCentreId}")]
         public async Task<IActionResult> GetQualificationsByTrainingId(int trainingCentreId)
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            if (!_cache.TryGetValue(QualificationsTrainingCentreCacheKey, out List<QualificationTrainingModel> qualifications))
+            if (!_cache.TryGetValue($"{QualificationsTrainingCentreCacheKey}{emailClaim}", out List<QualificationTrainingModel> qualifications))
             {
                 qualifications = await _qualificationService.GetAllQualificationsByTrainingCentreId(trainingCentreId);
 
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
 
-                _cache.Set(QualificationsTrainingCentreCacheKey, qualifications, cacheEntryOptions);
+                _cache.Set($"{QualificationsTrainingCentreCacheKey}{emailClaim}", qualifications, cacheEntryOptions);
             }
 
             return Ok(qualifications);

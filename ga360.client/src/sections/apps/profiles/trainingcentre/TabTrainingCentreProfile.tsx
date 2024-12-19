@@ -251,9 +251,9 @@ export default function TabTrainingCentreProfile() {
                     <Grid item xs={12}>
                         <TrainingCentreProfile />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <CourseProgressions />
-                    </Grid>
+                    </Grid> */}
                 </Grid>
             </Grid>
             <Grid item xs={12} sm={7} md={8} xl={9}>

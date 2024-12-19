@@ -46,6 +46,7 @@ import CourseProgressions from './CourseProfile';
 import { CertificateModel } from 'types/customerApiModel';
 import chartsMap from 'menu-items/charts-map';
 import CandidateProfile from './CandidateProfile';
+import MyQualificationsProfile from './MyQualificationsProfile';
 
 interface ReactTableProps {
     columns: ColumnDef<CertificationViewDataProps>[];
@@ -251,7 +252,8 @@ export default function TabCandidateProfile() {
                         <CandidateProfile candidate={candidate} defaultImages={avatar}></CandidateProfile>
                     </Grid>
                     <Grid item xs={12}>
-                        <CourseProgressions candidate={candidate} />
+                        <MyQualificationsProfile/>
+                        {/* <CourseProgressions candidate={candidate} />  */}
                     </Grid>
                 </Grid>
             </Grid>

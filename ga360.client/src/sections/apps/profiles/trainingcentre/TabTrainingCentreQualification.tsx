@@ -32,7 +32,7 @@ import makeData from 'data/react-table';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, HeaderGroup, SortingState, useReactTable } from '@tanstack/react-table';
 import ReactTable from 'data/react-table';
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from '@mui/material';
+import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from '@mui/material';
 import { CSVExport, HeaderSort, SelectColumnSorting, TablePagination } from 'components/third-party/react-table';
 import ScrollX from 'components/ScrollX';
 
@@ -61,6 +61,7 @@ export default function TabTrainingCentreQualification() {
 
 
     const mapQualifications = (qualifications: QualificationTrainingModel[]): QualificationTrainingCentreViewDataProps[] => {
+        //@ts-ignore
         return qualifications.map(certificate => ({
              qan: certificate.qan,
              internalReference: certificate.internalReference,
@@ -146,6 +147,8 @@ export default function TabTrainingCentreQualification() {
         fetchUser();
     }, []);
 
+    const handleAddQualificationClick = () => { window.open('https://form.jotform.com/243523175109049', '_blank'); };
+
     function ReactTable({ columns, data }: ReactTableProps) {
         const matchDownSM = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
         const [sorting, setSorting] = useState<SortingState>([
@@ -183,6 +186,7 @@ export default function TabTrainingCentreQualification() {
                 content={false}
                 secondary={
                     <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
+                        <Button variant="contained" color="primary" onClick={handleAddQualificationClick}>+ Add Qualification</Button>
                         <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
                         <CSVExport {...{ data, headers, filename: top ? 'pagination-top.csv' : 'pagination-bottom.csv' }} />
                     </Stack>
@@ -274,9 +278,9 @@ export default function TabTrainingCentreQualification() {
                         <TrainingCentreProfile/>
 
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <CourseProgressions />
-                    </Grid>
+                    </Grid> */}
                 </Grid>
             </Grid>
             <Grid item xs={12} sm={7} md={8} xl={9}>

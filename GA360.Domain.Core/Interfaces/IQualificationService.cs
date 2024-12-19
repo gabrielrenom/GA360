@@ -7,6 +7,7 @@ public interface IQualificationService
 {
     Qualification GetQualification(int id);
     Task<List<Qualification>> GetAllQualifications();
+    Task<List<Qualification>> GetAllQualificationsByEmail(string email);
     Task<List<QualificationTrainingModel>> GetAllQualificationsByTrainingCentreId(int trainingCentreId);
     Task<Qualification> AddQualification(Qualification qualification);
     Task<Qualification> UpdateQualification(Qualification qualification);

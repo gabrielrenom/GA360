@@ -34,6 +34,7 @@ import { LabelKeyObject } from 'react-csv/lib/core';
 import { getCandidate } from 'api/customer';
 import { CustomerListExtended } from 'types/customer';
 import CandidateProfile from './CandidateProfile';
+import MyQualificationsProfile from './MyQualificationsProfile';
 
 interface ReactTableProps {
   columns: ColumnDef<CourseViewDataProps>[];
@@ -242,23 +243,7 @@ export default function TabCandidateCourses() {
           <CandidateProfile candidate={candidate} defaultImages={avatar}></CandidateProfile>
           </Grid>
           <Grid item xs={12}>
-          <MainCard title="Course Progressions">
-              <Grid container spacing={1.25}>
-                {candidate!==null && candidate.courses!==null?
-                candidate.courses.map((data, index) => (
-                  <>
-                    <Grid item xs={6}>
-                      <Typography color="secondary">{data.name}</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <LinearWithLabel value={data.progression} />
-                    </Grid>
-                  </>
-                ))
-                :<></>}
-               
-              </Grid>
-            </MainCard>
+            <MyQualificationsProfile/>
           </Grid>
         </Grid>
       </Grid>
