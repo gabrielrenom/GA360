@@ -17,4 +17,5 @@ public class Course:Audit, IModel
     public string Sector { get; set; }
 
     public virtual List<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
+    public virtual List<CourseTrainingCentre> CourseTrainingCentres { get; set; }
 }

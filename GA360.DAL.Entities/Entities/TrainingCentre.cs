@@ -10,4 +10,6 @@ public class TrainingCentre : Audit, IModel
     public virtual Address Address { get; set; }
     public virtual List<Customer> Customers { get; set; }
     public virtual List<TrainingCentrePermission> TrainingCentrePermission { get; set; }
+    public virtual List<QualificationTrainingCentre> QualificationTrainingCentres { get; set; }
+    public virtual List<CourseTrainingCentre> CourseTrainingCentres { get; set; }
 }

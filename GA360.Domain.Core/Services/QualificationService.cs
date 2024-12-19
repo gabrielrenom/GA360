@@ -1,6 +1,9 @@
 ﻿using GA360.DAL.Entities.Entities;
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.Domain.Core.Interfaces;
+using GA360.Domain.Core.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Security;
 
 namespace GA360.Domain.Core.Services;
@@ -72,4 +75,77 @@ public class QualificationService : IQualificationService
 
         return result;
     }
+
+    public async Task<List<QualificationTrainingModel>> GetAllQualificationsByTrainingCentreId(int trainingCentreId)
+    {
+        var qualificationTrainingModels = new List<QualificationTrainingModel>();
+
+        using (var connection = new SqlConnection(_qualificationRepository.Context.Database.GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            var query = @"
+        SELECT 
+            qt.TrainingCentreId,
+            q.Id AS QualificationId,
+            q.InternalReference,
+            q.Name AS QualificationName,
+            q.AwardingBody,
+            SUM(CASE WHEN c.Role = 'Candidate' THEN 1 ELSE 0 END) AS Learners,
+            SUM(CASE WHEN c.Role = 'Assessor' THEN 1 ELSE 0 END) AS Assessors,
+            q.ExpectedDate AS ExpirationDate,
+            q.Status
+        FROM 
+            [dbo].[QualificationTrainingCentre] qt
+        JOIN 
+            [dbo].[Qualifications] q ON qt.QualificationId = q.Id
+        LEFT JOIN 
+            [dbo].[QualificationCustomerCourseCertificates] qc ON q.Id = qc.QualificationId
+        LEFT JOIN 
+            [dbo].[Customers] c ON qc.CustomerId = c.Id
+        WHERE 
+            qt.TrainingCentreId = @TrainingCentreId
+        GROUP BY 
+            qt.TrainingCentreId,
+            q.Id,
+            q.InternalReference,
+            q.Name,
+            q.AwardingBody,
+            q.ExpectedDate,
+            q.Status
+        ORDER BY 
+            q.Name;";
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    // Optionally, preallocate list capacity if an estimate is available
+                    while (await reader.ReadAsync())
+                    {
+                        var qualificationModel = new QualificationTrainingModel
+                        {
+                            TrainingCentreId = reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
+                            QualificationId = reader.GetInt32(reader.GetOrdinal("QualificationId")),
+                            QAN = reader.GetInt32(reader.GetOrdinal("QualificationId")),
+                            InternalReference = reader.GetString(reader.GetOrdinal("InternalReference")),
+                            QualificationName = reader.GetString(reader.GetOrdinal("QualificationName")),
+                            AwardingBody = reader.GetString(reader.GetOrdinal("AwardingBody")),
+                            Learners = reader.GetInt32(reader.GetOrdinal("Learners")),
+                            Assessors = reader.GetInt32(reader.GetOrdinal("Assessors")),
+                            ExpirationDate = reader.GetDateTime(reader.GetOrdinal("ExpirationDate")),
+                            Status = reader.GetInt32(reader.GetOrdinal("Status"))
+                        };
+
+                        qualificationTrainingModels.Add(qualificationModel);
+                    }
+                }
+            }
+        }
+
+        return qualificationTrainingModels;
+    }
+
 }

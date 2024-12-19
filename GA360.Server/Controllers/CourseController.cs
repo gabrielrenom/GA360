@@ -1,9 +1,12 @@
-﻿using GA360.DAL.Entities.Entities;
+﻿using GA360.Commons.Constants;
+using GA360.DAL.Entities.Entities;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
+using GA360.Domain.Core.Services;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GA360.Server.Controllers;
 
@@ -30,9 +33,27 @@ public class CourseController : ControllerBase
 
         var courses = await _courseService.GetAllCourses();
 
-        var coursesPermissions = await _permissionService.FilterPermissions(emailClaim, courses);
+        var permissions = await _permissionService.GetPermissions(emailClaim);
 
-        return Ok(coursesPermissions);
+        if (permissions.Role != RoleConstants.SUPER_ADMIN)
+        {
+            var coursesPermissions = await _permissionService.FilterPermissions(emailClaim, courses);
+
+            return Ok(coursesPermissions);
+        }
+
+        return Ok(courses);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("GetCoursesByTrainingId/{trainingCentreId}")]
+    public async Task<IActionResult> GetCoursesByTrainingId(int trainingCentreId)
+    {
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+        var courses = await _courseService.GetAllCoursesByTrainingCentreId(trainingCentreId);
+
+        return Ok(courses);
     }
 
     [AllowAnonymous]

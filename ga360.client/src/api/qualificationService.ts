@@ -40,13 +40,47 @@ export interface QualificationStatus {
     modifiedAt: string;
     tenantId: number | null;
   }
-  
+
+export interface QualificationTrainingModel {
+  trainingCentreId: number;
+  qualificationId: number;
+  qan: number;
+  internalReference: string;
+  qualificationName: string;
+  awardingBody: string;
+  learners: number;
+  assessors: number;
+  expirationDate: Date;
+  status: number;
+}
+
 export const endpoints = {
   key: '/api/qualification',
   fullrecord: '/api/customer/customerswithcoursequalificationrecords',
   singlerecord: '/api/customer/customerwithcoursequalificationrecords',
   qualificationstatuses: '/api/qualification/qualificationstatuses',
+  qualificationstrainingcentres: '/api/qualification/getqualificationsbytrainingId',
+
 };
+
+export async function getQualificationsTrainingCentres(trainingCentreId: number): Promise<QualificationTrainingModel[]> {
+  const response = await fetch(`${endpoints.qualificationstrainingcentres}/${trainingCentreId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF': 'Dog',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data: QualificationTrainingModel[] = await response.json();
+
+  return data;
+}
+
 
 export async function getQualificationStatuses(): Promise<QualificationStatus[]> {
   const response = await fetch(endpoints.qualificationstatuses, {

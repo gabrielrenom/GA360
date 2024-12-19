@@ -17,8 +17,31 @@ public class DashboardService : IDashboardService
 
     public async Task<List<IndustriesModel>> GetIndustryPercentageAsync(string email)
     {
-        const string query = @"
-            SELECT
+        var industryList = new List<IndustriesModel>();
+
+        using (var connection = new SqlConnection(_cRMDbContext.Database.GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            // Fetch the user's role
+            string userRoleQuery = @"
+            SELECT r.Name 
+            FROM [dbo].[UserRoles] ur
+            JOIN [dbo].[Roles] r ON ur.RoleId = r.Id
+            JOIN [dbo].[Customers] c ON ur.CustomerId = c.Id
+            WHERE c.Email = @Email";
+
+            string userRole;
+
+            using (var roleCommand = new SqlCommand(userRoleQuery, connection))
+            {
+                roleCommand.Parameters.AddWithValue("@Email", email);
+                userRole = (string)await roleCommand.ExecuteScalarAsync();
+            }
+
+            // Build the main query
+            var query = @"
+            SELECT DISTINCT
                 c.[Sector] AS Industry,
                 COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY tc.Id) AS Percentage
             FROM
@@ -28,42 +51,96 @@ public class DashboardService : IDashboardService
             JOIN
                 [dbo].[Customers] cust ON qccc.CustomerId = cust.Id
             JOIN
-                [dbo].[TrainingCentres] tc ON cust.TrainingCentreId = tc.Id
+                [dbo].[TrainingCentres] tc ON cust.TrainingCentreId = tc.Id";
+
+            if (userRole != "Super Admin")
+            {
+                query += @"
             WHERE
-                cust.Email = @Email
+                cust.Email = @Email";
+            }
+
+            query += @"
             GROUP BY
                 c.[Sector],
                 tc.Id
             ORDER BY
-                Percentage DESC;
-        ";
+                Percentage DESC;";
 
-        var industryList = new List<IndustriesModel>();
+            var command = new SqlCommand(query, connection);
 
-        using (var connection = new SqlConnection(_cRMDbContext.Database.GetConnectionString()))
-        {
-            await connection.OpenAsync();
-
-            using (var command = new SqlCommand(query, connection))
+            if (userRole != "Super Admin")
             {
                 command.Parameters.AddWithValue("@Email", email);
+            }
 
-                using (var reader = await command.ExecuteReaderAsync())
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
                 {
-                    while (await reader.ReadAsync())
+                    industryList.Add(new IndustriesModel
                     {
-                        industryList.Add(new IndustriesModel
-                        {
-                            Industry = reader["Industry"].ToString(),
-                            Percentage = Convert.ToDouble(reader["Percentage"])
-                        });
-                    }
+                        Industry = reader["Industry"].ToString(),
+                        Percentage = Convert.ToDouble(reader["Percentage"])
+                    });
                 }
             }
         }
 
         return industryList;
     }
+
+
+
+    //public async Task<List<IndustriesModel>> GetIndustryPercentageAsync(string email)
+    //{
+    //    const string query = @"
+    //        SELECT
+    //            c.[Sector] AS Industry,
+    //            COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY tc.Id) AS Percentage
+    //        FROM
+    //            [dbo].[QualificationCustomerCourseCertificates] qccc
+    //        JOIN
+    //            [dbo].[Courses] c ON qccc.CourseId = c.Id
+    //        JOIN
+    //            [dbo].[Customers] cust ON qccc.CustomerId = cust.Id
+    //        JOIN
+    //            [dbo].[TrainingCentres] tc ON cust.TrainingCentreId = tc.Id
+    //        WHERE
+    //            cust.Email = @Email
+    //        GROUP BY
+    //            c.[Sector],
+    //            tc.Id
+    //        ORDER BY
+    //            Percentage DESC;
+    //    ";
+
+    //    var industryList = new List<IndustriesModel>();
+
+    //    using (var connection = new SqlConnection(_cRMDbContext.Database.GetConnectionString()))
+    //    {
+    //        await connection.OpenAsync();
+
+    //        using (var command = new SqlCommand(query, connection))
+    //        {
+    //            command.Parameters.AddWithValue("@Email", email);
+
+    //            using (var reader = await command.ExecuteReaderAsync())
+    //            {
+    //                while (await reader.ReadAsync())
+    //                {
+    //                    industryList.Add(new IndustriesModel
+    //                    {
+    //                        Industry = reader["Industry"].ToString(),
+    //                        Percentage = Convert.ToDouble(reader["Percentage"])
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    return industryList;
+    //}
 
     public async Task<List<DashboardModel>> GetAllStats()
     {

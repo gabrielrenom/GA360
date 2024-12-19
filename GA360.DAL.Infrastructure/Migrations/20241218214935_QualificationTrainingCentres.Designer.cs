@@ -4,6 +4,7 @@ using GA360.DAL.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GA360.DAL.Infrastructure.Migrations
 {
     [DbContext(typeof(CRMDbContext))]
-    partial class CRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241218214935_QualificationTrainingCentres")]
+    partial class QualificationTrainingCentres
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -428,29 +431,6 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Courses");
-                });
-
-            modelBuilder.Entity("GA360.DAL.Entities.Entities.CourseTrainingCentre", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TrainingCentreId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("TrainingCentreId");
-
-                    b.ToTable("CourseTrainingCentre");
                 });
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Customer", b =>
@@ -1079,9 +1059,6 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AwardingBody")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CertificateDate")
                         .HasColumnType("datetime2");
 
@@ -1103,9 +1080,6 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     b.Property<DateTime>("ExpectedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("InternalReference")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1640,25 +1614,6 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("GA360.DAL.Entities.Entities.CourseTrainingCentre", b =>
-                {
-                    b.HasOne("GA360.DAL.Entities.Entities.Course", "Course")
-                        .WithMany("CourseTrainingCentres")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GA360.DAL.Entities.Entities.TrainingCentre", "TrainingCentre")
-                        .WithMany("CourseTrainingCentres")
-                        .HasForeignKey("TrainingCentreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("TrainingCentre");
-                });
-
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Customer", b =>
                 {
                     b.HasOne("GA360.DAL.Entities.Entities.Address", "Address")
@@ -1924,8 +1879,6 @@ namespace GA360.DAL.Infrastructure.Migrations
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.Course", b =>
                 {
-                    b.Navigation("CourseTrainingCentres");
-
                     b.Navigation("QualificationCustomerCourseCertificates");
                 });
 
@@ -1985,8 +1938,6 @@ namespace GA360.DAL.Infrastructure.Migrations
 
             modelBuilder.Entity("GA360.DAL.Entities.Entities.TrainingCentre", b =>
                 {
-                    b.Navigation("CourseTrainingCentres");
-
                     b.Navigation("Customers");
 
                     b.Navigation("QualificationTrainingCentres");

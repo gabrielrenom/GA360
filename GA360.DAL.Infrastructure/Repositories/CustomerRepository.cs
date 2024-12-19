@@ -53,6 +53,7 @@ namespace GA360.DAL.Infrastructure.Repositories
             var result = await GetDbContext()?.Customers
                 .Include(x=>x.Roles)
                 .ThenInclude(x=>x.Role)
+                .Include(x=>x.Address)
            .FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
 
             return result;

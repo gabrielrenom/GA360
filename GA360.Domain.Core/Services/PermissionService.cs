@@ -3,6 +3,7 @@ using GA360.DAL.Infrastructure.Contexts;
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -15,6 +16,62 @@ public class PermissionService:IPermissionService
         _context = context;
     }
 
+    //public async Task<PermissionModel> GetPermissions(string email)
+    //{
+    //    var permissionModel = new PermissionModel();
+
+    //    using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
+    //    {
+    //        await connection.OpenAsync();
+
+    //        // Fetch the user role and permissions
+    //        var query = @"
+    //        SELECT ur.CustomerId, ur.RoleId, r.Name AS RoleName, 
+    //               p.TrainingCentreId, p.CourseId, p.QualificationId, p.CertificateId
+    //        FROM [dbo].[UserRoles] ur
+    //        JOIN [dbo].[Roles] r ON ur.RoleId = r.Id
+    //        LEFT JOIN [dbo].[RolePermissions] rp ON r.Id = rp.RoleId
+    //        LEFT JOIN [dbo].[Permissions] p ON rp.PermissionId = p.Id
+    //        JOIN [dbo].[Customers] cust ON ur.CustomerId = cust.Id
+    //        WHERE LOWER(cust.Email) = @Email";
+
+    //        using (var command = new SqlCommand(query, connection))
+    //        {
+    //            command.Parameters.AddWithValue("@Email", email.ToLower());
+
+    //            using (var reader = await command.ExecuteReaderAsync())
+    //            {
+    //                if (await reader.ReadAsync())
+    //                {
+    //                    var permissions = new List<PermissionEntity>();
+    //                    do
+    //                    {
+    //                        permissions.Add(new PermissionEntity
+    //                        {
+    //                            TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
+    //                            CourseId = reader.IsDBNull(reader.GetOrdinal("CourseId")) ? 0 : reader.GetInt32(reader.GetOrdinal("CourseId")),
+    //                            QualificationId = reader.IsDBNull(reader.GetOrdinal("QualificationId")) ? 0 : reader.GetInt32(reader.GetOrdinal("QualificationId")),
+    //                            CertificateId = reader.IsDBNull(reader.GetOrdinal("CertificateId")) ? 0 : reader.GetInt32(reader.GetOrdinal("CertificateId"))
+    //                        });
+    //                    } while (await reader.ReadAsync());
+
+    //                    permissionModel.CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"));
+    //                    permissionModel.RoleId = reader.GetInt32(reader.GetOrdinal("RoleId"));
+    //                    permissionModel.Role = reader.GetString(reader.GetOrdinal("RoleName"));
+    //                    permissionModel.PermissionEntities = permissions;
+    //                }
+    //                else
+    //                {
+    //                    return null;
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    return permissionModel;
+    //}
+
+
     public async Task<PermissionModel> GetPermissions(string email)
     {
         var userRoles = await _context
@@ -26,7 +83,7 @@ public class PermissionService:IPermissionService
 
         if (userRoles == null || !userRoles.Any())
         {
-            return null; // Or throw an exception if preferred
+            return null;
         }
 
         var userRole = userRoles.FirstOrDefault();

@@ -75,7 +75,12 @@ export  const DuendeProvider = ({ children }) => {
                         roleId: userDetails.roleId,
                         role: userDetails.role,
                         firstName: userDetails.firstName,
-                        lastName: userDetails.lastName
+                        lastName: userDetails.lastName,
+                        trainingCentreId: userDetails.trainingCentreId,
+                        contact: userDetails.contact,
+                        city: userDetails.city,
+                        avatarImage: userDetails.avatarImage,
+                        employeeStatus: userDetails.employeeStatus,
                     };
                     dispatch({
                         type: LOGIN,

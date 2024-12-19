@@ -66,4 +66,9 @@ export interface User {
   customerId: number;
   role: string;
   roleId: number;
+  trainingCentreId: number;
+  contact: string;
+  city: string;
+  avatarImage: string;
+  employeeStatus: string;
 }

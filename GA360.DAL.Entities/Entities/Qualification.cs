@@ -11,6 +11,9 @@ public class Qualification: Audit, IModel
     public DateTime CertificateDate { get; set; }
     public int CertificateNumber { get; set; }
     public int Status { get; set; }
+    public string? AwardingBody { get; set; }
+    public string? InternalReference { get; set; }
 
     public virtual List<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
+    public virtual List<QualificationTrainingCentre> QualificationTrainingCentres { get; set; }
 }

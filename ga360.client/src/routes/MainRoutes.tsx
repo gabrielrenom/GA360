@@ -20,6 +20,8 @@ import Careers from '../pages/backoffice/careers';
 
 // Profile
 import CandidateProfile from 'pages/apps/profiles/candidate';
+import TrainingCentreProfile from 'pages/apps/profiles/trainingcentre';
+
 
 // Develoment API
 import GettingStarted from '../pages/development/gettingstarted';
@@ -70,6 +72,12 @@ const CandidateTabCandidateProfile = Loadable(lazy(() => import('sections/apps/p
 const CandidateTabQualifications = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateQualification')));
 const CandidateTabCandidateCourses = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateCourses')));
 const CandidateTabCandidateDocuments = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateDocuments')));
+
+const TrainingCentreTabProfile = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreProfile')));
+const TrainingCentreQualification = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreQualification')));
+const TrainingCentreCourses = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreCourses')));
+const TrainingCentreDocuments = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreDocuments')));
+
 
 const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
 const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
@@ -316,6 +324,32 @@ const MainRoutes = {
                     {
                       path: 'notes',
                       element: <AccountTabSettings />
+                    }
+                  ]
+                },
+                {
+                  path: 'trainingcentre',
+                  element: <TrainingCentreProfile />,
+                  children: [
+                    {
+                      path: 'profile',
+                      element: <TrainingCentreTabProfile />
+                    },
+                    {
+                      path: 'qualifications',
+                      element: <TrainingCentreQualification />
+                    },
+                    {
+                      path: 'courses',
+                      element: <TrainingCentreCourses />
+                    },
+                    {
+                      path: 'documents',
+                      element: <TrainingCentreDocuments />
+                    },
+                    {
+                      path: 'certificates',
+                      element: <TrainingCentreTabProfile />
                     }
                   ]
                 },

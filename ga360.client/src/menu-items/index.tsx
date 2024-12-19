@@ -39,37 +39,39 @@ import backOffice from './back-office';
 import mainDashboard from './main-dashboard';
 import profile from './profile';
 import development from './development';
-
+import trainingcentreprofile from './trainingcentreprofile';
 // ==============================|| MENU ITEMS ||============================== //
 
 
 const allMenuItems: { items: NavItemType[] } = {  
-  items: [mainDashboard, profile, backOffice, development]
+  items: [mainDashboard, profile, trainingcentreprofile, backOffice, development]
 };
 
 // Function to filter menu items based on user role
 export const getMenuItemsByRole = (role: string): { items: NavItemType[] } => {
   let filteredItems = [];
 
-  switch (role) {
-    case "Training Centre":
-      filteredItems = [
-        'group-dashboards',
-        'group-back-office'
-      ];
-      break;
-    case "Super Admin":
-      filteredItems = allMenuItems.items.map(item => item.id);
-      break;
-    case "Candidate":
-      filteredItems = ['group-profile'];
-      break;
-    case "Assessor":
-      filteredItems = ['group-profile'];
-      break;
-    default:
-      filteredItems = [];
-  }
+    switch (role) {
+      case "Training Centre":
+        filteredItems = [
+          'group-dashboards',
+          'group-back-office',
+          'group-trainingcentreprofile'
+        ];
+        break;
+      case "Super Admin":
+        filteredItems = allMenuItems.items.map(item => item.id)
+        .filter(itemId => itemId !== 'group-trainingcentreprofile');;
+        break;
+      case "Candidate":
+        filteredItems = ['group-profile'];
+        break;
+      case "Assessor":
+        filteredItems = ['group-profile'];
+        break;
+      default:
+        filteredItems = [];
+    }
 
   const filteredMenuItems = allMenuItems.items.filter(item => {
     if (item.id === 'group-back-office' && role === 'Training Centre') {

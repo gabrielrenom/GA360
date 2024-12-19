@@ -1,5 +1,7 @@
-﻿using GA360.DAL.Entities.Entities;
+﻿using GA360.Commons.Constants;
+using GA360.DAL.Entities.Entities;
 using GA360.Domain.Core.Interfaces;
+using GA360.Domain.Core.Models;
 using GA360.Domain.Core.Services;
 using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +19,9 @@ namespace GA360.Server.Controllers
         private readonly IPermissionService _permissionService;
         private readonly IMemoryCache _cache;
 
+
         private const string QualificationsCacheKey = "qualificationsCache";
+        private const string QualificationsTrainingCentreCacheKey = "qualificationsTrainingCentreCache";
 
         public QualificationController(
             ILogger<QualificationController> logger,
@@ -47,9 +51,35 @@ namespace GA360.Server.Controllers
                 _cache.Set(QualificationsCacheKey, qualifications, cacheEntryOptions);
             }
 
-            var qualificationsPermisssions = await _permissionService.FilterPermissions(emailClaim, qualifications);
+            var permissions = await _permissionService.GetPermissions(emailClaim);
 
-            return Ok(qualificationsPermisssions);
+            if (permissions.Role != RoleConstants.SUPER_ADMIN)
+            {
+                var qualificationsPermisssions = await _permissionService.FilterPermissions(emailClaim, qualifications);
+
+                return Ok(qualificationsPermisssions);
+            }
+            
+            return Ok(qualifications);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("GetQualificationsByTrainingId/{trainingCentreId}")]
+        public async Task<IActionResult> GetQualificationsByTrainingId(int trainingCentreId)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            if (!_cache.TryGetValue(QualificationsTrainingCentreCacheKey, out List<QualificationTrainingModel> qualifications))
+            {
+                qualifications = await _qualificationService.GetAllQualificationsByTrainingCentreId(trainingCentreId);
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+
+                _cache.Set(QualificationsTrainingCentreCacheKey, qualifications, cacheEntryOptions);
+            }
+
+            return Ok(qualifications);
         }
 
         [AllowAnonymous]

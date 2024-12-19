@@ -1,7 +1,7 @@
 
 import { Avatar, Chip, Grid, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import Box from "@mui/system/Box";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { styled } from '@mui/material/styles';
 import { CustomerList, CustomerListExtended } from "../../types/customer";
 import CustomerTable from "../../sections/apps/customer/CustomerTable";
@@ -17,6 +17,7 @@ import CustomerModal from "../../sections/apps/customer/CustomerModal";
 import { Gender } from "../../config";
 import {CustomerApiModel, CustomerApiModelExtended, mapCustomerApiModelToCustomerList, mapCustomerApiModelToCustomerListExtended} from "../../types/customerApiModel"
 import AlertCustomerDelete from "sections/apps/customer/AlertCustomerDelete";
+import DuendeContext from "contexts/DuendeContext";
 
 
 
@@ -26,6 +27,8 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
     const [customerModal, setCustomerModal] = useState<boolean>(false);
     const [selectedCustomer, setSelectedCustomer] = useState<CustomerListExtended | null>(null);
     const [customerDeleteId, setCustomerDeleteId] = useState<any>('');
+
+    const { user, isLoggedIn } = useContext(DuendeContext);
 
     const handleClose = () => {
         setOpen(!open);
@@ -105,6 +108,11 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
                 header: 'Country',
                 accessorKey: 'country'
             },
+        // Conditionally add the training centre column
+        ...(user?.role === "Super Admin" ? [{
+            header: 'Training Centre',
+            accessorKey: 'trainingCentre'
+        }] : []),
             {
                 header: 'Status',
                 accessorKey: 'status',
@@ -171,6 +179,7 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
         []
     );
 
+   
     useEffect(() => {
         if (triggerAddCandidate) {
             setCustomerModal(true)

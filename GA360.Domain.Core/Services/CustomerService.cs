@@ -64,6 +64,12 @@ public class CustomerService : ICustomerService
             Role = result.Roles!=null? result.Roles.FirstOrDefault().Role.Name:null,
             RoleId = result.Roles != null ? result.Roles.FirstOrDefault().RoleId:0,
             CustomerId= result.Id,
+            TrainingCentreId= result.TrainingCentreId,
+            Contact = result.Contact,
+            City = result.Address!=null?result.Address.City:string.Empty,
+            AvatarImage = result.AvatarImage,
+            EmployeeStatus = result.EmploymentStatus,
+
         } ;
     }
 
