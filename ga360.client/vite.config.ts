@@ -87,6 +87,10 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/customer/get/documents': {
+                target,
+                secure: false
+            },
             '^/api/customer/customerwithcoursequalificationrecords': {
                 target,
                 secure: false

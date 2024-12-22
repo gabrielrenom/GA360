@@ -30,7 +30,7 @@ import DownloadOutlined from "@ant-design/icons/DownloadOutlined";
 import defaultImages from "assets/images/users/default.png";
 import { DocumentViewDataProps, TableDataProps } from "types/table";
 import makeData from "data/react-table";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useContext } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -69,9 +69,10 @@ import ScrollX from "components/ScrollX";
 import { LabelKeyObject } from "react-csv/lib/core";
 import EditOutlined from "@ant-design/icons/EditOutlined";
 import { CustomerListExtended } from "types/customer";
-import { getCandidate } from "api/customer";
+import { getCandidate, getDocumentsByUser } from "api/customer";
 import { DocumentFileModel } from "types/customerApiModel";
 import TrainingCentreProfile from './TrainingCentreProfile';
+import DuendeContext from "contexts/DuendeContext";
  //import Button from 'themes/overrides/Button';
 
 interface ReactTableProps {
@@ -135,6 +136,9 @@ export default function TabTrainingCentreDocuments() {
     []
   );
   
+  const { user, isLoggedIn } = useContext(DuendeContext);
+
+
   function mapDocumentFilesToViewData(files: DocumentFileModel[]): DocumentViewDataProps[] {
     return files.map(file => {
         const nameParts = file.name.split('/');
@@ -146,23 +150,42 @@ export default function TabTrainingCentreDocuments() {
     });
 }
   
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await getCandidate();
-        setAvatar(response.avatarImage);
-        setCandidate(response);
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const response = await getCandidate();
+  //       setAvatar(response.avatarImage);
+  //       setCandidate(response);
 
-        const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response.files);
+  //       const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response.files);
+        
+  //       setDocuments(mappedFiles)
+
+  //     } catch (error) {
+  //       console.error("Error fetching countries:", error);
+  //     }
+  //   };
+
+  //   fetchUser();
+  // }, []);
+
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const response = await getDocumentsByUser(user.email);
+        console.log("DOCS",response);
+        setAvatar(user.avatarImage);
+        const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response);
         
         setDocuments(mappedFiles)
-
+        
       } catch (error) {
         console.error("Error fetching countries:", error);
       }
     };
 
-    fetchUser();
+    fetchDocuments();
   }, []);
 
   function ReactTable({ columns, data }: ReactTableProps) {

@@ -666,37 +666,50 @@ public class CustomerService : ICustomerService
         return result;
     }
 
-    public async Task<List<CustomerModelHighPerformance>> GetAllUltraHighPerfomance()
+    public async Task<List<CustomerModelHighPerformance>> GetAllUltraHighPerfomance(int? trainingCentreId)
     {
         var customers = new List<CustomerModelHighPerformance>();
 
         using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
         {
+            // Base query
             var query = @"
-        SELECT 
-            c.Id,
-            c.FirstName,
-            c.LastName,
-            CONCAT(c.FirstName, ' ', c.LastName) AS Name,
-            c.Contact,
-            c.Email,
-            co.Name AS Country,
-            c.Location,
-            c.Status,
-            c.CountryId,
-            c.DOB,
-            c.DOB AS DateOfBirth,
-            c.TrainingCentreId,
-            tc.Name AS TrainingCentreName
-        FROM 
-            Customers c
-        LEFT JOIN 
-            Countries co ON c.CountryId = co.Id
-        LEFT JOIN 
-            TrainingCentres tc ON c.TrainingCentreId = tc.Id
-        ORDER BY c.Id";
+            SELECT 
+                c.Id,
+                c.FirstName,
+                c.LastName,
+                CONCAT(c.FirstName, ' ', c.LastName) AS Name,
+                c.Contact,
+                c.Email,
+                co.Name AS Country,
+                c.Location,
+                c.Status,
+                c.CountryId,
+                c.DOB,
+                c.DOB AS DateOfBirth,
+                c.TrainingCentreId,
+                tc.Name AS TrainingCentreName
+            FROM 
+                Customers c
+            LEFT JOIN 
+                Countries co ON c.CountryId = co.Id
+            LEFT JOIN 
+                TrainingCentres tc ON c.TrainingCentreId = tc.Id";
+
+            // Add WHERE clause if trainingCentreId is provided
+            if (trainingCentreId.HasValue)
+            {
+                query += " WHERE c.TrainingCentreId = @TrainingCentreId";
+            }
+
+            query += " ORDER BY c.Id";
 
             var command = new SqlCommand(query, connection);
+
+            if (trainingCentreId.HasValue)
+            {
+                command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+            }
 
             await connection.OpenAsync();
             using (var reader = await command.ExecuteReaderAsync())
@@ -718,7 +731,7 @@ public class CustomerService : ICustomerService
                         CountryId = reader.GetInt32(reader.GetOrdinal("CountryId")),
                         DOB = reader.GetString(reader.GetOrdinal("DOB")),
                         DateOfBirth = reader.GetString(reader.GetOrdinal("DateOfBirth")),
-                        TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),                       
+                        TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
                         TrainingCentre = reader.IsDBNull(reader.GetOrdinal("TrainingCentreName")) ? null : reader.GetString(reader.GetOrdinal("TrainingCentreName"))
                     };
 
@@ -730,4 +743,50 @@ public class CustomerService : ICustomerService
         return customers;
     }
 
+    public async Task<List<FileModel>> GetCustomerDocumentsByEmail(string email)
+    {
+        var documents = new List<FileModel>();
+
+        using (var connection = new SqlConnection(_customerRepository.Context.Database.GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            var query = @"
+        SELECT 
+            d.Title AS Name,
+            d.Path AS Url,
+            d.BlobId,
+            d.Id
+        FROM 
+            [dbo].[Customers] c
+        JOIN 
+            [dbo].[DocumentCustomer] dc ON c.Id = dc.CustomerId
+        JOIN 
+            [dbo].[Documents] d ON dc.DocumentId = d.Id
+        WHERE 
+            c.Email = @Email";
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@Email", email);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var document = new FileModel
+                        {
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Url = reader.GetString(reader.GetOrdinal("Url")),
+                            BlobId = reader.GetString(reader.GetOrdinal("BlobId")),
+                        };
+
+                        documents.Add(document);
+                    }
+                }
+            }
+        }
+
+        return documents;
+    }
 }

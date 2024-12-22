@@ -27,15 +27,17 @@ namespace GA360.Server.Controllers
         private readonly IConfiguration _configuration;
         private readonly IMemoryCache _memoryCache;
         private readonly ICustomerRepository _customerRepository;
+        private readonly IPermissionService _permissionService;
 
 
-        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService, IConfiguration configuration, IMemoryCache memoryCache, ICustomerRepository customerRepository)
+        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService, IConfiguration configuration, IMemoryCache memoryCache, ICustomerRepository customerRepository, IPermissionService permissionService)
         {
             _logger = logger;
             _customerService = customerService;
             _configuration = configuration;
             _memoryCache = memoryCache;
             _customerRepository = customerRepository;
+            _permissionService = permissionService;
         }
 
         //[AllowAnonymous]
@@ -65,9 +67,13 @@ namespace GA360.Server.Controllers
 
         [Authorize]
         [HttpGet("list")]
-        public async Task<IActionResult> GetAllContacts(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllContacts(int page = 1, int pageSize = 10, int? trainingCentreId = null)
         {
-            return Ok(await _customerService.GetAllUltraHighPerfomance());
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            var permissions = _permissionService.GetPermissions(emailClaim);
+
+            return Ok(await _customerService.GetAllUltraHighPerfomance(trainingCentreId));
         }
 
         [Authorize]
@@ -189,6 +195,14 @@ namespace GA360.Server.Controllers
             var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
 
             var result = await _customerService.GetCustomerByEmail(emailClaim);
+
+            return Ok(result);
+        }
+
+        [HttpGet("get/documents/{email}")]
+        public async Task<IActionResult> GetDocuments(string email)
+        {
+            var result = await _customerService.GetCustomerDocumentsByEmail(email);
 
             return Ok(result);
         }

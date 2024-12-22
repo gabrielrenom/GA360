@@ -70,7 +70,7 @@ export default function TabTrainingCentreQualification() {
              learners:certificate.learners,
              assessors:certificate.assessors,
              expirationDate:new Date(certificate.expirationDate).toLocaleDateString('en-GB'),
-             status: certificate.status.toString(), // Assuming status is converted to string
+             status: certificate.status === 1 ?"Live":"Expired", // Assuming status is converted to string
         }));
     };
 
@@ -186,9 +186,13 @@ export default function TabTrainingCentreQualification() {
                 content={false}
                 secondary={
                     <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
-                        <Button variant="contained" color="primary" onClick={handleAddQualificationClick}>+ Add Qualification</Button>
-                        <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
-                        <CSVExport {...{ data, headers, filename: top ? 'pagination-top.csv' : 'pagination-bottom.csv' }} />
+
+                                <Button variant="contained" color="primary" onClick={handleAddQualificationClick}>+ Add Qualification</Button>
+
+                                <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
+
+                                <CSVExport {...{ data, headers, filename: top ? 'qualifications.csv' : 'qualifications.csv' }} />
+
                     </Stack>
                 }
             >

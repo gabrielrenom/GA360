@@ -259,6 +259,14 @@ export default function FormCustomerAdd({
         // Handle the files as needed
     };
 
+    const handleFileRemove = (file: File) => {
+        // Handle file removal logic
+        console.log('File removed:', file);
+        
+        // Update the documents state if necessary
+        setDocuments((prevDocs) => prevDocs.filter(doc => doc.name !== file.name));
+      };
+    
     const CustomerSchema = Yup.object().shape({
         firstName: Yup.string().max(255).required("First Name is required"),
         lastName: Yup.string().max(255).required("Last Name is required"),
@@ -970,12 +978,22 @@ export default function FormCustomerAdd({
                                                             <InputLabel htmlFor="customer-documents">
                                                                 Documents
                                                             </InputLabel>
-                                                            <MultipleFileUploader
+                                                            {/* <MultipleFileUploader
                                                                 onFilesUpload={handleFilesUpload}
                                                                 // @ts-ignore
                                                                 detailedFiles={documents}
                                                                 initialFiles={documents}
-                                                            />
+                                                            /> */}
+                                                                  <MultipleFileUploader
+        onFilesUpload={handleFilesUpload}
+        onFileRemove={handleFileRemove} // Add this line
+                                                                        // @ts-ignore
+
+        detailedFiles={documents}
+        initialFiles={documents}
+        acceptedFiles="image/*"
+      />
+
                                                         </Stack>
                                                     </Grid>
                                                     <Grid item xs={12} sm={6}>

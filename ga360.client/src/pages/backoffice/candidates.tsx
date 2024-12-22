@@ -183,6 +183,7 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
     useEffect(() => {
         if (triggerAddCandidate) {
             setCustomerModal(true)
+            setSelectedCustomer(null); 
         }
       }, [triggerAddCandidate]);
 
@@ -231,13 +232,24 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
     )
 
     async function fetchCustomerList() {
-
-        const response = await fetch("/api/customer/list", {
+        let url = "/api/customer/list";
+    
+        if (user.role === "Training Centre") {
+            url += `?trainingCentreId=${user.trainingCentreId}`;
+        }
+    
+        const response = await fetch(url, {
             headers: {
                 "X-CSRF": "Dog",
             },
         });
+    
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+    
         const result = await response.json();
         return result;
     }
+    
 }

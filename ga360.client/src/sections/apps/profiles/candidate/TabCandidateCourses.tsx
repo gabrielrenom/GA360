@@ -154,7 +154,7 @@ export default function TabCandidateCourses() {
         secondary={
           <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
             <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
-            <CSVExport {...{ data, headers, filename: top ? 'pagination-top.csv' : 'pagination-bottom.csv' }}  />
+            <CSVExport {...{ data, headers, filename: top ? 'courses.csv' : 'courses.csv' }}  />
           </Stack>
         }
       >

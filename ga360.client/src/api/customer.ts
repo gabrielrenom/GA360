@@ -75,7 +75,7 @@ import { fetcher } from 'utils/axios';
 
 // types
 import { BasicCustomer, CustomerList, CustomerListExtended, CustomerProps, User } from 'types/customer';
-import { mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel, mapCustomerListToCustomerApiModelExtended } from 'types/customerApiModel';
+import { DocumentFileModel, mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel, mapCustomerListToCustomerApiModelExtended } from 'types/customerApiModel';
 
 const initialState: CustomerProps = {
   modal: false
@@ -90,8 +90,30 @@ export const endpoints = {
   delete: '/delete', // server URL
   get: '/get',
   user:'/user',
-  batchupload:'/api/customer/batchupload'
+  batchupload:'/api/customer/batchupload',
+  getdocuments: '/api/customer/get/documents'
 };
+
+export async function getDocumentsByUser(email: string): Promise<DocumentFileModel[]> {
+  try {
+    const response = await fetch(`${endpoints.getdocuments}/${email}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF': 'Dog',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch documents:', error);
+    throw error;
+  }
+}
 
 export async function batchUploadCustomers(customers: CustomerUpload[]): Promise<CustomerBatchUploadResponse> {
 

@@ -27,6 +27,9 @@ import TrainingCentreProfile from 'pages/apps/profiles/trainingcentre';
 import GettingStarted from '../pages/development/gettingstarted';
 import ApiReference from '../pages/development/apireference';
 import CSVCandidatesUploader from 'sections/apps/customer/CSVCandidatesUploader';
+import AboutUs from 'layout/Dashboard/Footer/AboutUs';
+import Terms from 'layout/Dashboard/Footer/Terms';
+import Privacy from 'layout/Dashboard/Footer/Privacy';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -623,6 +626,18 @@ const MainRoutes = {
           path: 'map',
           element: <Map />
         },
+        {
+          path: 'about-us',
+          element: <AboutUs />
+          },
+          {
+            path: 'terms',
+            element: <Terms />
+            },
+            {
+              path: 'privacy',
+              element: <Privacy />
+              },
         {
           path: 'claimsdashboard',
           element: <ClaimsDashboard />

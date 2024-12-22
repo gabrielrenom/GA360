@@ -1,4 +1,3 @@
-// export default MultipleFileUploader;
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Box, IconButton, LinearProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -11,17 +10,17 @@ const Input = styled('input')({
 });
 
 const MAX_FILE_SIZE_MB = 25;
-const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/csv'];
-
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/csv'];
 
 interface MultipleFileUploaderProps {
   onFilesUpload: (files: File[]) => void;
+  onFileRemove?: (file: File) => void; // Add onFileRemove prop
   detailedFiles?: DocumentFileModel[];
   initialFiles?: File[]; // Add initialFiles prop
   acceptedFiles: string;
 }
 
-const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUpload,detailedFiles = [], initialFiles = [], acceptedFiles = "image/*" }) => {
+const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUpload, onFileRemove, detailedFiles = [], initialFiles = [], acceptedFiles = "image/*" }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>(initialFiles);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -80,8 +79,12 @@ const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUplo
 
   const handleRemoveFile = (index: number) => {
     const newFiles = [...selectedFiles];
-    newFiles.splice(index, 1);
+    const removedFile = newFiles.splice(index, 1)[0];
     setSelectedFiles(newFiles);
+
+    if (onFileRemove && removedFile) {
+      onFileRemove(removedFile);
+    }
   };
 
   return (
@@ -110,8 +113,8 @@ const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUplo
                       {file.name}
                     </a>
                 </Typography>
-                  <IconButton style={{color:'red' }}  onClick={() => handleRemoveFile(index)} size="small">
-                    <CloseCircleOutlined/>
+                  <IconButton style={{color:'red' }} onClick={() => handleRemoveFile(index)} size="small">
+                    <CloseCircleOutlined />
                   </IconButton>
                 </Box>
               </span>

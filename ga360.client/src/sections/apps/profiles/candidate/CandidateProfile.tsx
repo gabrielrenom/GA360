@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Grid, Stack, Typography, List, ListItem, ListItemIcon, ListItemSecondaryAction } from '@mui/material';
 
 import AimOutlined from "@ant-design/icons/AimOutlined";
@@ -8,8 +8,13 @@ import Avatar from "components/@extended/Avatar";
 import MailOutlined from "@ant-design/icons/MailOutlined";
 
 import MainCard from 'components/MainCard';
+import DuendeContext from 'contexts/DuendeContext';
+import { UserOutlined } from '@ant-design/icons';
 
 const CandidateProfile = ({ candidate, defaultImages }) => {
+
+  const { user, isLoggedIn } = useContext(DuendeContext);
+
   return (
     <MainCard>
       <Grid container spacing={3}>
@@ -60,6 +65,16 @@ const CandidateProfile = ({ candidate, defaultImages }) => {
               <ListItemSecondaryAction>
                 <Typography align="right">
                   {candidate !== null ? candidate.city : <></>}
+                </Typography>
+              </ListItemSecondaryAction>
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <UserOutlined />
+              </ListItemIcon>
+              <ListItemSecondaryAction>
+                <Typography align="right">
+                  {user !== null ? user.role : <></>}
                 </Typography>
               </ListItemSecondaryAction>
             </ListItem>

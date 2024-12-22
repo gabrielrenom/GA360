@@ -125,19 +125,19 @@ public class QualificationService : IQualificationService
                     // Optionally, preallocate list capacity if an estimate is available
                     while (await reader.ReadAsync())
                     {
-                        var qualificationModel = new QualificationTrainingModel
-                        {
-                            TrainingCentreId = reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
-                            QualificationId = reader.GetInt32(reader.GetOrdinal("QualificationId")),
-                            QAN = reader.GetInt32(reader.GetOrdinal("QualificationId")),
-                            InternalReference = reader.GetString(reader.GetOrdinal("InternalReference")),
-                            QualificationName = reader.GetString(reader.GetOrdinal("QualificationName")),
-                            AwardingBody = reader.GetString(reader.GetOrdinal("AwardingBody")),
-                            Learners = reader.GetInt32(reader.GetOrdinal("Learners")),
-                            Assessors = reader.GetInt32(reader.GetOrdinal("Assessors")),
-                            ExpirationDate = reader.GetDateTime(reader.GetOrdinal("ExpirationDate")),
-                            Status = reader.GetInt32(reader.GetOrdinal("Status"))
-                        };
+                        var qualificationModel = new QualificationTrainingModel();
+
+                        qualificationModel.TrainingCentreId = reader.GetInt32(reader.GetOrdinal("TrainingCentreId"));
+                        qualificationModel.QualificationId = reader.GetInt32(reader.GetOrdinal("QualificationId"));
+                        qualificationModel.QAN = reader.GetInt32(reader.GetOrdinal("QualificationId"));
+                        qualificationModel.InternalReference = reader.IsDBNull(reader.GetOrdinal("InternalReference")) ? string.Empty : reader.GetString(reader.GetOrdinal("InternalReference"));
+                        qualificationModel.QualificationName = reader.IsDBNull(reader.GetOrdinal("QualificationName")) ? string.Empty : reader.GetString(reader.GetOrdinal("QualificationName"));
+                        qualificationModel.AwardingBody = reader.IsDBNull(reader.GetOrdinal("AwardingBody")) ? string.Empty : reader.GetString(reader.GetOrdinal("AwardingBody"));
+                        qualificationModel.Learners = reader.GetInt32(reader.GetOrdinal("Learners"));
+                        qualificationModel.Assessors = reader.GetInt32(reader.GetOrdinal("Assessors"));
+                        qualificationModel.ExpirationDate = reader.GetDateTime(reader.GetOrdinal("ExpirationDate"));
+                        qualificationModel.Status = reader.GetInt32(reader.GetOrdinal("Status"));
+
 
                         qualificationTrainingModels.Add(qualificationModel);
                     }
