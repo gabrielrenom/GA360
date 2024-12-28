@@ -34,6 +34,7 @@ import {
   createCustomersWithCourseQualificationRecords,
   updateCustomersWithCourseQualificationRecords,
   getAllCustomerWithCourseQualificationRecords,
+  getAllCustomerWithCourseQualificationRecordsWithCandidateId,
 } from "api/qualificationService";
 
 import { addQualification, deleteQualification, getQualifications, Qualification, updateQualification } from "api/qualificationService";
@@ -103,19 +104,22 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
+interface DynamicTableCustomerWithCourseQualificationRecordsProps {
+  customerId: number;
+}
 
-export default function DynamicTableCustomerWithCourseQualificationRecords() {
+export default function DynamicTableCustomerWithCourseQualificationRecords({ customerId }: DynamicTableCustomerWithCourseQualificationRecordsProps) {
   const theme = useTheme();
   const downSM = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [rows, setRows] = React.useState<CustomersWithCourseQualificationRecordsViewModel[]>([]);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+  const [rows, setRows] = useState<CustomersWithCourseQualificationRecordsViewModel[]>([]);
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllCustomerWithCourseQualificationRecords();
-        console.log(data)
+        const data = await getAllCustomerWithCourseQualificationRecordsWithCandidateId(customerId); // Pass the customerId
+        console.log(data);
         setRows(data);
       } catch (error) {
         console.error("Failed to fetch data", error);
@@ -123,7 +127,7 @@ export default function DynamicTableCustomerWithCourseQualificationRecords() {
     };
 
     fetchData();
-  }, []);
+  }, [customerId]); // Add customerId as a dependency
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -172,6 +176,16 @@ export default function DynamicTableCustomerWithCourseQualificationRecords() {
     }
   };
 
+  const fetchCustomerWithCourseQualificationRecords = async () => {
+    try {
+      const data = await getAllCustomerWithCourseQualificationRecordsWithCandidateId(customerId);
+      setRows(data);
+    } catch (error) {
+      console.error("Failed to fetch data", error);
+      return [];
+    }
+  };
+  
 const processRowUpdate = async (newRow: GridRowModel) => {
   const updatedRow = { ...newRow, isNew: false };
   try {
@@ -211,15 +225,36 @@ const processRowUpdate = async (newRow: GridRowModel) => {
     if (newRow.isNew) {
       if(newCustomerQualification.isNew == false)
       {
-        console.log("Adding...")
-      const createdRow = await createCustomersWithCourseQualificationRecords(newCustomerQualification);
-      setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdRow : row)));
+        newCustomerQualification.customerId = customerId
+        if (newCustomerQualification.qualificationId === undefined &&
+          newCustomerQualification.qualificationStatusId === undefined &&
+          newCustomerQualification.customerId === undefined) {
+            console.log("Adding empty...",newCustomerQualification)
+
+          //setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdRow : row)));
+          }
+          else
+          {
+            console.log("Adding full...",newCustomerQualification)
+
+            const createdRow = await createCustomersWithCourseQualificationRecords(newCustomerQualification);
+
+            await fetchCustomerWithCourseQualificationRecords();
+            return;
+          }
+
       }
     } 
     else {
       console.log("updating...",newCustomerQualification)
+      newCustomerQualification.customerId = customerId
+      
+      // @ts-ignore
+      newCustomerQualification.progression = Number(updatedRow.progression);
       const updatedRowData = await updateCustomersWithCourseQualificationRecords(Number(newRow.id), newCustomerQualification);
       setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? updatedRowData : row)));
+      await fetchCustomerWithCourseQualificationRecords();
+      //return;
     }
     return updatedRow;
   } catch (error) {
@@ -262,18 +297,18 @@ const processRowUpdate = async (newRow: GridRowModel) => {
       ),
     },    
     { field: "certificateId", hideable: true },
-    {
-      field: 'certificateName',
-      headerName: 'CERTIFICATE',
-      flex: 2,
-      editable: true,
-      renderEditCell: (params) => (
-        <CertificateDropdown
-          value={params.value}
-          onChange={(value) => params.api.setEditCellValue({ id: params.id, field: params.field, value })}
-        />
-      ),
-    },
+    // {
+    //   field: 'certificateName',
+    //   headerName: 'CERTIFICATE',
+    //   flex: 2,
+    //   editable: true,
+    //   renderEditCell: (params) => (
+    //     <CertificateDropdown
+    //       value={params.value}
+    //       onChange={(value) => params.api.setEditCellValue({ id: params.id, field: params.field, value })}
+    //     />
+    //   ),
+    // },
     { field: "progression", headerName: "PROGRESSION", flex: 1, editable: true },
     { field: "qualificationStatusId", hideable: true },
     {

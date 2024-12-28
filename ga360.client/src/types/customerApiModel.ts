@@ -85,7 +85,7 @@ export interface CustomerApiModelExtended {
   disability: string;
   employeeStatus: string;
   employer: string;
-  trainingCentre: string;
+  trainingCentre: number;
   nationalInsurance: string;
   portfolio: string;
   city: string;
@@ -267,7 +267,7 @@ export const mapCustomerListToCustomerApiModelExtended = (
     disability: user.disability || "",
     employeeStatus: user.employeeStatus || "",
     employer: user.employer || "",
-    trainingCentre: user.trainingCentre || "",
+    trainingCentre: user.trainingCentre,
     nationalInsurance: user.nationalInsurance || "",
     portfolio: user.portfolio || "",
     street: user.street || "",

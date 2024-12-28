@@ -32,6 +32,10 @@ export default function CustomerModal({ open, modalToggler, customer }: Props) {
   const closeModal = () => modalToggler(false);
 
   useEffect(() => {
+    if (customer === null)
+    {
+      setCustomerDetails(null);
+    }
     if (customer?.id) {
       setLoading(true);
       getUserById(customer.id)
@@ -52,6 +56,7 @@ export default function CustomerModal({ open, modalToggler, customer }: Props) {
     () => !loading && <FormCustomerAdd customer={customerDetails} closeModal={closeModal} />,
     [customerDetails, loading, closeModal]
   );
+  // const customerForm = !loading ? <FormCustomerAdd customer={customerDetails} closeModal={closeModal} /> : null;
 
   return (
     <>

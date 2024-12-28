@@ -12,6 +12,8 @@ public class QualificationViewModel
     public DateTime CertificateDate { get; set; }
     public int CertificateNumber { get; set; }
     public int Status { get; set; }
+    public int TrainingCentreId { get; set; }
+    public string TrainingCentre { get; set; }
 }
 
 

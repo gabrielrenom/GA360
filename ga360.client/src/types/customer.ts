@@ -31,15 +31,13 @@ export interface CustomerList {
 }
 
 export interface CustomerListExtended extends CustomerList {
-
-
   avatarImage: string | null;
   dateOfBirth: string;
   ethnicity: string;
   disability: string;
   employeeStatus: string;
   employer: string;
-  trainingCentre: string;
+  trainingCentre: number;
   nationalInsurance: string;
   portfolio: string;
   dob: string;
@@ -52,6 +50,7 @@ export interface CustomerListExtended extends CustomerList {
   courses: CourseModel [];
   qualifications: QualificationModel [];
   certificates: CertificateModel [];
+  trainingCentreId?: number; // Make this property optional
 }
 
 export interface BasicCustomer {

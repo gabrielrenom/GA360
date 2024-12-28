@@ -46,11 +46,130 @@ public class QualificationService : IQualificationService
         return await _qualificationRepository.GetAll();
     }
 
+    public async Task<List<QualificationWithTrainingModel>> GetAllQualificationsWithTrainingCentres()
+    {
+        var qualifications = await _qualificationRepository.Context.Qualifications.Include(x => x.QualificationTrainingCentres).ThenInclude(x => x.TrainingCentre).ToListAsync();
+
+        var result = qualifications.Select(q => new QualificationWithTrainingModel
+        {
+            Id = q.Id,
+            Name = q.Name,
+            RegistrationDate = q.RegistrationDate,
+            ExpectedDate = q.ExpectedDate,
+            CertificateDate = q.CertificateDate,
+            CertificateNumber = q.CertificateNumber,
+            Status = q.Status,
+            TrainingCentreId = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Id).FirstOrDefault(),
+            TrainingCentre = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Name).FirstOrDefault(),
+        }).ToList();
+
+        return result;
+    }
+
+
     public async Task<Qualification> AddQualification(Qualification qualification)
     {
         var result = await _qualificationRepository.AddAsync(qualification);
         return result;
     }
+
+    public async Task<QualificationWithTrainingModel> AddQualification(QualificationWithTrainingModel qualification)
+    {
+        var qualificationEntity = new Qualification
+        {
+            Name = qualification.Name,
+            RegistrationDate = qualification.RegistrationDate,
+            ExpectedDate = qualification.ExpectedDate,
+            CertificateDate = qualification.CertificateDate,
+            CertificateNumber = qualification.CertificateNumber,
+            Status = qualification.Status,
+        };
+
+        var result = await _qualificationRepository.AddAsync(qualificationEntity);
+
+        // Adding the training centre relationship
+        var qualificationTrainingCentre = new QualificationTrainingCentre
+        {
+            QualificationId = result.Id,
+            TrainingCentreId = (int)qualification.TrainingCentreId,
+        };
+        _qualificationRepository.Context.QualificationTrainingCentre.Add(qualificationTrainingCentre);
+        await _qualificationRepository.Context.SaveChangesAsync();
+
+        // Get the training centre name
+        var trainingCentre = await _qualificationRepository.Context.TrainingCentres.FindAsync(qualification.TrainingCentreId);
+        var qualificationWithTraining = new QualificationWithTrainingModel
+        {
+            Id = result.Id,
+            Name = result.Name,
+            RegistrationDate = result.RegistrationDate,
+            ExpectedDate = result.ExpectedDate,
+            CertificateDate = result.CertificateDate,
+            CertificateNumber = result.CertificateNumber,
+            Status = result.Status,
+            TrainingCentreId = qualification.TrainingCentreId,
+            TrainingCentre = trainingCentre?.Name // Assuming training centre's name as string
+        };
+
+        return qualificationWithTraining;
+    }
+
+
+    public async Task<QualificationWithTrainingModel> UpdateQualification(QualificationWithTrainingModel qualification)
+    {
+        var qualificationEntity = await _qualificationRepository.Context.Qualifications.FirstOrDefaultAsync(x=>x.Id == qualification.Id);
+        if (qualificationEntity == null)
+        {
+            throw new Exception("Qualification not found");
+        }
+
+        qualificationEntity.Name = qualification.Name;
+        qualificationEntity.RegistrationDate = qualification.RegistrationDate;
+        qualificationEntity.ExpectedDate = qualification.ExpectedDate;
+        qualificationEntity.CertificateDate = qualification.CertificateDate;
+        qualificationEntity.CertificateNumber = qualification.CertificateNumber;
+        qualificationEntity.Status = qualification.Status;
+
+        var result = await _qualificationRepository.UpdateAsync(qualificationEntity);
+
+        // Update the training centre relationship
+        var existingTrainingCentre = await _qualificationRepository.Context.QualificationTrainingCentre
+            .FirstOrDefaultAsync(qtc => qtc.QualificationId == qualification.Id);
+
+        if (existingTrainingCentre != null)
+        {
+            existingTrainingCentre.TrainingCentreId = (int)qualification.TrainingCentreId;
+        }
+        else
+        {
+            var qualificationTrainingCentre = new QualificationTrainingCentre
+            {
+                QualificationId = qualification.Id,
+                TrainingCentreId = (int)qualification.TrainingCentreId,
+            };
+            _qualificationRepository.Context.QualificationTrainingCentre.Add(qualificationTrainingCentre);
+        }
+
+        await _qualificationRepository.Context.SaveChangesAsync();
+
+        // Get the training centre name
+        var trainingCentre = await _qualificationRepository.Context.TrainingCentres.FindAsync(qualification.TrainingCentreId);
+        var qualificationWithTraining = new QualificationWithTrainingModel
+        {
+            Id = result.Id,
+            Name = result.Name,
+            RegistrationDate = result.RegistrationDate,
+            ExpectedDate = result.ExpectedDate,
+            CertificateDate = result.CertificateDate,
+            CertificateNumber = result.CertificateNumber,
+            Status = result.Status,
+            TrainingCentreId = qualification.TrainingCentreId,
+            TrainingCentre = trainingCentre?.Name // Assuming training centre's name as string
+        };
+
+        return qualificationWithTraining;
+    }
+
 
     public async Task<Qualification> UpdateQualification(Qualification qualification)
     {
@@ -147,6 +266,86 @@ public class QualificationService : IQualificationService
 
         return qualificationTrainingModels;
     }
+
+    public async Task<List<Qualification>> GetQualificationsByTrainingCentreWithEmail(string email)
+    {
+        var qualifications = new List<Qualification>();
+
+        using (var connection = new SqlConnection(_qualificationRepository.Context.Database.GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            // Fetch TrainingCentreId using email
+            var getTrainingCentreIdQuery = @"
+            SELECT TrainingCentreId
+            FROM [dbo].[Customers]
+            WHERE Email = @Email;";
+
+            int trainingCentreId;
+
+            using (var command = new SqlCommand(getTrainingCentreIdQuery, connection))
+            {
+                command.Parameters.AddWithValue("@Email", email);
+
+                var result = await command.ExecuteScalarAsync();
+                if (result == null)
+                {
+                    throw new Exception("TrainingCentreId not found for the given email.");
+                }
+
+                trainingCentreId = (int)result;
+            }
+
+            // Fetch qualifications using TrainingCentreId
+            var getQualificationsQuery = @"
+            SELECT 
+                q.Id, 
+                q.Name, 
+                q.RegistrationDate, 
+                q.ExpectedDate, 
+                q.CertificateDate, 
+                q.CertificateNumber, 
+                q.Status, 
+                q.AwardingBody, 
+                q.InternalReference
+            FROM 
+                [dbo].[QualificationTrainingCentre] qt
+            JOIN 
+                [dbo].[Qualifications] q ON qt.QualificationId = q.Id
+            WHERE 
+                qt.TrainingCentreId = @TrainingCentreId;";
+
+            using (var command = new SqlCommand(getQualificationsQuery, connection))
+            {
+                command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var qualification = new Qualification
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            RegistrationDate = reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            ExpectedDate = reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
+                            CertificateDate = reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
+                            CertificateNumber = reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
+                            Status = reader.GetInt32(reader.GetOrdinal("Status")),
+                            AwardingBody = reader.IsDBNull(reader.GetOrdinal("AwardingBody")) ? null : reader.GetString(reader.GetOrdinal("AwardingBody")),
+                            InternalReference = reader.IsDBNull(reader.GetOrdinal("InternalReference")) ? null : reader.GetString(reader.GetOrdinal("InternalReference"))
+                        };
+
+                        qualifications.Add(qualification);
+                    }
+                }
+            }
+        }
+
+        return qualifications;
+    }
+
+
 
     public async Task<List<Qualification>> GetAllQualificationsByEmail(string email)
     {

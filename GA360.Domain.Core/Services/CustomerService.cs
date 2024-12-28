@@ -1,5 +1,6 @@
 ﻿using GA360.DAL.Entities.Entities;
 using GA360.DAL.Infrastructure.Interfaces;
+using GA360.DAL.Infrastructure.Repositories;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
 using Microsoft.Data.SqlClient;
@@ -146,13 +147,29 @@ public class CustomerService : ICustomerService
                 AvatarImage = customerModel.AvatarImage,
             };
 
-            if (customerModel.TrainingCentre != null || customerModel.TrainingCentre > 0)
+            if (customerModel.TrainingCentre != null && customerModel.TrainingCentre > 0)
             {
                 customer.TrainingCentreId = customerModel.TrainingCentre;
             }
+            else
+            {
+                customer.TrainingCentreId = null;
+            }
 
-            _customerRepository.Add(customer);
+            _customerRepository.Context.Customers.Add(customer);
+            //_customerRepository.Add(customer);
             await _customerRepository.SaveChangesAsync();
+
+            var role = await _customerRepository.Context.Roles.FirstOrDefaultAsync(x => x.Name.ToLower() == customer.Role.ToLower());
+
+            _customerRepository.Context.UserRoles.Add(new UserRole
+            {
+                RoleId = role.Id,
+                CustomerId = customer.Id
+            });
+
+            await _customerRepository.SaveChangesAsync();
+
 
             var skills = new List<CustomerSkills>();
             var dbSkills = await _skillRepository.GetAll();
@@ -222,102 +239,162 @@ public class CustomerService : ICustomerService
 
     public async Task<Customer> UpdateCustomer(int id, Models.CustomerModel customer)
     {
+        
         var ethnicOrigin = await _ethnicityRepository.Get<EthnicOrigin>(x => x.Name.ToLower() == customer.Ethnicity.ToLower());
 
         var customerdb = await _customerRepository.GetWithAllEntitiesById(id);
 
-        if (customer.TrainingCentre != null || customer.TrainingCentre > 0)
+        try
         {
-            customerdb.TrainingCentre = null;
-            customerdb.TrainingCentreId = customer.TrainingCentre;
-        }
-
-        if (customer.Country != null)
-        {
-            var country = await _customerRepository.Get<Country>(x => x.Name.ToLower() == customer.Country.ToLower());
-            customerdb.Country = null;
-            customerdb.CountryId = country.Id;
-        }
-
-        customerdb.About = customer.About;
-        customerdb.Contact = customer.Contact;
-        customerdb.Description = customer.Description;
-        customerdb.Location = customer.Location;
-        customerdb.Email = customer.Email;
-        customerdb.FatherName = customer.FatherName;
-        customerdb.FirstName = customer.FirstName;
-        customerdb.LastName = customer.LastName;
-        customerdb.Role = customer.Role;
-        customerdb.DOB = customer.DOB;
-        customerdb.EthnicOriginId = ethnicOrigin.Id;
-        customerdb.Disability = customer.Disability;
-        customerdb.Employer = customer.Employer;
-        customerdb.EmploymentStatus = customer.EmploymentStatus;
-        customerdb.Employer = customerdb.Employer;
-        customerdb.NI = customer.NI;
-        customerdb.NI = customer.NationalInsurance;
-        customerdb.Role = customer.Role;
-        customerdb.Gender = customer.Gender;
-        customerdb.Status = (DAL.Entities.Enums.StatusEnum.Status)Enum.ToObject(typeof(DAL.Entities.Enums.StatusEnum.Status), customer.Status); ;
-        customerdb.Contact = customer.Contact;
-        customerdb.Address.City = customer.City;
-        customerdb.Address.Street = customer.Street;
-        customerdb.Address.Number = customer.Number;
-        customerdb.Address.Postcode = customer.Postcode;
-        customerdb.Location = customer.Location;
-        customerdb.ePortfolio = customer.ePortfolio;
-        customerdb.EthnicOrigin = ethnicOrigin;
-        customerdb.AvatarImage = customer.AvatarImage;
-
-        _customerRepository.Update(customerdb);
-        await _customerRepository.SaveChangesAsync();
-
-
-        var skills = new List<CustomerSkills>();
-        await _skillRepository.Remove(customerdb.Id);
-        var dbSkills = await _skillRepository.GetAll();
-        foreach (var skill in customer.Skills)
-        {
-            if (dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()) != null)
+            if ((customer.TrainingCentre != null || customer.TrainingCentre > 0) && customer.TrainingCentre!=0)
             {
-                skills.Add(new CustomerSkills
-                {
-                    CustomerId = customerdb.Id,
-                    SkillId = dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()).Id
-                });
+                var trainingCentreEntity = await _customerRepository.Get<TrainingCentre>(x => x.Id == customer.TrainingCentre);
+                customerdb.TrainingCentre = trainingCentreEntity;
+                customerdb.TrainingCentreId = customer.TrainingCentre;
             }
+
+            if (customer.Country != null)
+            {
+                var country = await _customerRepository.Get<Country>(x => x.Name.ToLower() == customer.Country.ToLower());
+                customerdb.Country = country;
+                customerdb.CountryId = country.Id;
+            }
+
+            customerdb.About = customer.About;
+            customerdb.Contact = customer.Contact;
+            customerdb.Description = customer.Description;
+            customerdb.Location = customer.Location;
+            customerdb.Email = customer.Email;
+            customerdb.FatherName = customer.FatherName;
+            customerdb.FirstName = customer.FirstName;
+            customerdb.LastName = customer.LastName;
+            customerdb.Role = customer.Role;
+            customerdb.DOB = customer.DOB;
+            customerdb.EthnicOriginId = ethnicOrigin.Id;
+            customerdb.Disability = customer.Disability;
+            customerdb.Employer = customer.Employer;
+            customerdb.EmploymentStatus = customer.EmploymentStatus;
+            customerdb.Employer = customerdb.Employer;
+            customerdb.NI = customer.NI;
+            customerdb.NI = customer.NationalInsurance;
+            customerdb.Role = customer.Role;
+            customerdb.Gender = customer.Gender;
+            customerdb.Status = (DAL.Entities.Enums.StatusEnum.Status)Enum.ToObject(typeof(DAL.Entities.Enums.StatusEnum.Status), customer.Status); ;
+            customerdb.Contact = customer.Contact;
+            customerdb.Address.City = customer.City;
+            customerdb.Address.Street = customer.Street;
+            customerdb.Address.Number = customer.Number;
+            customerdb.Address.Postcode = customer.Postcode;
+            customerdb.Location = customer.Location;
+            customerdb.ePortfolio = customer.ePortfolio;
+            customerdb.EthnicOrigin = ethnicOrigin;
+            customerdb.AvatarImage = customer.AvatarImage;
+
+            _customerRepository.Update(customerdb);
+            await _customerRepository.SaveChangesAsync();
+
+
+            var skills = new List<CustomerSkills>();
+            await _skillRepository.Remove(customerdb.Id);
+            var dbSkills = await _skillRepository.GetAll();
+            foreach (var skill in customer.Skills)
+            {
+                if (dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()) != null)
+                {
+                    skills.Add(new CustomerSkills
+                    {
+                        CustomerId = customerdb.Id,
+                        SkillId = dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()).Id
+                    });
+                }
+            }
+
+            var result = await _skillRepository.AddCustomerSkills(skills);
+
+            var fileResult = await _fileService.UploadDocumentsAsync(customer.Files, customerdb.Id.ToString());
+
+            var documents = new List<DocumentCustomer>();
+            var documentEntities = fileResult.Select(x => new Document
+            {
+                BlobId = x.BlobId,
+                Title = x.Name,
+                Path = x.Url,
+                FileSize = x.ByteArrayContent != null ? x.ByteArrayContent.Length.ToString() : null,
+            }).ToList();
+
+            await _documentRepository.UpsertDocuments(customerdb.Id, documentEntities);
+
+            var docOrphansRemoved = await _fileService.CleanOrphans(customer.Files, customerdb.Id.ToString());
+            var haveOrphansRemovedFromDb = await _documentRepository.CleanOrphans(customerdb.Id, documentEntities);
         }
-
-        var result = await _skillRepository.AddCustomerSkills(skills);
-
-        var fileResult = await _fileService.UploadDocumentsAsync(customer.Files, customerdb.Id.ToString());
-
-        var documents = new List<DocumentCustomer>();
-        var documentEntities = fileResult.Select(x => new Document
+        catch(Exception ex)
         {
-            BlobId = x.BlobId,
-            Title = x.Name,
-            Path = x.Url,
-            FileSize = x.ByteArrayContent != null ? x.ByteArrayContent.Length.ToString() : null,
-        }).ToList();
-
-        await _documentRepository.UpsertDocuments(customerdb.Id, documentEntities);
-
-        var docOrphansRemoved = await _fileService.CleanOrphans(customer.Files, customerdb.Id.ToString());
-        var haveOrphansRemovedFromDb = await _documentRepository.CleanOrphans(customerdb.Id, documentEntities);
+            _logger.LogError("Error updating customer", ex);
+        }
 
         return customerdb;
     }
 
     public async Task DeleteCustomer(int id)
     {
-        var customer = _customerRepository.Get(id);
-        if (customer != null)
+        try
         {
-            _customerRepository.Delete(customer);
-            await _customerRepository.SaveChangesAsync();
+            var customer = _customerRepository.Get(id);
+            if (customer != null)
+            {
+                // Delete related records in QualificationCustomerCourseCertificates table
+                var relatedQualifications = _customerRepository.Context.QualificationCustomerCourseCertificates
+                    .Where(qccc => qccc.CustomerId == id)
+                    .ToList();
+                foreach (var record in relatedQualifications)
+                {
+                    _customerRepository.Context.QualificationCustomerCourseCertificates.Remove(record);
+                }
+
+                // Delete related records in CustomerSkills table
+                var relatedSkills = _customerRepository.Context.CustomerSkills
+                    .Where(cs => cs.CustomerId == id)
+                    .ToList();
+                foreach (var record in relatedSkills)
+                {
+                    _customerRepository.Context.CustomerSkills.Remove(record);
+                }
+
+                // Delete related records in DocumentCustomers table
+                var relatedDocuments = _customerRepository.Context.DocumentCustomer
+                    .Where(dc => dc.CustomerId == id)
+                    .ToList();
+                foreach (var record in relatedDocuments)
+                {
+                    _customerRepository.Context.DocumentCustomer.Remove(record);
+                }
+
+                // Delete related records in UserRoles table
+                var relatedRoles = _customerRepository.Context.UserRoles
+                    .Where(ur => ur.CustomerId == id)
+                    .ToList();
+                foreach (var record in relatedRoles)
+                {
+                    _customerRepository.Context.UserRoles.Remove(record);
+                }
+
+                // Save changes to delete related records
+                await _customerRepository.Context.SaveChangesAsync();
+
+                // Now delete the customer
+                _customerRepository.Delete(customer);
+                await _customerRepository.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting customer");
+            throw;
         }
     }
+
+
+
 
     public async Task<List<Customer>> GetAll()
     {
@@ -351,6 +428,34 @@ public class CustomerService : ICustomerService
         var customerList = new List<Customer>();
 
         var customers = await _customerRepository.GetAllCustomerWithCourseQualificationRecords(email, pageNumber, pageSize, c => c.FirstName, true);
+
+        if (customers != null)
+        {
+            foreach (var customer in customers)
+            {
+                customerList.Add(customer);
+            }
+        }
+
+        return customerList;
+    }
+
+    public async Task<List<Customer>> GetAllCustomerWithCourseQualificationRecordsByCustomerId(int customerId)
+    {
+        var customerList = new List<Customer>();
+
+        var customers = await _customerRepository.Context.Customers
+               .Include(x => x.QualificationCustomerCourseCertificates)
+               .ThenInclude(x => x.Course)
+               .Include(x => x.QualificationCustomerCourseCertificates)
+               .ThenInclude(x => x.Qualification)
+               .Include(x => x.QualificationCustomerCourseCertificates)
+               .ThenInclude(x => x.Certificate)
+               .Include(x => x.QualificationCustomerCourseCertificates)
+               .ThenInclude(x => x.QualificationStatus)
+               .Include(x => x.TrainingCentre)
+               .Where(x => x.Id == customerId)
+               .ToListAsync();
 
         if (customers != null)
         {
@@ -399,6 +504,7 @@ public class CustomerService : ICustomerService
             QualificationStatusId = customer.QualificationStatusId,
             QualificationId = customer.QualificationId,
             QualificationProgression = customer.Progression,
+            CourseProgression = customer.Progression,
             CustomerId = customer.CustomerId,
             CourseId = customer.CourseId,
             Id = customer.Id
@@ -444,7 +550,7 @@ public class CustomerService : ICustomerService
         {
             QualificationId = customer.QualificationId,
             CertificateId = customer.CertificateId,
-            CourseProgression = customer.Progression,
+            QualificationProgression = customer.Progression,
             CustomerId = customer.CustomerId,
             QualificationStatusId = customer.QualificationStatusId,
             CourseId = customer.CourseId
@@ -454,8 +560,12 @@ public class CustomerService : ICustomerService
 
         if (result == null)
             return null;
+
+        var customerEntity = await _customerRepository.Context.Customers.FirstOrDefaultAsync(x => x.Id == customer.CustomerId);
+
         var qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
-        qualificationRecord.TrainingCentreId = Convert.ToInt32(customer.TrainingCentre);
+        qualificationRecord.TrainingCentreId = customerEntity.TrainingCentreId;
+
         await UpdateCustomer(qualificationRecord.Id, qualificationRecord);
         qualificationRecord = await _customerRepository.GetCustomerWithCourseQualificationRecordById(result.Id);
 
@@ -470,7 +580,7 @@ public class CustomerService : ICustomerService
         customerRecord.CourseName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Course?.Name;
         customerRecord.Progression = customer.Progression;
         customerRecord.QualificationName = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.Qualification?.Name;
-        customerRecord.TrainingCentreId = customer?.TrainingCentreId;
+        customerRecord.TrainingCentreId = customerEntity.TrainingCentreId;
         customerRecord.Id = result.Id;
         customerRecord.QualificationStatus = qualificationRecord?.QualificationCustomerCourseCertificates.FirstOrDefault(x => x.Id == result.Id)?.QualificationStatus?.Name ?? string.Empty;
         customerRecord.QualificationStatusId = result?.QualificationStatusId;

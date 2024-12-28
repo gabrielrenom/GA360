@@ -9,6 +9,8 @@ export interface Course {
     certificateNumber: string;
     status: number;
     sector: string;
+    trainingCentreId: number;
+    trainingCentre: string;
   }
 
   export interface CourseTrainingCentre {
@@ -140,7 +142,7 @@ export async function addCourse(course: Course): Promise<Course> {
 }
 
 
-export async function updateCourse(id: number, course: Course): Promise<void> {
+export async function updateCourse(id: number, course: Course): Promise<Course> {
   const response = await fetch(`${endpoints.key}/${id}`, {
     method: 'PUT',
     headers: {
@@ -153,7 +155,11 @@ export async function updateCourse(id: number, course: Course): Promise<void> {
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
+
+  const updatedCourse: Course = await response.json();
+  return updatedCourse;
 }
+
 
 export async function deleteCourse(id: number): Promise<void> {
   const response = await fetch(`${endpoints.key}/${id}`, {

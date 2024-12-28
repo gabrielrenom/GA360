@@ -15,6 +15,7 @@ namespace GA360.Server.ViewModels
         public string CertificateNumber { get; set; }
         public string Sector { get; set; }
         public int Status { get; set; }
+        public int? TrainingCentreId { get; set; }
     }
 
     public static class CourseMapper

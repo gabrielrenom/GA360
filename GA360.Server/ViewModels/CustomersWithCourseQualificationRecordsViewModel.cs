@@ -38,7 +38,7 @@ namespace GA360.Server.ViewModels
                 CourseName = x.Course !=null? x.Course.Name:string.Empty,
                 Email = customer.Email,
                 CustomerId = customer.Id,
-                Progression = x.CourseProgression,
+                Progression = x.QualificationProgression,
                 TrainingCentre = customer.TrainingCentre!=null?customer.TrainingCentre.Name:string.Empty,
                 TrainingCentreId = customer.TrainingCentreId,
                 QualificationStatus = x.QualificationStatus!=null?x.QualificationStatus.Name:string.Empty,

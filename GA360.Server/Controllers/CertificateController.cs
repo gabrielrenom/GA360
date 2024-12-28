@@ -11,7 +11,7 @@ namespace GA360.Server.Controllers
     [Route("api/[controller]")]
     public class CertificateController : ControllerBase
     {
-        private readonly ILogger<CourseController> _logger;
+        private readonly ILogger<CertificateController> _logger;
         private readonly ICertificateService _certificateService;
         private readonly IPermissionService _permissionService;
         private readonly IMemoryCache _cache;

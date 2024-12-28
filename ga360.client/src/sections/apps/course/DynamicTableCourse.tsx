@@ -24,9 +24,12 @@ import {
   GridSlots,
 } from "@mui/x-data-grid";
 import MainCard from "components/MainCard";
-import { Stack, Tooltip, useMediaQuery } from "@mui/material";
+import { MenuItem, Select, Stack, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
 import { addCourse, Course, deleteCourse, getCourses, updateCourse } from "api/courseService";
+import { useEffect, useState } from "react";
+import { getTrainingCentres, TrainingCentre } from "api/trainingcentreService";
+import TrainingCentreForCoursesDropdown from "./components/TrainingCentreForCoursesDropdown";
 
 
 const initialRows: GridRowsProp = [];
@@ -36,22 +39,28 @@ interface EditToolbarProps {
   setRowModesModel: (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel
   ) => void;
+  trainingCentres: TrainingCentre[]; 
 }
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel } = props;
+  const { setRows, setRowModesModel, trainingCentres } = props;
 
   const handleClick = () => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id = ''; // Ensure unique ID
+    const defaultTrainingCentre = trainingCentres.length > 0 ? trainingCentres[0] : null;
     setRows((oldRows) => [
       {
         id,
         name: "",
         description: "",
         duration: 0,
-        registration: null,
-        expected: null,
-        certification: null,
+        registrationDate: null,
+        expectedDate: null,
+        certificateDate: null,
+        certificateNumber: "",
+        status: 1,
+        sector: "Technology",
+        trainingCentre: defaultTrainingCentre ? defaultTrainingCentre.id.toString() : "", // Set default value
         isNew: true,
       },
       ...oldRows,
@@ -61,7 +70,7 @@ function EditToolbar(props: EditToolbarProps) {
       [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
     }));
   };
-
+  
   return (
     <GridToolbarContainer sx={{ justifyContent: 'flex-end', paddingBottom: 2, paddingRight: 2 }}>
       <Button
@@ -82,6 +91,16 @@ export default function DynamicTableCourse() {
 
   const [rows, setRows] = React.useState<GridRowsProp>(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+
+  const [trainingCentres, setTrainingCentres] = useState([]);
+
+  useEffect(() => {
+    async function fetchTrainingCentres() {
+      const centres = await getTrainingCentres();
+      setTrainingCentres(centres);
+    }
+    fetchTrainingCentres();
+  }, []);
 
   React.useEffect(() => {
     const fetchCourses = async () => {
@@ -138,6 +157,23 @@ export default function DynamicTableCourse() {
     }
   };
 
+  const mapToGridRowModel = (course: Course): GridRowModel => {
+    return {
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      duration: course.duration,
+      // registrationDate: course.registrationDate ? course.registrationDate.toISOString().split('T')[0] : '',
+      // expectedDate: course.expectedDate ? course.expectedDate.toISOString().split('T')[0] : '',
+      // certificateDate: course.certificateDate ? course.certificateDate.toISOString().split('T')[0] : '',
+      certificateNumber: course.certificateNumber,
+      status: course.status,
+      sector: course.sector,
+      trainingCentre: course.trainingCentre ? course.trainingCentre.toString() : '',
+    };
+  };
+  
+
   const mapToCourse = (row: GridRowModel): Course => {
     return {
       id: row.id as number,  // Assuming id is a string, adjust if necessary
@@ -149,24 +185,52 @@ export default function DynamicTableCourse() {
       certificateDate: row.certificateDate ? new Date(row.certificateDate as string) : null,
       certificateNumber: row.certificateNumber as string,
       status: row.status as number,
-      sector: row.sector as string
+      sector: row.sector as string,
+      trainingCentreId: row.trainingCentre as number,
+      trainingCentre: row.trainingCentre
     };
   };
   
+  const fetchCourses = async () => {
+    try {
+      const courses: Course[] = await getCourses();
+      setRows(courses.map(mapToGridRowModel));
+    } catch (error) {
+      console.error('Failed to fetch courses:', error);
+    }
+  };
+  
+
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
     try {
-      // If it's a new row, call the addCourse function
       if (newRow.isNew) {
         const course = mapToCourse(newRow);
         course.id = 0;
-        console.log("MY COURSE", course);
         const createdCourse = await addCourse(course);
-        setRows(rows.map((row) => (row.id === newRow.id ? createdCourse : row)));
+        console.log("MY COURSE", createdCourse);
+  
+        console.log("BEFORE FETCHING", createdCourse);
+  
+        if (typeof createdCourse === 'object' && createdCourse !== null && createdCourse.id > 0) {
+          console.log("FETCHING");
+          await fetchCourses();
+        } else {
+          console.error('Failed to create course: createdCourse is invalid');
+        }
+        // Avoid returning updatedRow when adding a new course
+        return;
       } else {
         const course = mapToCourse(newRow);
-        await updateCourse(course.id, course);
-        setRows(rows.map((row) => (row.id === newRow.id ? course : row)));
+        const updatedCourse = await updateCourse(course.id, course); // Get the updated course
+        // const updatedRowModel = {
+        //   ...mapToGridRowModel(course),
+        //   trainingCentre: trainingCentres.find(tc => tc.id === course.trainingCentreId)?.name || '',
+        // };
+        // console.log("NEWROW", newRow);
+       newRow.trainingCentre = updatedCourse.trainingCentre;
+       setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)));
+        //return;
       }
     } catch (error) {
       console.error('Failed to update course:', error);
@@ -178,6 +242,7 @@ export default function DynamicTableCourse() {
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
   };
+  
 
   const columns: GridColDef[] = [
     {
@@ -237,6 +302,20 @@ export default function DynamicTableCourse() {
       headerName: "CERT NUMBER",
       flex: 1,
       editable: true,
+    },
+    {
+      field: 'trainingCentre',
+      headerName: 'TRAINING CENTRE',
+      flex: 2,
+      editable: true,
+      renderEditCell: (params) => (
+        <TrainingCentreForCoursesDropdown
+          value={params.value}
+          onChange={(value) =>
+            params.api.setEditCellValue({ id: params.id, field: params.field, value }, event)
+          }
+        />
+      ),
     },
     {
       field: "status",
@@ -361,7 +440,7 @@ export default function DynamicTableCourse() {
                   toolbar: EditToolbar as GridSlots['toolbar'],
                 }}
                 slotProps={{
-                  toolbar: { setRows, setRowModesModel },
+                  toolbar: { setRows, setRowModesModel, trainingCentres },
                 }}
                 sx={{
                   '& .MuiDataGrid-columnHeaders': {

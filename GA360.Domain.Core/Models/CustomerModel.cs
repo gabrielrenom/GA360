@@ -78,6 +78,13 @@ namespace GA360.Domain.Core.Models
         public string Date { get; set; }
         public string Card { get; set; } = string.Empty;
         public string Certification { get; set; } = string.Empty;
+        public int? TrainingCentreId { get; set; }
+        public string? TrainingCentre { get; set; }
+        public DateTime RegistrationDate { get; set; }
+        public DateTime ExpectedDate { get; set; }
+        public DateTime CertificateDate { get; set; }
+        public string CertificateNumber { get; set; }
+        public string Sector { get; set; }
     }
 
     public class CertificateModel

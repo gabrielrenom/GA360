@@ -15,6 +15,8 @@ namespace GA360.DAL.Infrastructure.Contexts
     public class CRMDbContext : DbContext
     {
         private readonly IConfiguration _configuration;
+        public DbSet<CourseTrainingCentre> CourseTrainingCentre { get; set; }
+        public DbSet<QualificationTrainingCentre> QualificationTrainingCentre { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<ApplicationPermission> ApplicationPermissions { get; set; }
         public DbSet<EntityPermission> EntityPermissions { get; set; }

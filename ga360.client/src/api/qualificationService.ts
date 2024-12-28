@@ -26,6 +26,18 @@ export interface Qualification {
     status: number;
   }
 
+  export interface QualificationTable {
+    id: number;
+    name: string;
+    registrationDate: Date;
+    expectedDate: Date;
+    certificateDate: Date;
+    certificateNumber: number;
+    status: number;
+    trainingCentreId: number;
+    trainingCentre:string;
+  }
+
 export interface QualificationStatus {
     id: number;
     name: string;
@@ -58,9 +70,11 @@ export const endpoints = {
   key: '/api/qualification',
   fullrecord: '/api/customer/customerswithcoursequalificationrecords',
   singlerecord: '/api/customer/customerwithcoursequalificationrecords',
+  singlerecordbycustomerid: '/api/customer/customerwithcoursequalificationrecordsbycustomerid',
   qualificationstatuses: '/api/qualification/qualificationstatuses',
   qualificationstrainingcentres: '/api/qualification/getqualificationsbytrainingId',
   qualificationsbyuser: '/api/qualification/getqualificationsbyUser',
+  qualificationswithtrainingcentres: '/api/qualification/getqualificationswithtrainingcentres',
 };
 
 export async function GetQualificationsByUser(): Promise<Qualification[]> {
@@ -134,6 +148,23 @@ export async function getQualifications(): Promise<Qualification[]> {
   return data;
 }
 
+export async function getQualificationsWithTrainingCentresForTable(): Promise<QualificationTable[]> {
+  const response = await fetch(endpoints.qualificationswithtrainingcentres, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF': 'Dog',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data: QualificationTable[] = await response.json();
+  return data;
+}
+
 export async function getQualification(id: number): Promise<Qualification> {
   const response = await fetch(`${endpoints.key}/${id}`, {
     method: 'GET',
@@ -170,7 +201,7 @@ export async function addQualification(qualification: Qualification): Promise<Qu
   return createdQualification;
 }
 
-export async function updateQualification(id: number, qualification: Qualification): Promise<void> {
+export async function updateQualification(id: number, qualification: Qualification): Promise<QualificationTable> {
   const response = await fetch(`${endpoints.key}/${id}`, {
     method: 'PUT',
     headers: {
@@ -183,6 +214,9 @@ export async function updateQualification(id: number, qualification: Qualificati
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
+
+  const updatedQualification: QualificationTable = await response.json();
+  return updatedQualification;
 }
 
 export async function deleteQualification(id: number): Promise<void> {
@@ -203,6 +237,24 @@ export async function getAllCustomerWithCourseQualificationRecords(pageNumber?: 
   pageNumber = 1
   pageSize = 20
   const response = await fetch(`${endpoints.singlerecord}?pageNumber=${pageNumber}&pageSize=${pageSize}&orderBy=${orderBy}&ascending=${ascending}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF': 'Dog',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data: CustomersWithCourseQualificationRecordsViewModel[] = await response.json();
+  return data;
+}
+
+export async function getAllCustomerWithCourseQualificationRecordsWithCandidateId(candidateId: number): Promise<CustomersWithCourseQualificationRecordsViewModel[]> {
+
+  const response = await fetch(`${endpoints.singlerecordbycustomerid}/${candidateId}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -269,6 +321,7 @@ export async function updateCustomersWithCourseQualificationRecords(id: number, 
 }
 
 export async function createCustomersWithCourseQualificationRecords(customer: CustomersWithCourseQualificationRecordsViewModel): Promise<CustomersWithCourseQualificationRecordsViewModel> {
+  console.log("ADDING",customer)
   const response = await fetch(endpoints.fullrecord, {
     method: 'POST',
     headers: {

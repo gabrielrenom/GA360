@@ -33,7 +33,7 @@ export default function LogoSection({ reverse, isIcon, sx, to }: Props) {
     </ButtonBase>
     {isIcon ?<></>:
     <Typography variant="caption" display="block" align="left" sx={{ mt: 1.5, fontSize: '0.45rem' }}>
-        v0.6 Alpha-22/12/2024
+        v0.7 Alpha-28/12/2024
     </Typography>}
     </div>
   );

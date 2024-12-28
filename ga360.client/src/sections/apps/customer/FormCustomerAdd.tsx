@@ -110,7 +110,7 @@ const getInitialValues = (customer: CustomerListExtended | null) => {
         disability: "",
         employeeStatus: "",
         employer: "",
-        trainingCentre: "",
+        trainingCentre: 0,
         nationalInsurance: "",
         portfolio: "",
         dob: "",
@@ -120,6 +120,7 @@ const getInitialValues = (customer: CustomerListExtended | null) => {
         postcode: "",
         documents: [],
         fileDocuments: [],
+        trainingCentreId:0
     };
 
     if (customer) {
@@ -169,8 +170,7 @@ export default function FormCustomerAdd({
     const [documents, setDocuments] = useState<File[]>([]);
 
     const { user, isLoggedIn } = useContext(DuendeContext);
-
-    console.log('Context values in SomeComponent:', user, isLoggedIn);
+    console.log(user)
     useEffect(() => {
         if (customer != null) {
             const files: File[] = customer.fileDocuments.map(
@@ -197,6 +197,7 @@ export default function FormCustomerAdd({
                 const data: TrainingCentre[] = await getTrainingCentres();
                 //const data1:TrainingCentre[] = [];
                 setTrainingCentres(data);
+                console.log("TRAINING CENTRES", data);
             } catch (error) {
                 setError("Failed to fetch training centres");
                 console.error(error);
@@ -280,14 +281,14 @@ export default function FormCustomerAdd({
         location: Yup.string().max(500),
         about: Yup.string().max(500),
         gender: Yup.mixed().oneOf([Gender.MALE, Gender.FEMALE, Gender.NONBINARY, Gender.PREFERNOTTOSAY], 'Invalid gender').required('Gender is required'),
-        role: Yup.string().max(255).required("Role is required"),
+        // role: Yup.string().max(255).required("Role is required"),
         country: Yup.string().max(255).required("Country is required"),
         dateOfBirth: Yup.date()
             .max(new Date(new Date().setFullYear(new Date().getFullYear() - 18)), "You must be at least 18 years old")
             .required("Date of birth is required"),
         ethnicity: Yup.string().max(255).required("Ethnicity of birth is required"),
-        employeeStatus: Yup.string().max(255).required("Employee status of birth is required"),
-        trainingCentre: Yup.string().max(255).required("Training centre is required"),
+        employeeStatus: Yup.string().max(255).required("Employee status is required"),
+        // trainingCentre: Yup.string().max(255).required("Training centre is required"),
         city: Yup.string().max(255).required("City is required"),
         postcode: Yup.string().max(255).required("Postcode is required"),
         street: Yup.string().max(255).required("Street is required"),
@@ -307,6 +308,7 @@ export default function FormCustomerAdd({
         validationSchema: CustomerSchema,
         enableReinitialize: true,
         onSubmit: async (values, { setSubmitting }) => {
+            console.log("ADDDDINGs")
             SetHasBeenSubmitted(true);
 
             try {
@@ -347,6 +349,19 @@ export default function FormCustomerAdd({
                     });
                 } else {
                     setSubmitting(true); // Set submitting state to true
+
+                    console.log("TRAINING CENTRE",user.trainingCentreId, newCustomer.trainingCentre,user.role)
+
+                    if (user.trainingCentreId === null && newCustomer.trainingCentre === 0 && user.role ==="Super Admin")
+                    {
+                        console.log("HERE")
+                        newCustomer.trainingCentre = 0;
+                    }
+                    else if (user.role ==="Training Centre" || user.role ==="Candidate")
+                        newCustomer.trainingCentre = user.trainingCentreId;
+
+                    console.log("TRAINING CENTRE",user.trainingCentreId, newCustomer.trainingCentre)
+
                     insertCustomerWithDocuments(
                         newCustomer,
                         documents
@@ -411,7 +426,7 @@ export default function FormCustomerAdd({
             <Tabs value={value} onChange={handleChange} aria-label="tabs">
                 <Tab label="Candidate" />
                 <Tab label="Qualifications" />
-                <Tab label="Batch Upload" />
+                {/* <Tab label="Batch Upload" /> */}
             </Tabs>
             <Box sx={{ mt: 2 }}>
                 {value === 0 && (
@@ -631,35 +646,64 @@ export default function FormCustomerAdd({
                                                             />
                                                         </Stack>
                                                     </Grid>
-                                                    {user && user.roles && user.roles.includes("Admin") ? (
-                                                        <Grid item xs={12}>
-                                                            <Stack spacing={1}>
-                                                                <InputLabel htmlFor="customer-trainingCentre">
-                                                                    Training Centre
-                                                                </InputLabel>
-                                                                <Select
-                                                                    fullWidth
-                                                                    id="customer-trainingCentre"
-                                                                    {...getFieldProps("trainingCentre")}
-                                                                    error={Boolean(touched.trainingCentre && errors.trainingCentre)}
-                                                                >
-                                                                    {trainingCentres.length > 0 ? (
-                                                                        trainingCentres.map((centre) => (
-                                                                            <MenuItem key={centre.id} value={centre.id}>
-                                                                                {centre.name}
-                                                                            </MenuItem>
-                                                                        ))
-                                                                    ) : (
-                                                                        <MenuItem value="" disabled>
-                                                                            No training centres available
-                                                                        </MenuItem>
-                                                                    )}
-                                                                </Select>
-                                                            </Stack>
-                                                        </Grid>
-                                                    ) : (
-                                                        <></>
-                                                    )}
+                                                    {user && user.role === "Super Admin" ? (
+    <Grid item xs={12}>
+        <Stack spacing={1}>
+            <InputLabel htmlFor="customer-trainingCentre">
+                Training Centre
+            </InputLabel>
+            <Select
+                fullWidth
+                id="customer-trainingCentre"
+                {...getFieldProps("trainingCentre")}
+                error={Boolean(touched.trainingCentre && errors.trainingCentre)}
+            >
+                {trainingCentres.length > 0 ? (
+                    trainingCentres.map((centre) => (
+                        <MenuItem key={centre.id} value={centre.id}>
+                            {centre.name}
+                        </MenuItem>
+                    ))
+                ) : (
+                    <MenuItem value="" disabled>
+                        No training centres available
+                    </MenuItem>
+                )}
+            </Select>
+        </Stack>
+    </Grid>
+) : user && user.role === "Training Centre" ? (
+    <Grid item xs={12}>
+        <input type="hidden" id="customer-trainingCentre" value={user.trainingCentreId} {...getFieldProps("trainingCentre")} />
+        {/* <Stack spacing={1}>
+            <InputLabel htmlFor="customer-trainingCentre">
+                Training Centre
+            </InputLabel>
+            <Select
+                fullWidth
+                id="customer-trainingCentre"
+                {...getFieldProps("trainingCentre")}
+                error={Boolean(touched.trainingCentre && errors.trainingCentre)}
+                value={user.trainingCentreId} // Preselect the training centre
+            >
+                {trainingCentres.length > 0 ? (
+                    trainingCentres.map((centre) => (
+                        <MenuItem key={centre.id} value={centre.id}>
+                            {centre.name}
+                        </MenuItem>
+                    ))
+                ) : (
+                    <MenuItem value="" disabled>
+                        No training centres available
+                    </MenuItem>
+                )}
+            </Select>
+        </Stack> */}
+    </Grid>
+) : (
+    <></>
+)}
+
                                                     <Grid item xs={12} sm={6}>
                                                         <Stack spacing={1}>
                                                             <InputLabel htmlFor="customer-nationalInsurance">
@@ -672,7 +716,7 @@ export default function FormCustomerAdd({
                                                             />
                                                         </Stack>
                                                     </Grid>
-                                                    {user && user.roles && user.roles.includes("Admin") ?
+                                                    {user && user.role === "Super Admin" ?
                                                         <Grid item xs={12} sm={6}>
                                                             <Stack spacing={1}>
                                                                 <InputLabel htmlFor="customer-role">
@@ -684,7 +728,7 @@ export default function FormCustomerAdd({
                                                                     {...getFieldProps("role")}
                                                                     error={Boolean(touched.role && errors.role)}
                                                                 >
-                                                                    <MenuItem value="Admin">Admin</MenuItem>
+                                                                    <MenuItem value="Super Admin">Super Admin</MenuItem>
                                                                     <MenuItem value="Training Centre">
                                                                         Training Centre
                                                                     </MenuItem>
@@ -1071,10 +1115,10 @@ export default function FormCustomerAdd({
                 )}
                 {user && (user.role === "Training Centre" || user.role === "Super Admin") && value === 1 && (
                     <>
-                        <DynamicTableCustomerWithCourseQualificationRecords />
+                        <DynamicTableCustomerWithCourseQualificationRecords customerId={customer.id}/>
                     </>
                 )}
-                {user && (user.role === "Training Centre" || user.role === "Super Admin") && value === 2 && (
+                {/* {user && (user.role === "Training Centre" || user.role === "Super Admin") && value === 2 && (
                     <Box>
                         <Typography variant="h6">Batch Upload</Typography>
                         <Button variant="contained" component="label">
@@ -1082,7 +1126,7 @@ export default function FormCustomerAdd({
                             <input type="file" hidden />
                         </Button>
                     </Box>
-                )}
+                )} */}
             </Box>
         </Box>
     );

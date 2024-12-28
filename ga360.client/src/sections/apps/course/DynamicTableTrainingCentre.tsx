@@ -221,6 +221,7 @@ export default function DynamicTableTrainingCentre() {
       editable: false,
       headerAlign: 'center',
       align: 'center',
+      hideable:true
     },
     {
       field: 'street',
@@ -337,7 +338,13 @@ export default function DynamicTableTrainingCentre() {
                 processRowUpdate={processRowUpdate}
                 disableRowSelectionOnClick 
                 onCellDoubleClick={(params, event) => { event.stopPropagation(); }}
-        
+                initialState={{
+                  columns: {
+                    columnVisibilityModel: {
+                      addressId: false,
+                    },
+                  },
+                }}
                 slots={{
                   toolbar: EditToolbar as GridSlots['toolbar'],
                 }}

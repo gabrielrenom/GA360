@@ -13,23 +13,32 @@ const CourseDropdown: React.FC<CourseDropdownProps> = ({ value, onChange }) => {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      try {
-        const courseData = await getCourses();
-        setCourses(courseData);
+      if (courses.length === 0) {
+        try {
+          const courseData = await getCourses();
+          setCourses(courseData);
 
-        // Set the initial selected value if it matches one of the options
-        const matchedCourse = courseData.find(course => course.name === value);
+          // Set the initial selected value if it matches one of the options
+          const matchedCourse = courseData.find(course => course.name === value);
+          if (matchedCourse) {
+            setSelectedValue(matchedCourse.id.toString());
+            onChange(matchedCourse.id.toString()); // Ensure parent component is updated
+          }
+        } catch (error) {
+          console.error("Failed to fetch courses", error);
+        }
+      } else {
+        // Set the initial selected value if it matches one of the already fetched options
+        const matchedCourse = courses.find(course => course.name === value);
         if (matchedCourse) {
           setSelectedValue(matchedCourse.id.toString());
           onChange(matchedCourse.id.toString()); // Ensure parent component is updated
         }
-      } catch (error) {
-        console.error("Failed to fetch courses", error);
       }
     };
 
     fetchCourses();
-  }, [value, onChange]);
+  }, [value, onChange, courses]);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newValue = event.target.value as string;

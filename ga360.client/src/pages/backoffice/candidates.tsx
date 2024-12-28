@@ -207,6 +207,10 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
         fetchCustomerData();
     }, [customerModal,open]);
 
+    const handleAddCustomer = () => { 
+        setSelectedCustomer(null); 
+        console.log("NULL CUSTOMER" )
+    };
     // function setCustomerModal(arg0: boolean) {
     //     throw new Error("Function not implemented.");
     // }
@@ -223,7 +227,8 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
                     columns={columns} modalToggler={() => {
                     setCustomerModal(true);
                     setSelectedCustomer(null);
-                    }} />
+                    }} 
+                    onAddCustomer={handleAddCustomer} />
                 <AlertCustomerDelete id={Number(customerDeleteId)} title={customerDeleteId} open={open} handleClose={handleClose} />
                 <CustomerModal open={customerModal} modalToggler={setCustomerModal} customer={selectedCustomer} />
             </>

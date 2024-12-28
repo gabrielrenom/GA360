@@ -37,31 +37,62 @@ namespace GA360.Server.Controllers
             _cache = cache;
         }
 
+        //[AllowAnonymous]
+        //[HttpGet]
+        //public async Task<IActionResult> GetQualifications()
+        //{
+        //    var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+        //    if (!_cache.TryGetValue(QualificationsCacheKey, out List<Qualification> qualifications))
+        //    {
+        //        qualifications = await _qualificationService.GetAllQualifications();
+
+        //        var cacheEntryOptions = new MemoryCacheEntryOptions()
+        //            .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+
+        //        _cache.Set(QualificationsCacheKey, qualifications, cacheEntryOptions);
+        //    }
+
+        //    var permissions = await _permissionService.GetPermissions(emailClaim);
+
+        //    if (permissions.Role != RoleConstants.SUPER_ADMIN)
+        //    {
+        //        var qualificationsPermisssions = await _permissionService.FilterPermissions(emailClaim, qualifications);
+
+        //        return Ok(qualificationsPermisssions);
+        //    }
+
+        //    return Ok(qualifications);
+        //}
+
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetQualifications()
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            if (!_cache.TryGetValue(QualificationsCacheKey, out List<Qualification> qualifications))
-            {
-                qualifications = await _qualificationService.GetAllQualifications();
-
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
-
-                _cache.Set(QualificationsCacheKey, qualifications, cacheEntryOptions);
-            }
-
             var permissions = await _permissionService.GetPermissions(emailClaim);
 
-            if (permissions.Role != RoleConstants.SUPER_ADMIN)
+            if (permissions.Role == RoleConstants.SUPER_ADMIN)
             {
-                var qualificationsPermisssions = await _permissionService.FilterPermissions(emailClaim, qualifications);
-
-                return Ok(qualificationsPermisssions);
+                return Ok(await _qualificationService.GetAllQualifications());
             }
-            
+            else if (permissions.Role == RoleConstants.TRAINING_CENTRE)
+            {
+                return Ok(await _qualificationService.GetQualificationsByTrainingCentreWithEmail(emailClaim));
+            }
+
+            return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("GetQualificationsWithTrainingCentres")]
+        public async Task<IActionResult> GetQualificationsWithTrainingCentres()
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            var qualifications = await _qualificationService.GetAllQualificationsWithTrainingCentres();
+
             return Ok(qualifications);
         }
 
@@ -125,21 +156,19 @@ namespace GA360.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddQualification([FromBody] QualificationViewModel qualification)
+        public async Task<IActionResult> AddQualification([FromBody] QualificationWithTrainingModel qualification)
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            var result = await _qualificationService.AddQualification(qualification.ToEntity());
-            _cache.Remove(QualificationsCacheKey); // Clear cache
+            var result = await _qualificationService.AddQualification(qualification);
             return CreatedAtAction(nameof(GetQualification), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateQualification(int id, [FromBody] QualificationViewModel qualification)
+        public async Task<IActionResult> UpdateQualification(int id, [FromBody] QualificationWithTrainingModel qualification)
         {
-            var result = await _qualificationService.UpdateQualification(qualification.ToEntity());
-            _cache.Remove(QualificationsCacheKey); // Clear cache
-            return Ok(result.ToViewModel());
+            var result = await _qualificationService.UpdateQualification(qualification);
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]

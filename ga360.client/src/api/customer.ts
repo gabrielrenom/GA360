@@ -324,8 +324,9 @@ export async function getBasicCandidate() {
 }
 
 export async function insertCustomerWithDocuments(newCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
+  console.log("MYNEWINSERT", newCustomer)
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(newCustomer);
-
+  console.log("MYNEWINSERT 2", mappedCustomer)
   const formData = new FormData();
   formData.append('Customer', JSON.stringify(mappedCustomer));
 

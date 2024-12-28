@@ -29,17 +29,19 @@ public class CourseController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetCourses()
     {
-        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+        var courses = new List<Course>();
 
-        var courses = await _courseService.GetAllCourses();
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
         var permissions = await _permissionService.GetPermissions(emailClaim);
 
-        if (permissions.Role != RoleConstants.SUPER_ADMIN)
+        if (permissions.Role == RoleConstants.SUPER_ADMIN)
         {
-            var coursesPermissions = await _permissionService.FilterPermissions(emailClaim, courses);
-
-            return Ok(coursesPermissions);
+            return Ok(await _courseService.GetAllCoursesWithTrainigCentres());
+        }
+        else if (permissions.Role == RoleConstants.TRAINING_CENTRE)
+        {
+            courses = await _courseService.GetAllCoursesByTrainingId(emailClaim);
         }
 
         return Ok(courses);
@@ -71,29 +73,37 @@ public class CourseController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddCourse([FromBody] CourseViewModel course)
     {
-        var emailClaim = User?.Claims?.FirstOrDefault (x => x.Type == "email")?.Value;
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+        Course courseResult = new();
 
-        var result = await _courseService.AddCourse(course.ToEntity());
+        var permissions = await _permissionService.GetPermissions(emailClaim);
 
-        var permission = await _permissionService.UpsertPermissions(new PermissionModel
+        if (permissions.Role == "Training Centre")
         {
-            CustomerEmail = emailClaim,
-            PermissionEntities = new List<PermissionEntity> { new PermissionEntity
-                {
-                      CourseId = result.Id
-                } 
+            courseResult = await _courseService.AddCourse(course.ToEntity(), emailClaim);
+        }
+        else if (permissions.Role == "Super Admin")
+        {
+            if (course.TrainingCentreId == null)
+            {
+                courseResult = await _courseService.AddCourse(course.ToEntity());
             }
-        });
+            else
+            {
+                var finalResult = await _courseService.AddCourseByTrainingId(course.ToEntity(), (int)course.TrainingCentreId);
+                return Ok(finalResult);
+            }
+        }
 
-        return CreatedAtAction(nameof(GetCourse), new { id = result.Id }, result);
+        return CreatedAtAction(nameof(GetCourse), new { id = courseResult.Id }, courseResult);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCourse(int id, [FromBody] CourseViewModel course)
     {
-        var result = await _courseService.UpdateCourse(course.ToEntity());
+        var result = await _courseService.UpdateCourse(course.ToEntity(), course.TrainingCentreId);
 
-        return Ok(result.ToViewModel());
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]

@@ -27,9 +27,12 @@ import MainCard from "components/MainCard";
 import { Stack, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
 import { QualificationModel } from "types/customerApiModel";
-import { addQualification, deleteQualification, getQualifications, Qualification, updateQualification } from "api/qualificationService";
+import { addQualification, deleteQualification, getQualifications, getQualificationsTrainingCentres, getQualificationsWithTrainingCentresForTable, Qualification, QualificationTable, updateQualification } from "api/qualificationService";
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import TrainingCentreForCoursesDropdown from "./components/TrainingCentreForCoursesDropdown";
+import { getTrainingCentres, TrainingCentre } from "api/trainingcentreService";
+import { useEffect, useState } from "react";
 
 
 const initialRows: GridRowsProp = [];
@@ -39,13 +42,15 @@ interface EditToolbarProps {
   setRowModesModel: (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel
   ) => void;
+  trainingCentres: TrainingCentre[]; 
 }
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel } = props;
+  const { setRows, setRowModesModel,trainingCentres } = props;
 
   const handleClick = () => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id ='';
+    const defaultTrainingCentre = trainingCentres.length > 0 ? trainingCentres[0] : null;
     setRows((oldRows) => [
       {
         id,
@@ -55,6 +60,8 @@ function EditToolbar(props: EditToolbarProps) {
         registration: null,
         expected: null,
         certification: null,
+        certificateNumber: 0,
+        trainingCentre: defaultTrainingCentre ? defaultTrainingCentre.id.toString() : "", // Set default value
         isNew: true,
       },
       ...oldRows,
@@ -84,16 +91,25 @@ export default function DynamicTableQualifications() {
   const theme = useTheme();
   const downSM = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [rows, setRows] = React.useState<GridRowsProp>(initialRows);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+  const [rows, setRows] = useState<GridRowsProp>(initialRows);
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [trainingCentres, setTrainingCentres] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    async function fetchTrainingCentres() {
+      const centres = await getTrainingCentres();
+      setTrainingCentres(centres);
+    }
+    fetchTrainingCentres();
+  }, []);
+
+  useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const qualifications: Qualification[] = await getQualifications();
+        const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable();
         console.log("QUALUFICATIONS",qualifications)
         setRows(qualifications);
       } catch (error) {
@@ -151,7 +167,7 @@ export default function DynamicTableQualifications() {
     }
   };
 
-  const mapToQualification = (row: GridRowModel): Qualification => {
+  const mapToQualification = (row: GridRowModel): QualificationTable => {
     return {
       id: row.id as number,
       name: row.name as string,
@@ -159,22 +175,40 @@ export default function DynamicTableQualifications() {
       expectedDate: row.expectedDate ? new Date(row.expectedDate as string) : null,
       certificateDate: row.certificateDate ? new Date(row.certificateDate as string) : null,
       certificateNumber: row.certificateNumber as number,
-      status: row.status as number
+      status: row.status as number,
+      trainingCentreId: row.trainingCentre as number,
+      trainingCentre: row.trainingCentre
     };
+  };
+  const fetchQualifications = async () => {
+    try {
+      const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable();
+      console.log("QUALIFICATIONS", qualifications);
+      setRows(qualifications);
+    } catch (error) {
+      console.error('Failed to fetch qualifications:', error);
+    }
   };
   
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
     try {
       if (newRow.isNew) {
+        // const qualification = mapToQualification(newRow);
+        // qualification.id = 0;
+        // const createdQualification = await addQualification(qualification);
+        // setRows(rows.map((row) => (row.id === newRow.id ? createdQualification : row)));
         const qualification = mapToQualification(newRow);
         qualification.id = 0;
         const createdQualification = await addQualification(qualification);
-        setRows(rows.map((row) => (row.id === newRow.id ? createdQualification : row)));
+  
+        await fetchQualifications();
       } else {
         const qualification = mapToQualification(newRow);
-        await updateQualification(qualification.id, qualification); // Call updateQualification for existing rows
-        setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+        const updatedQualification = await updateQualification(qualification.id, qualification); // Call updateQualification for existing rows
+        console.log(updatedQualification)
+        newRow.trainingCentre = updatedQualification.trainingCentre;
+        setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)));
       }
     } catch (error) {
       console.error('Failed to update qualification:', error);
@@ -241,7 +275,22 @@ const columns: GridColDef[] = [
     field: 'certificateNumber',
     headerName: 'CERTIFICATE NUMBER',
     flex: 1,
+    type: "number",
     editable: true,
+  },
+  {
+    field: 'trainingCentre',
+    headerName: 'TRAINING CENTRE',
+    flex: 2,
+    editable: true,
+    renderEditCell: (params) => (
+      <TrainingCentreForCoursesDropdown
+        value={params.value}
+        onChange={(value) =>
+          params.api.setEditCellValue({ id: params.id, field: params.field, value }, event)
+        }
+      />
+    ),
   },
   {
     field: 'status',
@@ -348,7 +397,7 @@ const columns: GridColDef[] = [
                   toolbar: EditToolbar as GridSlots['toolbar'],
                 }}
                 slotProps={{
-                  toolbar: { setRows, setRowModesModel },
+                  toolbar: { setRows, setRowModesModel, trainingCentres },
                 }}
                 sx={{
                   '& .MuiDataGrid-columnHeaders': {

@@ -15,6 +15,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Data.SqlClient;
 using GA360.DAL.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GA360.Server.Controllers
 {
@@ -71,7 +72,7 @@ namespace GA360.Server.Controllers
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            var permissions = _permissionService.GetPermissions(emailClaim);
+            var permissions = await _permissionService.GetPermissions(emailClaim);
 
             return Ok(await _customerService.GetAllUltraHighPerfomance(trainingCentreId));
         }
@@ -130,6 +131,19 @@ namespace GA360.Server.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("customerwithcoursequalificationrecordsbycustomerid/{customerid}")]
+        public async Task<IActionResult> GetCustomerWithCourseQualificationRecordsByCustomerId(int customerid)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            var result = await _customerService.GetAllCustomerWithCourseQualificationRecordsByCustomerId(customerid);
+
+            return Ok(result != null ?
+                result?.SelectMany(c => c.ToCustomersWithCourseQualificationRecordsViewModel()).ToList() :
+                new List<CustomersWithCourseQualificationRecordsViewModel>());
+        }
+
+        [AllowAnonymous]
         [HttpGet]
         [Route("customerswithcoursequalificationrecords")]
         public async Task<IActionResult> GetAllCustomersWithCourseQualificationRecords(
@@ -165,6 +179,9 @@ namespace GA360.Server.Controllers
         [HttpPost("customerswithcoursequalificationrecords")]
         public async Task<IActionResult> CreateCustomersWithCourseQualificationRecords([FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
         {
+            if (customer.QualificationId == null && customer.QualificationStatusId == null && customer.CourseId == null)
+                return Ok();
+
             var result = await _customerService.CreateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());
             _memoryCache.Remove("GetAllCustomersWithCourseQualificationRecords"); // Clear cache when data is modified
             return Ok(result);
@@ -237,12 +254,31 @@ namespace GA360.Server.Controllers
         {
             try
             {
+                if (User.Claims.FirstOrDefault(x => x.Type == "email") == null)
+                    return Forbid();
+
+                var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+
+                var permissions = await _permissionService.GetPermissions(emailClaim);
+
                 var customer = JsonSerializer.Deserialize<UserViewModel>(contact.Customer, new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = new UpperCaseNamingPolicy()
                 });
 
                 var files = await FileService.ExtractFiles(contact.Files);
+
+                if (permissions.Role == "Training Centre")
+                    customer.Role = "Candidate";
+
+                if (customer.Role == "Super Admin")
+                {
+                    customer.TrainingCentre = 0;
+                }
+                if (customer.Role.IsNullOrEmpty())
+                {
+                    customer.Role = "Super Admin";
+                }
 
                 var result = await _customerService.AddCustomer(FromUserViewModelToCustomerModel(customer, files));
 

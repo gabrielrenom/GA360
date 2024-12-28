@@ -13,23 +13,32 @@ const QualificationDropdown: React.FC<QualificationDropdownProps> = ({ value, on
 
   useEffect(() => {
     const fetchQualifications = async () => {
-      try {
-        const qualificationData = await getQualifications();
-        setQualifications(qualificationData);
+      if (qualifications.length === 0) {
+        try {
+          const qualificationData = await getQualifications();
+          setQualifications(qualificationData);
 
-        // Set the initial selected value if it matches one of the options
-        const matchedQualification = qualificationData.find(qualification => qualification.name === value);
+          // Set the initial selected value if it matches one of the options
+          const matchedQualification = qualificationData.find(qualification => qualification.name === value);
+          if (matchedQualification) {
+            setSelectedValue(matchedQualification.id.toString());
+            onChange(matchedQualification.id.toString()); // Ensure parent component is updated
+          }
+        } catch (error) {
+          console.error("Failed to fetch qualifications", error);
+        }
+      } else {
+        // Set the initial selected value if it matches one of the already fetched options
+        const matchedQualification = qualifications.find(qualification => qualification.name === value);
         if (matchedQualification) {
           setSelectedValue(matchedQualification.id.toString());
           onChange(matchedQualification.id.toString()); // Ensure parent component is updated
         }
-      } catch (error) {
-        console.error("Failed to fetch qualifications", error);
       }
     };
 
     fetchQualifications();
-  }, [value, onChange]);
+  }, [value, onChange, qualifications]);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newValue = event.target.value as string;

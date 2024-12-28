@@ -76,6 +76,9 @@ export const getMenuItemsByRole = (role: string): { items: NavItemType[] } => {
   const filteredMenuItems = allMenuItems.items.filter(item => {
     if (item.id === 'group-back-office' && role === 'Training Centre') {
       item.children = item.children?.filter(child => child.id !== 'group-back-office-collapse-training-centres');
+      item.children = item.children?.filter(child => child.id !== 'group-back-office-collapse-courses');
+      item.children = item.children?.filter(child => child.id !== 'group-back-office-collapse-qualifications');
+
     }
     return filteredItems.includes(item.id);
   });

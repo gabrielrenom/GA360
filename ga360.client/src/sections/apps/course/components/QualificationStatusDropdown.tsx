@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MenuItem, TextField, Box } from '@mui/material';
-import { getQualificationStatuses, QualificationStatus } from 'api/qualificationService'; // Adjust the import path
+import { getQualificationStatuses, QualificationStatus } from 'api/qualificationService';
 
 interface QualificationStatusDropdownProps {
   value: string;
@@ -13,23 +13,32 @@ const QualificationStatusDropdown: React.FC<QualificationStatusDropdownProps> = 
 
   useEffect(() => {
     const fetchQualificationStatuses = async () => {
-      try {
-        const data = await getQualificationStatuses();
-        setQualificationStatuses(data);
+      if (qualificationStatuses.length === 0) {
+        try {
+          const data = await getQualificationStatuses();
+          setQualificationStatuses(data);
 
-        // Set the initial selected value if it matches one of the options
-        const matchedQualificationStatus = data.find(status => status.name === value);
+          // Set the initial selected value if it matches one of the options
+          const matchedQualificationStatus = data.find(status => status.name === value);
+          if (matchedQualificationStatus) {
+            setSelectedValue(matchedQualificationStatus.id.toString());
+            onChange(matchedQualificationStatus.id.toString()); // Ensure parent component is updated
+          }
+        } catch (error) {
+          console.error("Failed to fetch qualification statuses", error);
+        }
+      } else {
+        // Set the initial selected value if it matches one of the already fetched options
+        const matchedQualificationStatus = qualificationStatuses.find(status => status.name === value);
         if (matchedQualificationStatus) {
           setSelectedValue(matchedQualificationStatus.id.toString());
           onChange(matchedQualificationStatus.id.toString()); // Ensure parent component is updated
         }
-      } catch (error) {
-        console.error("Failed to fetch qualification statuses", error);
       }
     };
 
     fetchQualificationStatuses();
-  }, [value, onChange]);
+  }, [value, onChange, qualificationStatuses]);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newValue = event.target.value as string;
