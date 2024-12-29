@@ -24,7 +24,7 @@ import {
   GridSlots,
 } from "@mui/x-data-grid";
 import MainCard from "components/MainCard";
-import { Autocomplete, Stack, TextField, Tooltip, useMediaQuery } from "@mui/material";
+import { Autocomplete, CircularProgress, Stack, TextField, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
 
 import {
@@ -109,15 +109,19 @@ export default function DynamicTableCustomersWithCourseQualificationRecords() {
 
   const [rows, setRows] = React.useState<CustomersWithCourseQualificationRecordsViewModel[]>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Set loading to true when fetching data
       try {
         const data = await getAllCustomersWithCourseQualificationRecords();
-        console.log(data)
+        console.log(data);
         setRows(data);
       } catch (error) {
         console.error("Failed to fetch data", error);
+      } finally {
+        setLoading(false); // Set loading to false when data is fetched
       }
     };
 
@@ -142,12 +146,14 @@ export default function DynamicTableCustomersWithCourseQualificationRecords() {
       [id]: { mode: GridRowModes.View },
     }));
   
+    console.log("ROWS",rows)
     const rowToUpdate = rows.find((row) => row.id === id);
     console.log("ROWTOUPDATE", rowToUpdate)
     if (rowToUpdate) {
       await processRowUpdate(rowToUpdate);
     }
   };
+  
   
   const handleDeleteClick = (id: GridRowId) => async () => {
     try {
@@ -171,9 +177,23 @@ export default function DynamicTableCustomersWithCourseQualificationRecords() {
     }
   };
 
+  const fetchCustomerData = async () => {
+    setLoading(true); // Set loading to true when fetching data
+    try {
+      const data = await getAllCustomersWithCourseQualificationRecords();
+      setRows(data);
+    } catch (error) {
+      console.error("Failed to fetch data", error);
+    } finally {
+      setLoading(false); // Set loading to false when data is fetched
+    }
+  };
+  
 const processRowUpdate = async (newRow: GridRowModel) => {
   const updatedRow = { ...newRow, isNew: false };
   try {
+    console.log("UPDATED newrow", newRow)
+
     const newCustomerQualification = updatedRow as unknown as CustomersWithCourseQualificationRecordsViewModel;
     console.log("UPDATED", updatedRow)
     // Initialize the ID to 0 for new rows
@@ -210,9 +230,12 @@ const processRowUpdate = async (newRow: GridRowModel) => {
     if (newRow.isNew) {
       if(newCustomerQualification.isNew == false)
       {
-        console.log("Adding...")
-      const createdRow = await createCustomersWithCourseQualificationRecords(newCustomerQualification);
-      setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdRow : row)));
+       const createdRow = await createCustomersWithCourseQualificationRecords(newCustomerQualification);
+       const actualId = createdRow.id; 
+       const updatedCreatedRow = { ...createdRow, id: actualId}
+       setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdRow : row)));
+       await fetchCustomerData();
+       return updatedCreatedRow;
       }
     } 
     else {
@@ -392,51 +415,56 @@ const processRowUpdate = async (newRow: GridRowModel) => {
             "& .textPrimary": { color: "text.primary" },
           }}
         >
-          <DataGrid
+    {loading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+              <CircularProgress />
+            </Box>
+          ) : (
+            <DataGrid
               initialState={{
                 columns: {
                   columnVisibilityModel: {
                     customerId: false,
                     courseId: false,
-                    qualificationId:false,
+                    qualificationId: false,
                     certificateId: false,
                     trainingCentreId: false,
                     qualificationStatusId: false
                   },
                 },
               }}
-            rows={rows}
-            columns={columns}
-            editMode="row"
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
-            processRowUpdate={processRowUpdate}
-            disableRowSelectionOnClick 
-            onCellDoubleClick={(params, event) => { event.stopPropagation(); }}
-        
-            slots={{ toolbar: EditToolbar as GridSlots["toolbar"] }}
-            slotProps={{ toolbar: { setRows, setRowModesModel } }}
-            sx={{
-              "& .MuiDataGrid-columnHeaders": {
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                borderTop: `1px solid ${theme.palette.divider}`,
-                padding: 0, // Remove padding from the header
-                "& .MuiDataGrid-columnHeaderTitle": { fontWeight: "bold" },
-                "& .MuiDataGrid-columnHeaderTitle:first-child": { paddingLeft: 1 },
-              },
-              "& .MuiDataGrid-cell": {
-                borderColor: theme.palette.divider,
-                padding: theme.spacing(1), // Add padding to the rows
-                paddingLeft: 2,
-              },
-              "& .MuiDataGrid-pagination": {
-                borderTop: "1px solid",
-                marginTop: theme.spacing(2), // Add some margin for better separation
-              },
-            }}
-            rowHeight={60}
-          />
+              rows={rows}
+              columns={columns}
+              editMode="row"
+              processRowUpdate={processRowUpdate}
+              rowModesModel={rowModesModel}
+              onRowModesModelChange={handleRowModesModelChange}
+              onRowEditStop={handleRowEditStop}
+              disableRowSelectionOnClick 
+              onCellDoubleClick={(params, event) => { event.stopPropagation(); }}
+              slots={{ toolbar: EditToolbar }}
+              slotProps={{ toolbar: { setRows, setRowModesModel } }}
+              sx={{
+                "& .MuiDataGrid-columnHeaders": {
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  borderTop: `1px solid ${theme.palette.divider}`,
+                  padding: 0,
+                  "& .MuiDataGrid-columnHeaderTitle": { fontWeight: "bold" },
+                  "& .MuiDataGrid-columnHeaderTitle:first-child": { paddingLeft: 1 },
+                },
+                "& .MuiDataGrid-cell": {
+                  borderColor: theme.palette.divider,
+                  padding: theme.spacing(1),
+                  paddingLeft: 2,
+                },
+                "& .MuiDataGrid-pagination": {
+                  borderTop: "1px solid",
+                  marginTop: theme.spacing(2),
+                },
+              }}
+              rowHeight={60}
+            />
+          )}
         </Box>
       </Stack>
     </MainCard>

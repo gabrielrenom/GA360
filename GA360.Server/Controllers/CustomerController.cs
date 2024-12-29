@@ -179,7 +179,7 @@ namespace GA360.Server.Controllers
         [HttpPost("customerswithcoursequalificationrecords")]
         public async Task<IActionResult> CreateCustomersWithCourseQualificationRecords([FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
         {
-            if (customer.QualificationId == null && customer.QualificationStatusId == null && customer.CourseId == null)
+            if (customer.QualificationId == null && customer.QualificationStatusId == null && customer.CourseId == null && customer.CertificateId == null && customer.Email == null)
                 return Ok();
 
             var result = await _customerService.CreateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());

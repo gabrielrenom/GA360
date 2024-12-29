@@ -201,6 +201,129 @@ namespace GA360.DAL.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
+        //public async Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords(int? pageNumber, int? pageSize, string orderBy, bool ascending = true)
+        //{
+        //    var customers = new List<Customer>();
+
+        //    try
+        //    {
+        //        // Define the base SQL query
+        //        var sql = @"
+        //    SELECT 
+        //        c.*, 
+        //        qccc.Id AS QCCCertificateId, qccc.QualificationId AS QCCQualificationId, qccc.CertificateId AS QCCCertificateId, 
+        //        qccc.QualificationProgression AS QCCQualificationProgression, qccc.CourseId AS QCCCourseId, 
+        //        qccc.QualificationStatusId AS QCCQualificationStatusId, qccc.CustomerId AS QCCCustomerId, 
+        //        q.Name AS QualificationName, q.Status AS QualificationStatus, 
+        //        q.AwardingBody AS QualificationAwardingBody, q.InternalReference AS QualificationInternalReference, 
+        //        co.Id AS CourseId, co.Name AS CourseName, co.Description AS CourseDescription, 
+        //        co.RegistrationDate AS CourseRegistrationDate, co.ExpectedDate AS CourseExpectedDate, 
+        //        co.Duration AS CourseDuration, co.CertificateDate AS CourseCertificateDate, 
+        //        co.CertificateNumber AS CourseCertificateNumber, co.Status AS CourseStatus, co.Sector AS CourseSector, 
+        //        qc.Id AS CertificateId, qc.Name AS CertificateName, qc.Charge AS CertificateCharge, qc.Type AS CertificateType, 
+        //        qs.Id AS QualificationStatusId, qs.Name AS QualificationStatusName, qs.Description AS QualificationStatusDescription, 
+        //        tc.Id AS TrainingCentreId
+        //    FROM Customers c
+        //    LEFT JOIN QualificationCustomerCourseCertificates qccc ON c.Id = qccc.CustomerId
+        //    LEFT JOIN Courses co ON qccc.CourseId = co.Id
+        //    LEFT JOIN Qualifications q ON qccc.QualificationId = q.Id
+        //    LEFT JOIN Certificates qc ON qccc.CertificateId = qc.Id
+        //    LEFT JOIN QualificationStatuses qs ON qccc.QualificationStatusId = qs.Id
+        //    LEFT JOIN TrainingCentres tc ON c.TrainingCentreId = tc.Id
+        //";
+
+        //        // Apply sorting
+        //        sql += $" ORDER BY {orderBy} {(ascending ? "ASC" : "DESC")}";
+
+        //        // Apply pagination if pageNumber and pageSize are provided
+        //        if (pageNumber.HasValue && pageSize.HasValue)
+        //        {
+        //            sql += $" OFFSET {(pageNumber.Value - 1) * pageSize.Value} ROWS FETCH NEXT {pageSize.Value} ROWS ONLY";
+        //        }
+
+        //        using (var connection = new SqlConnection(GetDbContext().Database.GetConnectionString()))
+        //        using (var command = new SqlCommand(sql, connection))
+        //        {
+        //            await connection.OpenAsync();
+
+        //            using (var reader = await command.ExecuteReaderAsync())
+        //            {
+        //                while (await reader.ReadAsync())
+        //                {
+        //                    // Map Customer
+        //                    var customer = new Customer
+        //                    {
+        //                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+        //                        Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? string.Empty : reader.GetString(reader.GetOrdinal("Email")),
+        //                        Role = reader.IsDBNull(reader.GetOrdinal("Role")) ? string.Empty : reader.GetString(reader.GetOrdinal("Role")),
+        //                        Status = (Status)reader.GetInt32(reader.GetOrdinal("Status")),
+        //                        AvatarImage = reader.IsDBNull(reader.GetOrdinal("AvatarImage")) ? string.Empty : reader.GetString(reader.GetOrdinal("AvatarImage")),
+        //                        TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
+        //                        QualificationCustomerCourseCertificates = new List<QualificationCustomerCourseCertificate>()
+        //                    };
+
+        //                    // Map QualificationCustomerCourseCertificate
+        //                    if (!reader.IsDBNull(reader.GetOrdinal("QCCQualificationId")))
+        //                    {
+        //                        var qualificationCustomerCourseCertificate = new QualificationCustomerCourseCertificate
+        //                        {
+        //                            Id = reader.GetInt32(reader.GetOrdinal("QCCCertificateId")),
+        //                            CourseId = reader.IsDBNull(reader.GetOrdinal("QCCCourseId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QCCCourseId")),
+        //                            CustomerId = reader.IsDBNull(reader.GetOrdinal("QCCCustomerId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QCCCustomerId")),
+        //                            QualificationId = reader.IsDBNull(reader.GetOrdinal("QCCQualificationId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QCCQualificationId")),
+        //                            CertificateId = reader.IsDBNull(reader.GetOrdinal("QCCCertificateId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QCCCertificateId")),
+        //                            QualificationProgression = reader.GetInt32(reader.GetOrdinal("QCCQualificationProgression")),
+        //                            QualificationStatusId = reader.IsDBNull(reader.GetOrdinal("QCCQualificationStatusId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QCCQualificationStatusId")),
+        //                            Course = new Course
+        //                            {
+        //                                Id = reader.IsDBNull(reader.GetOrdinal("CourseId")) ? 0 : reader.GetInt32(reader.GetOrdinal("CourseId")),
+        //                                Name = reader.IsDBNull(reader.GetOrdinal("CourseName")) ? string.Empty : reader.GetString(reader.GetOrdinal("CourseName")),
+        //                                Status = reader.IsDBNull(reader.GetOrdinal("CourseStatus")) ? 0 : reader.GetInt32(reader.GetOrdinal("CourseStatus")),
+        //                                Sector = reader.IsDBNull(reader.GetOrdinal("CourseSector")) ? string.Empty : reader.GetString(reader.GetOrdinal("CourseSector"))
+        //                            },
+        //                            Qualification = new Qualification
+        //                            {
+        //                                Id = reader.IsDBNull(reader.GetOrdinal("QCCQualificationId")) ? 0 : reader.GetInt32(reader.GetOrdinal("QCCQualificationId")),
+        //                                Name = reader.IsDBNull(reader.GetOrdinal("QualificationName")) ? string.Empty : reader.GetString(reader.GetOrdinal("QualificationName")),
+        //                                Status = reader.IsDBNull(reader.GetOrdinal("QualificationStatus")) ? 0 : reader.GetInt32(reader.GetOrdinal("QualificationStatus")),
+        //                                AwardingBody = reader.IsDBNull(reader.GetOrdinal("QualificationAwardingBody")) ? string.Empty : reader.GetString(reader.GetOrdinal("QualificationAwardingBody")),
+        //                                InternalReference = reader.IsDBNull(reader.GetOrdinal("QualificationInternalReference")) ? string.Empty : reader.GetString(reader.GetOrdinal("QualificationInternalReference"))
+        //                            },
+        //                            Certificate = new Certificate
+        //                            {
+        //                                Id = reader.IsDBNull(reader.GetOrdinal("QCCCertificateId")) ? 0 : reader.GetInt32(reader.GetOrdinal("QCCCertificateId")),
+        //                                Name = reader.IsDBNull(reader.GetOrdinal("CertificateName")) ? string.Empty : reader.GetString(reader.GetOrdinal("CertificateName")),
+        //                                Charge = reader.IsDBNull(reader.GetOrdinal("CertificateCharge")) ? string.Empty : reader.GetString(reader.GetOrdinal("CertificateCharge")),
+        //                                Type = reader.IsDBNull(reader.GetOrdinal("CertificateType")) ? string.Empty : reader.GetString(reader.GetOrdinal("CertificateType"))
+        //                            },
+        //                            QualificationStatus = new QualificationStatus
+        //                            {
+        //                                Id = reader.IsDBNull(reader.GetOrdinal("QualificationStatusId")) ? 0 : reader.GetInt32(reader.GetOrdinal("QualificationStatusId")),
+        //                                Name = reader.IsDBNull(reader.GetOrdinal("QualificationStatusName")) ? string.Empty : reader.GetString(reader.GetOrdinal("QualificationStatusName")),
+        //                                Description = reader.IsDBNull(reader.GetOrdinal("QualificationStatusDescription")) ? string.Empty : reader.GetString(reader.GetOrdinal("QualificationStatusDescription"))
+        //                            }
+        //                        };
+
+        //                        // Add the qualificationCustomerCourseCertificate to the customer
+        //                        customer.QualificationCustomerCourseCertificates.Add(qualificationCustomerCourseCertificate);
+        //                    }
+
+        //                    // Add customer to the list
+        //                    customers.Add(customer);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError($"An error occurred: {ex.Message}");
+        //    }
+
+        //    return customers;
+        //}
+
+
+
         public async Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
         {
             var query = GetDbContext()
@@ -226,6 +349,25 @@ namespace GA360.DAL.Infrastructure.Repositories
             }
 
             return await query.ToListAsync();
+        }
+
+        public async Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords()
+        {
+            var query =await GetDbContext()
+                .Set<Customer>()
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Course)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Qualification)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.Certificate)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .ThenInclude(x => x.QualificationStatus)
+                .Include(x => x.TrainingCentre)
+                .ToListAsync();
+
+
+            return query;
         }
 
         //public async Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true)
@@ -494,5 +636,9 @@ namespace GA360.DAL.Infrastructure.Repositories
             return entity;
         }
 
+        public Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords(int? pageNumber, int? pageSize, string orderBy, bool ascending = true)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

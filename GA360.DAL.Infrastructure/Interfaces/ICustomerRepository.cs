@@ -20,7 +20,7 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Task<Customer> GetWithAllEntitiesById(int id);
         Task<Customer> GetCustomerByEmail(string email);
         Task<Customer> GetCustomerBasicByEmail(string email);
-        Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
+        //Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords<TOrderKey>(int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
         Task<bool> DeleteCustomersWithCourseQualificationRecords(int id);
         Task<QualificationCustomerCourseCertificate> UpdateCustomersWithCourseQualificationRecords(QualificationCustomerCourseCertificate qualificationCustomerCourseCertificate);
         Task<QualificationCustomerCourseCertificate> CreateCustomersWithCourseQualificationRecords(QualificationCustomerCourseCertificate qualificationCustomerCourseCertificate);
@@ -29,5 +29,7 @@ namespace GA360.DAL.Infrastructure.Interfaces
         Task<List<Customer>> GetAllCustomerWithCourseQualificationRecords<TOrderKey>(string email, int? pageNumber, int? pageSize, Expression<Func<Customer, TOrderKey>> orderBy, bool ascending = true);
         Task<Customer> GetWithAllPossibleEntitiesById(int id);
         CRMDbContext GetDbContext();
+        Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords(int? pageNumber, int? pageSize, string orderBy, bool ascending = true);
+        Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords();
     }
 }

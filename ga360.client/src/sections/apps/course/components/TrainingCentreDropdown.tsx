@@ -13,24 +13,32 @@ const TrainingCentreDropdown: React.FC<TrainingCentreDropdownProps> = ({ value, 
 
   useEffect(() => {
     const fetchTrainingCentres = async () => {
-      try {
-        const data = await getTrainingCentres();
-        setTrainingCentres(data);
+      if (trainingCentres.length === 0) {
+        try {
+          const data = await getTrainingCentres();
+          setTrainingCentres(data);
 
-        // Set the initial selected value if it matches one of the options
-        
-        const matchedTrainingCentre = data.find(tc => tc.name === value);
+          // Set the initial selected value if it matches one of the options
+          const matchedTrainingCentre = data.find(tc => tc.name === value);
+          if (matchedTrainingCentre) {
+            setSelectedValue(matchedTrainingCentre.id.toString());
+            onChange(matchedTrainingCentre.id.toString()); // Ensure parent component is updated
+          }
+        } catch (error) {
+          console.error("Failed to fetch training centres", error);
+        }
+      } else {
+        // Set the initial selected value if it matches one of the already fetched options
+        const matchedTrainingCentre = trainingCentres.find(tc => tc.name === value);
         if (matchedTrainingCentre) {
           setSelectedValue(matchedTrainingCentre.id.toString());
           onChange(matchedTrainingCentre.id.toString()); // Ensure parent component is updated
         }
-      } catch (error) {
-        console.error("Failed to fetch training centres", error);
       }
     };
 
     fetchTrainingCentres();
-  }, [value, onChange]);
+  }, [value, onChange, trainingCentres]);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newValue = event.target.value as string;

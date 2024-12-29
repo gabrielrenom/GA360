@@ -229,14 +229,10 @@ const processRowUpdate = async (newRow: GridRowModel) => {
         if (newCustomerQualification.qualificationId === undefined &&
           newCustomerQualification.qualificationStatusId === undefined &&
           newCustomerQualification.customerId === undefined) {
-            console.log("Adding empty...",newCustomerQualification)
-
           //setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdRow : row)));
           }
           else
           {
-            console.log("Adding full...",newCustomerQualification)
-
             const createdRow = await createCustomersWithCourseQualificationRecords(newCustomerQualification);
 
             await fetchCustomerWithCourseQualificationRecords();
@@ -248,7 +244,7 @@ const processRowUpdate = async (newRow: GridRowModel) => {
     else {
       console.log("updating...",newCustomerQualification)
       newCustomerQualification.customerId = customerId
-      
+
       // @ts-ignore
       newCustomerQualification.progression = Number(updatedRow.progression);
       const updatedRowData = await updateCustomersWithCourseQualificationRecords(Number(newRow.id), newCustomerQualification);

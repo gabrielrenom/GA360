@@ -51,40 +51,43 @@ const allMenuItems: { items: NavItemType[] } = {
 export const getMenuItemsByRole = (role: string): { items: NavItemType[] } => {
   let filteredItems = [];
 
-    switch (role) {
-      case "Training Centre":
-        filteredItems = [
-          'group-dashboards',
-          'group-back-office',
-          'group-trainingcentreprofile'
-        ];
-        break;
-      case "Super Admin":
-        filteredItems = allMenuItems.items.map(item => item.id)
-        .filter(itemId => itemId !== 'group-trainingcentreprofile');;
-        break;
-      case "Candidate":
-        filteredItems = ['group-profile'];
-        break;
-      case "Assessor":
-        filteredItems = ['group-profile'];
-        break;
-      default:
-        filteredItems = [];
-    }
+  switch (role) {
+    case "Training Centre":
+      filteredItems = [
+        'group-dashboards',
+        'group-back-office',
+        'group-trainingcentreprofile'
+      ];
+      break;
+    case "Super Admin":
+      filteredItems = allMenuItems.items.map(item => item.id)
+        .filter(itemId => itemId !== 'group-trainingcentreprofile');
+      break;
+    case "Candidate":
+      filteredItems = ['group-profile'];
+      break;
+    case "Assessor":
+      filteredItems = ['group-profile'];
+      break;
+    default:
+      filteredItems = [];
+  }
 
   const filteredMenuItems = allMenuItems.items.filter(item => {
     if (item.id === 'group-back-office' && role === 'Training Centre') {
-      item.children = item.children?.filter(child => child.id !== 'group-back-office-collapse-training-centres');
-      item.children = item.children?.filter(child => child.id !== 'group-back-office-collapse-courses');
-      item.children = item.children?.filter(child => child.id !== 'group-back-office-collapse-qualifications');
-
+      item.children = item.children?.map(child => {
+        if (child.id === 'group-back-office-collapse') {
+          child.children = child.children?.filter(subChild => subChild.id !== 'group-back-office-candidates-career');
+        }
+        return child;
+      }).filter(Boolean);
     }
     return filteredItems.includes(item.id);
   });
 
   return { items: filteredMenuItems };
 };
+
 
 export default allMenuItems;
 

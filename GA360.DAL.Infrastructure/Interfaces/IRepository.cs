@@ -1,4 +1,5 @@
 ﻿using GA360.DAL.Entities.BaseEntities;
+using GA360.DAL.Entities.Entities;
 using GA360.DAL.Infrastructure.Contexts;
 using System.Linq.Expressions;
 

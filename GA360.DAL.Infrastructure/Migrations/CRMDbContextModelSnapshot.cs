@@ -308,6 +308,9 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Id")
+                        .HasDatabaseName("IDX_Certificates_Id");
+
                     b.ToTable("Certificates");
                 });
 
@@ -426,6 +429,9 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("IDX_Courses_Id");
 
                     b.ToTable("Courses");
                 });
@@ -578,7 +584,8 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     b.HasIndex("EthnicOriginId");
 
-                    b.HasIndex("TrainingCentreId");
+                    b.HasIndex("TrainingCentreId")
+                        .HasDatabaseName("IDX_Customer_TrainingCentreId");
 
                     b.ToTable("Customers");
                 });
@@ -1132,6 +1139,9 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Id")
+                        .HasDatabaseName("IDX_Qualifications_Id");
+
                     b.ToTable("Qualifications");
                 });
 
@@ -1196,15 +1206,20 @@ namespace GA360.DAL.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CertificateId");
+                    b.HasIndex("CertificateId")
+                        .HasDatabaseName("IDX_QCCC_CertificateId");
 
-                    b.HasIndex("CourseId");
+                    b.HasIndex("CourseId")
+                        .HasDatabaseName("IDX_QCCC_CourseId");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("IDX_QCCC_CustomerId");
 
-                    b.HasIndex("QualificationId");
+                    b.HasIndex("QualificationId")
+                        .HasDatabaseName("IDX_QCCC_QualificationId");
 
-                    b.HasIndex("QualificationStatusId");
+                    b.HasIndex("QualificationStatusId")
+                        .HasDatabaseName("IDX_QCCC_QualificationStatusId");
 
                     b.ToTable("QualificationCustomerCourseCertificates");
                 });
@@ -1252,6 +1267,9 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("IDX_QualificationStatuses_Id");
 
                     b.ToTable("QualificationStatuses");
                 });
@@ -1492,6 +1510,9 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("IDX_TrainingCentres_Id");
 
                     b.ToTable("TrainingCentres");
                 });

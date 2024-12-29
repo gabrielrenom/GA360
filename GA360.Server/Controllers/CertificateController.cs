@@ -36,14 +36,12 @@ namespace GA360.Server.Controllers
                 certificates = await _certificateService.GetAllCertificates();
 
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
+                       .SetSlidingExpiration(TimeSpan.FromMinutes(30));
 
                 _cache.Set(CertificatesCacheKey, certificates, cacheEntryOptions);
             }
 
-            var certificatesPermissions = await _permissionService.FilterPermissions(emailClaim, certificates);
-
-            return Ok(certificatesPermissions);
+            return Ok(certificates);
         }
     }
 }

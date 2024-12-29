@@ -13,9 +13,8 @@ const EmailDropdown: React.FC<EmailDropdownProps> = ({ value, onChange }) => {
   const [selectedValue, setSelectedValue] = useState<string>(''); // Use local state for selected value
 
   useEffect(() => {
-    // Check if value is not a number before calling fetchEmails
-    if (typeof value === 'string') {
-      const fetchEmails = async () => {
+    const fetchEmails = async () => {
+      if (emails.length === 0) {
         try {
           const emailData = await getBasicCandidates();
           console.log("EMAIL CALLED", value);
@@ -38,11 +37,18 @@ const EmailDropdown: React.FC<EmailDropdownProps> = ({ value, onChange }) => {
         } catch (error) {
           console.error("Failed to fetch emails", error);
         }
-      };
+      } else {
+        // Set the initial selected value if it matches one of the already fetched options
+        const matchedEmail = emails.find(email => email.email === value);
+        if (matchedEmail) {
+          setSelectedValue(matchedEmail.id.toString());
+          onChange(matchedEmail.id.toString()); // Ensure parent component is updated
+        }
+      }
+    };
 
-      fetchEmails();
-    }
-  }, [value, onChange]);
+    fetchEmails();
+  }, [value, onChange, emails]);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newValue = event.target.value as string;

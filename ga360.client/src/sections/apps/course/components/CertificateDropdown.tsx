@@ -13,24 +13,32 @@ const CertificateDropdown: React.FC<CertificateDropdownProps> = ({ value, onChan
 
   useEffect(() => {
     const fetchCertificates = async () => {
-      try {
-        const data = await getCertificates();
-        setCertificates(data);
-        console.log("fetchCertificates CALLED");
+      if (certificates.length === 0) {
+        try {
+          const data = await getCertificates();
+          setCertificates(data);
 
-        // Set the initial selected value if it matches one of the options
-        const matchedCertificate = data.find(cert => cert.name === value);
+          // Set the initial selected value if it matches one of the options
+          const matchedCertificate = data.find(cert => cert.name === value);
+          if (matchedCertificate) {
+            setSelectedValue(matchedCertificate.id.toString());
+            onChange(matchedCertificate.id.toString()); // Ensure parent component is updated
+          }
+        } catch (error) {
+          console.error("Failed to fetch certificates", error);
+        }
+      } else {
+        // Set the initial selected value if it matches one of the already fetched options
+        const matchedCertificate = certificates.find(cert => cert.name === value);
         if (matchedCertificate) {
           setSelectedValue(matchedCertificate.id.toString());
           onChange(matchedCertificate.id.toString()); // Ensure parent component is updated
         }
-      } catch (error) {
-        console.error("Failed to fetch certificates", error);
       }
     };
 
     fetchCertificates();
-  }, [value, onChange]);
+  }, [value, onChange, certificates]);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newValue = event.target.value as string;
