@@ -802,6 +802,104 @@ public class CustomerService : ICustomerService
         return result;
     }
 
+    public async Task<CustomerBatchModel> UploadBatchCandidates(CustomerBatchModel batch)
+    {
+        var result = new CustomerBatchModel
+        {
+            Customers = new List<CustomerBatchItemModel>(),
+        };
+
+        try
+        {
+            foreach (var customerModel in batch.Customers)
+            {
+                try
+                {
+                    var existingUser = await GetCustomerByEmail(customerModel.Email);
+
+                    if (existingUser.Id > 0 || customerModel.Email.IsNullOrEmpty())
+                        continue;
+
+                    var address = new Address
+                    {
+                        City = customerModel.City,
+                        Number = customerModel.Number.ToString(),
+                        Postcode = customerModel.Postcode,
+                        Street = customerModel.Street,
+                    };
+
+                    var countryId = 0;
+                    if (customerModel.Country != null)
+                    {
+                        var country = await _customerRepository.Get<Country>(x => x.Name.ToLower() == customerModel.Country.ToLower());
+                        if (country == null)
+                            continue;
+
+                        countryId = country.Id;
+                    }
+
+                    var ethnicOrigin = await _ethnicityRepository.Get<EthnicOrigin>(x => x.Name.ToLower() == customerModel.Ethnicity.ToLower());
+
+                    if (ethnicOrigin == null)
+                        continue;
+
+                    var trainingCentre = await _trainingCentreRepository.Get<TrainingCentre>(x => x.Name.ToLower() == customerModel.TrainingCentre.ToLower());
+
+                    var customer = new Customer
+                    {
+                        About = customerModel.About,
+                        Address = address,
+                        Contact = customerModel.Contact,
+                        DOB = customerModel.DOB,
+                        CountryId = countryId,
+                        Disability = customerModel.Disability,
+                        Email = customerModel.Email,
+                        FirstName = customerModel.FirstName,
+                        LastName = customerModel.LastName,
+                        Employer = customerModel.Employer,
+                        ePortfolio = customerModel.Portfolio,
+                        EmploymentStatus = customerModel.EmployeeStatus,
+                        EthnicOriginId = ethnicOrigin.Id,
+                        FatherName = customerModel.FatherName,
+                        Gender = customerModel.Gender,
+                        Location = customerModel.Location,
+                        NI = customerModel.NationalInsurance,
+                        Status = DAL.Entities.Enums.StatusEnum.Status.ProcessingRequest,
+                        Role = customerModel.Role,
+                        //TrainingCentreId =  trainingCentreUserEntity.TrainingCentre:trainingCentre.Id,
+                        TrainingCentreId = trainingCentre.Id,
+                    };
+
+                    _customerRepository.Add(customer);
+
+                    await _customerRepository.SaveChangesAsync();
+
+                    var role = _customerRepository.GetDbContext().Set<Role>().Where(x => x.Name.ToLower() == "candidate").FirstOrDefault();
+
+                    _customerRepository.GetDbContext().Add(new UserRole
+                    {
+                        RoleId = role.Id,
+                        CustomerId = customer.Id
+                    });
+                    await _customerRepository.SaveChangesAsync();
+
+                    result.Customers.Add(customerModel);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error creating client {customerModel.Email}", ex);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "AddCustomer");
+        }
+
+        return result;
+    }
+
+
     public async Task<List<CustomerModelHighPerformance>> GetAllUltraHighPerfomance(int? trainingCentreId)
     {
         var customers = new List<CustomerModelHighPerformance>();

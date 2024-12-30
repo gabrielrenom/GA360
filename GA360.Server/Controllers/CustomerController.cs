@@ -352,9 +352,18 @@ namespace GA360.Server.Controllers
             {
                 var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-                var result = await _customerService.UploadBatchCandidates(contacts.ToModel(), emailClaim);
+                var permissions = await _permissionService.GetPermissions(emailClaim);
 
-                return Ok(result?.ToViewModel());
+                if (permissions.Role == "Training Centre")
+                {
+                    var result = await _customerService.UploadBatchCandidates(contacts.ToModel(), emailClaim);
+                    return Ok(result?.ToViewModel());
+                }
+                else
+                {
+                    var result = await _customerService.UploadBatchCandidates(contacts.ToModel());
+                    return Ok(result?.ToViewModel());
+                }
             }
             catch (Exception ex)
             {
