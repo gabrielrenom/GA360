@@ -44,6 +44,7 @@ import { CustomerListExtended } from "types/customer";
 import { getBasicCandidate } from "api/customer";
 import DuendeContext from "contexts/DuendeContext";
 import {
+  getLogoutUrl,
   getRedirectUrl,
   logOutByCleaningCookies,
 } from "api/configurationService";
@@ -128,7 +129,9 @@ export default function Profile() {
   }, []);
 
   const handleLogout = async () => {
-    const redirectUrl = await getRedirectUrl();
+    //const redirectUrl = await getRedirectUrl();
+    const redirectUrl = await getLogoutUrl();
+
     console.log(redirectUrl)
     await logOutByCleaningCookies();
     window.location.href = redirectUrl;
