@@ -37,22 +37,22 @@ public class ConfigurationController : ControllerBase
         try
         {
             // Clear the user's cookies and sign out
-            var auth = new AuthenticationProperties()
+            //var auth = new AuthenticationProperties()
+            //{
+            //    ExpiresUtc = DateTime.Now.AddDays(-5)
+            //};
+            //await HttpContext.SignOutAsync(auth);
+
+            foreach (var cookie in Request.Cookies)
             {
-                ExpiresUtc = DateTime.Now.AddDays(-5)
-            };
-            await HttpContext.SignOutAsync(auth);
+                Console.WriteLine($"Cookie Name: {cookie.Key}, Cookie Value: {cookie.Value}");
+                Response.Cookies.Delete(cookie.Key);
+            }
 
             //await HttpContext.SignOutAsync((AuthenticationProperties..DefaultCookieAuthenticationScheme);
 
             // Optionally clear session data
-            //HttpContext.Session.Clear();
-
-            // Clear cookies manually if necessary
-            foreach (var cookie in Request.Cookies.Keys)
-            {
-                Response.Cookies.Delete(cookie);
-            }
+            HttpContext.Session.Clear();
 
             // Redirect to the login page or return a response
             return Ok(new { message = "Logout successful" });

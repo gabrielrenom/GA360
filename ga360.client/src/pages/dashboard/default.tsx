@@ -397,7 +397,7 @@ export default function DashboardDefault() {
                   </Stack>
                 </MainCard>
               </Grid>
-
+            {user && user.role=="Super Admin"?
               <Grid item xs={12} sm={3}>
                 <MainCard
                   sx={{
@@ -415,6 +415,7 @@ export default function DashboardDefault() {
                   </Stack>
                 </MainCard>
               </Grid>
+              :<></>}
               <Grid item xs={12} sm={3}>
                 <MainCard
                   sx={{

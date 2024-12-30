@@ -63,9 +63,9 @@ export  const DuendeProvider = ({ children }) => {
                     const name = userResult.find((x: { type: string; }) => x.type === 'name').value;
                     const id = userResult.find((x: { type: string; }) => x.type === 'sid').value;
                     const email = userResult.find((x: { type: string; }) => x.type === 'email').value;
-                    const logouturl: (string | number | undefined) = userResult.find((x: { type: string; }) => x.type === 'bff:logout_url')?.value as string;
+                    const logouturl = userResult.find((x: { type: string; }) => x.type === 'bff:logout_url').value;
 
-                    console.log("LOGOUT",logout)
+                    console.log("LOGOUT",userResult)
                     const userDetails: User = await getUser(); 
                     
                     const user = {
@@ -81,6 +81,7 @@ export  const DuendeProvider = ({ children }) => {
                         city: userDetails.city,
                         avatarImage: userDetails.avatarImage,
                         employeeStatus: userDetails.employeeStatus,
+                        logouturl: logouturl
                     };
                     dispatch({
                         type: LOGIN,
@@ -164,7 +165,7 @@ export  const DuendeProvider = ({ children }) => {
     }
 
     return (
-        <DuendeContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile }}>
+        <DuendeContext.Provider value={{ ...state, login, register, resetPassword, updateProfile }}>
             {children}
         </DuendeContext.Provider>
     );

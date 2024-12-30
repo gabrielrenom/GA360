@@ -55,7 +55,13 @@ builder.Services.AddScoped<ICertificateService, CertificateService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 builder.Services.AddScoped<IPermissionService, PermissionService>();
-
+//builder.Services.AddSession(options =>
+//{
+//    options.Cookie.Name = "__Host-bff";
+//    options.Cookie.HttpOnly = true;
+//    options.Cookie.IsEssential = true;
+//    options.IdleTimeout = TimeSpan.FromMinutes(30);
+//});
 builder.Services.AddBff(x =>
 {
     x.AntiForgeryHeaderValue = "Dog";
@@ -69,11 +75,15 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = "cookie";
     options.DefaultChallengeScheme = "oidc";
     options.DefaultSignOutScheme = "oidc";
-}).AddCookie("cookie", options =>
-{
-    options.Cookie.Name = "__Host-bff";
-    options.Cookie.SameSite = SameSiteMode.Strict;
-}).AddOpenIdConnect("oidc", options =>
+})
+    .AddCookie("cookie")
+//    .AddCookie("cookie", options =>
+//{
+//    options.Cookie.Name = "__Host-bff";
+//    options.Cookie.SameSite = SameSiteMode.Strict;
+//    options.Cookie.HttpOnly = false;
+//})
+    .AddOpenIdConnect("oidc", options =>
 {
     options.Authority = identitySettings.Authority;
     options.ClientId = identitySettings.ClientId;
@@ -97,6 +107,7 @@ builder.Services.AddAuthentication(options =>
         RoleClaimType = "role"
     };
 });
+builder.Services.AddSession();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -126,6 +137,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseBff();
 app.UseAuthorization();
+app.UseSession();
 app.MapBffManagementEndpoints();
 
 app.MapControllers();

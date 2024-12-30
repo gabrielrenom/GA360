@@ -1,42 +1,52 @@
-import { useRef, useState, ReactNode, SyntheticEvent, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router';
+import {
+  useRef,
+  useState,
+  ReactNode,
+  SyntheticEvent,
+  useEffect,
+  useContext,
+} from "react";
+import { useNavigate } from "react-router";
 import Cookies from "js-cookie";
 
-
 // material-ui
-import { useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import ButtonBase from '@mui/material/ButtonBase';
-import CardContent from '@mui/material/CardContent';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Popper from '@mui/material/Popper';
-import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
+import { useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import CardContent from "@mui/material/CardContent";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Popper from "@mui/material/Popper";
+import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 
 // project import
-import ProfileTab from './ProfileTab';
-import SettingTab from './SettingTab';
-import Avatar from 'components/@extended/Avatar';
-import MainCard from 'components/MainCard';
-import Transitions from 'components/@extended/Transitions';
-import IconButton from 'components/@extended/IconButton';
+import ProfileTab from "./ProfileTab";
+import SettingTab from "./SettingTab";
+import Avatar from "components/@extended/Avatar";
+import MainCard from "components/MainCard";
+import Transitions from "components/@extended/Transitions";
+import IconButton from "components/@extended/IconButton";
 
-import { ThemeMode } from 'config';
-import useAuth from 'hooks/useAuth';
+import { ThemeMode } from "config";
+import useAuth from "hooks/useAuth";
 
 // assets
-import LogoutOutlined from '@ant-design/icons/LogoutOutlined';
-import SettingOutlined from '@ant-design/icons/SettingOutlined';
-import UserOutlined from '@ant-design/icons/UserOutlined';
-import avatar1 from 'assets/images/users/avatar-1.png';
-import { CustomerListExtended } from 'types/customer';
-import { getBasicCandidate } from 'api/customer';
-import DuendeContext from 'contexts/DuendeContext';
+import LogoutOutlined from "@ant-design/icons/LogoutOutlined";
+import SettingOutlined from "@ant-design/icons/SettingOutlined";
+import UserOutlined from "@ant-design/icons/UserOutlined";
+import avatar1 from "assets/images/users/avatar-1.png";
+import { CustomerListExtended } from "types/customer";
+import { getBasicCandidate } from "api/customer";
+import DuendeContext from "contexts/DuendeContext";
+import {
+  getRedirectUrl,
+  logOutByCleaningCookies,
+} from "api/configurationService";
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -48,7 +58,13 @@ interface TabPanelProps {
 // tab panel wrapper
 function TabPanel({ children, value, index, ...other }: TabPanelProps) {
   return (
-    <div role="tabpanel" hidden={value !== index} id={`profile-tabpanel-${index}`} aria-labelledby={`profile-tab-${index}`} {...other}>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`profile-tabpanel-${index}`}
+      aria-labelledby={`profile-tab-${index}`}
+      {...other}
+    >
       {value === index && children}
     </div>
   );
@@ -57,7 +73,7 @@ function TabPanel({ children, value, index, ...other }: TabPanelProps) {
 function a11yProps(index: number) {
   return {
     id: `profile-tab-${index}`,
-    'aria-controls': `profile-tabpanel-${index}`
+    "aria-controls": `profile-tabpanel-${index}`,
   };
 }
 
@@ -66,20 +82,6 @@ function a11yProps(index: number) {
 export default function Profile() {
   const theme = useTheme();
   const navigate = useNavigate();
-
-  // const { logout, user } = useAuth();
-  // const handleLogout = async () => {
-  //   try {
-  //     await logout();
-  //     navigate(`/login`, {
-  //       state: {
-  //         from: ''
-  //       }
-  //     });
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
 
   const anchorRef = useRef<any>(null);
   const [open, setOpen] = useState(false);
@@ -100,77 +102,69 @@ export default function Profile() {
     setValue(newValue);
   };
 
-  const iconBackColorOpen = theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100';
+  const iconBackColorOpen =
+    theme.palette.mode === ThemeMode.DARK ? "background.default" : "grey.100";
 
-  const [candidate,setCandidate] =  useState<CustomerListExtended>(null);
+  const [candidate, setCandidate] = useState<CustomerListExtended>(null);
 
   const [avatar, setAvatar] = useState<string | undefined>(
-    candidate?.avatarImage
-        ? candidate.avatarImage
-        : avatar1
+    candidate?.avatarImage ? candidate.avatarImage : avatar1
   );
 
   const { user, isLoggedIn } = useContext(DuendeContext);
 
-
   useEffect(() => {
     const fetchUser = async () => {
-        try {
-            const response = await getBasicCandidate();
-            setAvatar(response.avatarImage);
-            setCandidate(response);
-        } catch (error) {
-            console.error("Error fetching basic user:", error);
-        }
+      try {
+        const response = await getBasicCandidate();
+        setAvatar(response.avatarImage);
+        setCandidate(response);
+      } catch (error) {
+        console.error("Error fetching basic user:", error);
+      }
     };
 
     fetchUser();
-}, []);
+  }, []);
 
-const handleLogout = async () => {
-      await fetch("/api/configuration/sessionout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF": "Dog",
-      },
-    });
-  const allCookies = Cookies.get();
-  console.log(allCookies,"before for")
-  for (let cookie in allCookies) 
-    { 
-      console.log(cookie,"before cookies")
-
-      Cookies.remove(cookie); 
-
-    }
-
-  Cookies.remove('__Host-bff', { path: '/', domain: 'localhost' });
-  Cookies.remove('__Host-bffC1', { path: '/', domain: 'localhost' })
-  Cookies.remove('__Host-bffC2', { path: '/', domain: 'localhost' })
- console.log("Removing cookies")
- 
-  window.location.href = "https://app-ga360authn-prod-uksouth.azurewebsites.net/Account/Logout";
-};
+  const handleLogout = async () => {
+    const redirectUrl = await getRedirectUrl();
+    console.log(redirectUrl)
+    await logOutByCleaningCookies();
+    window.location.href = redirectUrl;
+  };
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
       <ButtonBase
         sx={{
           p: 0.25,
-          bgcolor: open ? iconBackColorOpen : 'transparent',
+          bgcolor: open ? iconBackColorOpen : "transparent",
           borderRadius: 1,
-          '&:hover': { bgcolor: theme.palette.mode === ThemeMode.DARK ? 'secondary.light' : 'secondary.lighter' },
-          '&:focus-visible': { outline: `2px solid ${theme.palette.secondary.dark}`, outlineOffset: 2 }
+          "&:hover": {
+            bgcolor:
+              theme.palette.mode === ThemeMode.DARK
+                ? "secondary.light"
+                : "secondary.lighter",
+          },
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.secondary.dark}`,
+            outlineOffset: 2,
+          },
         }}
         aria-label="open profile"
         ref={anchorRef}
-        aria-controls={open ? 'profile-grow' : undefined}
+        aria-controls={open ? "profile-grow" : undefined}
         aria-haspopup="true"
         onClick={handleToggle}
       >
-        <Stack direction="row" spacing={1.25} alignItems="center" sx={{ p: 0.5 }}>
+        <Stack
+          direction="row"
+          spacing={1.25}
+          alignItems="center"
+          sx={{ p: 0.5 }}
+        >
           <Avatar alt="profile user" src={avatar} size="sm" />
-          <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
+          <Typography variant="subtitle1" sx={{ textTransform: "capitalize" }}>
             {user?.name}
           </Typography>
         </Stack>
@@ -185,35 +179,63 @@ const handleLogout = async () => {
         popperOptions={{
           modifiers: [
             {
-              name: 'offset',
+              name: "offset",
               options: {
-                offset: [0, 9]
-              }
-            }
-          ]
+                offset: [0, 9],
+              },
+            },
+          ],
         }}
       >
         {({ TransitionProps }) => (
-          <Transitions type="grow" position="top-right" in={open} {...TransitionProps}>
-            <Paper sx={{ boxShadow: theme.customShadows.z1, width: 290, minWidth: 240, maxWidth: { xs: 250, md: 290 } }}>
+          <Transitions
+            type="grow"
+            position="top-right"
+            in={open}
+            {...TransitionProps}
+          >
+            <Paper
+              sx={{
+                boxShadow: theme.customShadows.z1,
+                width: 290,
+                minWidth: 240,
+                maxWidth: { xs: 250, md: 290 },
+              }}
+            >
               <ClickAwayListener onClickAway={handleClose}>
                 <MainCard elevation={0} border={false} content={false}>
                   <CardContent sx={{ px: 2.5, pt: 3 }}>
-                    <Grid container justifyContent="space-between" alignItems="center">
+                    <Grid
+                      container
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
                       <Grid item>
-                        <Stack direction="row" spacing={1.25} alignItems="center">
-                          <Avatar alt="profile user" src={avatar} sx={{ width: 32, height: 32 }} />
+                        <Stack
+                          direction="row"
+                          spacing={1.25}
+                          alignItems="center"
+                        >
+                          <Avatar
+                            alt="profile user"
+                            src={avatar}
+                            sx={{ width: 32, height: 32 }}
+                          />
                           <Stack>
                             <Typography variant="h6">{user?.name}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                               {user.role}
+                              {user.role}
                             </Typography>
                           </Stack>
                         </Stack>
                       </Grid>
                       <Grid item>
                         <Tooltip title="Logout">
-                          <IconButton size="large" sx={{ color: 'text.primary' }} onClick={handleLogout}>
+                          <IconButton
+                            size="large"
+                            sx={{ color: "text.primary" }}
+                            onClick={handleLogout}
+                          >
                             <LogoutOutlined />
                           </IconButton>
                         </Tooltip>
