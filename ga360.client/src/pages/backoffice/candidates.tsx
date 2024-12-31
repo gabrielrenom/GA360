@@ -92,7 +92,7 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
             {
                 header: 'Contact',
                 accessorKey: 'contact',
-                cell: ({ getValue }) => <PatternFormat displayType="text" format="+1 (###) ###-####" mask="_" defaultValue={getValue() as number} />
+                cell: ({ getValue }) => <PatternFormat displayType="text" format="(+##) ###-####" mask="_" defaultValue={getValue() as number} />
             },
             {
                 header: 'DOB',
