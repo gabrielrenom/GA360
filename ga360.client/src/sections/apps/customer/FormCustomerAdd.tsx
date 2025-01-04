@@ -271,7 +271,6 @@ export default function FormCustomerAdd({
     const CustomerSchema = Yup.object().shape({
         firstName: Yup.string().max(255).required("First Name is required"),
         lastName: Yup.string().max(255).required("Last Name is required"),
-        fatherName: Yup.string().max(255).required("Father Name Name is required"),
         age: Yup.number().required("Age is required"),
         email: Yup.string()
             .max(255)
@@ -423,11 +422,12 @@ export default function FormCustomerAdd({
 
     return (
         <Box sx={{ bgcolor: 'background.paper', p: 4 }}>
+            {customer ? 
             <Tabs value={value} onChange={handleChange} aria-label="tabs">
                 <Tab label="Candidate" />
                 <Tab label="Qualifications" />
                 {/* <Tab label="Batch Upload" /> */}
-            </Tabs>
+            </Tabs>:<></>}
             <Box sx={{ mt: 2 }}>
                 {value === 0 && (
                     <>
@@ -545,7 +545,7 @@ export default function FormCustomerAdd({
                                                             />
                                                         </Stack>
                                                     </Grid>
-                                                    <Grid item xs={12} sm={6}>
+                                                    {/* <Grid item xs={12} sm={6}>
                                                         <Stack spacing={1}>
                                                             <InputLabel htmlFor="customer-fatherName">
                                                                 Father Name
@@ -561,7 +561,7 @@ export default function FormCustomerAdd({
                                                                 helperText={touched.fatherName && errors.fatherName}
                                                             />
                                                         </Stack>
-                                                    </Grid>
+                                                    </Grid> */}
                                                     <Grid item xs={12} sm={6}>
                                                         <Stack spacing={1}>
                                                             <InputLabel htmlFor="customer-dateOfBirth">
@@ -848,21 +848,6 @@ export default function FormCustomerAdd({
                                                     </Grid>
                                                     <Grid item xs={12} sm={6}>
                                                         <Stack spacing={1}>
-                                                            <InputLabel htmlFor="customer-street">
-                                                                Street
-                                                            </InputLabel>
-                                                            <TextField
-                                                                fullWidth
-                                                                id="customer-street"
-                                                                placeholder="Enter Street"
-                                                                {...getFieldProps("street")}
-                                                                error={Boolean(touched.street && errors.street)}
-                                                                helperText={touched.street && errors.street}
-                                                            />
-                                                        </Stack>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={6}>
-                                                        <Stack spacing={1}>
                                                             <InputLabel htmlFor="customer-number">
                                                                 House Number
                                                             </InputLabel>
@@ -878,16 +863,16 @@ export default function FormCustomerAdd({
                                                     </Grid>
                                                     <Grid item xs={12} sm={6}>
                                                         <Stack spacing={1}>
-                                                            <InputLabel htmlFor="customer-postcode">
-                                                                Postcode
+                                                            <InputLabel htmlFor="customer-street">
+                                                                Street
                                                             </InputLabel>
                                                             <TextField
                                                                 fullWidth
-                                                                id="customer-postcode"
-                                                                placeholder="Enter Postcode"
-                                                                {...getFieldProps("postcode")}
-                                                                error={Boolean(touched.postcode && errors.postcode)}
-                                                                helperText={touched.postcode && errors.postcode}
+                                                                id="customer-street"
+                                                                placeholder="Enter Street"
+                                                                {...getFieldProps("street")}
+                                                                error={Boolean(touched.street && errors.street)}
+                                                                helperText={touched.street && errors.street}
                                                             />
                                                         </Stack>
                                                     </Grid>
@@ -901,6 +886,21 @@ export default function FormCustomerAdd({
                                                                 {...getFieldProps("city")}
                                                                 error={Boolean(touched.city && errors.city)}
                                                                 helperText={touched.city && errors.city}
+                                                            />
+                                                        </Stack>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Stack spacing={1}>
+                                                            <InputLabel htmlFor="customer-postcode">
+                                                                Postcode
+                                                            </InputLabel>
+                                                            <TextField
+                                                                fullWidth
+                                                                id="customer-postcode"
+                                                                placeholder="Enter Postcode"
+                                                                {...getFieldProps("postcode")}
+                                                                error={Boolean(touched.postcode && errors.postcode)}
+                                                                helperText={touched.postcode && errors.postcode}
                                                             />
                                                         </Stack>
                                                     </Grid>

@@ -82,8 +82,6 @@ export default function Navigation() {
     // } else {
     //   setMenuItems({ items: [...menuItem.items] });
     // }
-    console.log("OH USER", user)
-    console.log("MENU ITEMS",menuItem.items )
     setMenuItems({ items: [...menuItem.items] });
 
     if (user && user.role) {

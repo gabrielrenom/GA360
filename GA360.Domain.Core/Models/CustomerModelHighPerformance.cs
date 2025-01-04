@@ -23,5 +23,6 @@ namespace GA360.Domain.Core.Models
         public string DateOfBirth { get; set; }
         public int TrainingCentreId { get; set; }
         public string TrainingCentre { get; set; }
+        public string AvatarImage { get; set; }
     }
 }

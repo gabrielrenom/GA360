@@ -54,7 +54,7 @@ interface ReactTableProps {
 }
 
 
-export default function TabCandidateProfile() {
+export default function TabCandidateCardAndCerts() {
     const [candidate, setCandidate] = useState<CustomerListExtended>(null);
 
     const [avatar, setAvatar] = useState<string | undefined>(
@@ -108,8 +108,9 @@ export default function TabCandidateProfile() {
         const fetchUser = async () => {
             try {
                 const response = await getCandidate();
-                console.log("CANDIDATE",response)
                 setAvatar(response.avatarImage);
+                console.log("HOOO·",response)
+
                 setCandidate(response);
                 const certificatesResponse = mapCertificates(response.certificates);
                 setCertificates(certificatesResponse);
@@ -257,144 +258,10 @@ export default function TabCandidateProfile() {
                 </Grid>
             </Grid>
             <Grid item xs={12} sm={7} md={8} xl={9}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <MainCard title="About me">
-              <Typography color="secondary">
-                {candidate && candidate.about}
-              </Typography>
-            </MainCard>
-          </Grid>
-          <Grid item xs={12}>
-            <MainCard title="Personal Details">
-              <List sx={{ py: 0 }}>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Full Name
-                        </Typography>
-                        <Typography>                
-                            {candidate && (candidate.firstName + ' ' + candidate.lastName)}
-                        </Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">NI</Typography>
-                        <Typography>{candidate && candidate.nationalInsurance}</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Phone</Typography>
-                        <Typography>
-                          {candidate && candidate.contact}
-                        </Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Country</Typography>
-                        <Typography>{candidate && candidate.country}</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">DOB
-                        </Typography>
-                        <Typography>                
-                            {candidate && candidate.dob}
-                        </Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Gender</Typography>
-                        <Typography>{candidate && candidate.gender}</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Phone</Typography>
-                        <Typography>
-                          {candidate && candidate.contact}
-                        </Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Country</Typography>
-                        <Typography>{candidate && candidate.country}</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Email</Typography>
-                        <Typography>{candidate && candidate.email}</Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Postcode</Typography>
-                        <Typography>{candidate && candidate.postcode}</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem>
-                  <Stack spacing={0.5}>
-                    <Typography color="secondary">Address</Typography>
-                    <Typography>
-  {candidate && 
-    `${candidate.number ? candidate.number + ', ' : ''}${candidate.street ? candidate.street + ', ' : ''}${candidate.city || ''}`
-  }
-</Typography>
-                  </Stack>
-                </ListItem>
-              </List>
-            </MainCard>
-          </Grid>
-          <Grid item xs={12}>
-            <MainCard title="Employment">
-              <List sx={{ py: 0 }}>
-                <ListItem divider>
-                  <Grid container spacing={matchDownMD ? 0.5 : 3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Employment Status</Typography>
-                        <Typography>{candidate && candidate.employmentStatus}</Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Employer</Typography>
-                        <Typography>{candidate && candidate.employer}</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-              </List>
-            </MainCard>
-          </Grid>
-        </Grid>
-      </Grid>
+            <ReactTable data={certificates} columns={columns} />
+                {/* {certificates.length>0?
+                <ReactTable data={certificates} columns={columns} />:<></>} */}
+            </Grid>
         </Grid>
     );
 }

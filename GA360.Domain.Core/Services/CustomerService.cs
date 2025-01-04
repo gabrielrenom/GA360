@@ -904,10 +904,12 @@ public class CustomerService : ICustomerService
     {
         var customers = new List<CustomerModelHighPerformance>();
 
-        using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
+        try
         {
-            // Base query
-            var query = @"
+            using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
+            {
+                // Base query
+                var query = @"
             SELECT 
                 c.Id,
                 c.FirstName,
@@ -922,7 +924,8 @@ public class CustomerService : ICustomerService
                 c.DOB,
                 c.DOB AS DateOfBirth,
                 c.TrainingCentreId,
-                tc.Name AS TrainingCentreName
+                tc.Name AS TrainingCentreName,
+                c.AvatarImage
             FROM 
                 Customers c
             LEFT JOIN 
@@ -930,48 +933,54 @@ public class CustomerService : ICustomerService
             LEFT JOIN 
                 TrainingCentres tc ON c.TrainingCentreId = tc.Id";
 
-            // Add WHERE clause if trainingCentreId is provided
-            if (trainingCentreId.HasValue)
-            {
-                query += " WHERE c.TrainingCentreId = @TrainingCentreId";
-            }
-
-            query += " ORDER BY c.Id";
-
-            var command = new SqlCommand(query, connection);
-
-            if (trainingCentreId.HasValue)
-            {
-                command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
-            }
-
-            await connection.OpenAsync();
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
+                // Add WHERE clause if trainingCentreId is provided
+                if (trainingCentreId.HasValue)
                 {
-                    var customer = new CustomerModelHighPerformance
-                    {
-                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                        FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                        LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                        Name = reader.GetString(reader.GetOrdinal("Name")),
-                        Contact = reader.GetString(reader.GetOrdinal("Contact")),
-                        Email = reader.GetString(reader.GetOrdinal("Email")),
-                        Country = reader.GetString(reader.GetOrdinal("Country")),
-                        Location = reader.GetString(reader.GetOrdinal("Location")),
-                        Status = reader.GetInt32(reader.GetOrdinal("Status")),
-                        Avatar = 0, // Assuming Avatar is not mapped from Customer
-                        CountryId = reader.GetInt32(reader.GetOrdinal("CountryId")),
-                        DOB = reader.GetString(reader.GetOrdinal("DOB")),
-                        DateOfBirth = reader.GetString(reader.GetOrdinal("DateOfBirth")),
-                        TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
-                        TrainingCentre = reader.IsDBNull(reader.GetOrdinal("TrainingCentreName")) ? null : reader.GetString(reader.GetOrdinal("TrainingCentreName"))
-                    };
+                    query += " WHERE c.TrainingCentreId = @TrainingCentreId";
+                }
 
-                    customers.Add(customer);
+                query += " ORDER BY c.Id";
+
+                var command = new SqlCommand(query, connection);
+
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var customer = new CustomerModelHighPerformance
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Contact = reader.GetString(reader.GetOrdinal("Contact")),
+                            Email = reader.GetString(reader.GetOrdinal("Email")),
+                            Country = reader.GetString(reader.GetOrdinal("Country")),
+                            Location = reader.GetString(reader.GetOrdinal("Location")),
+                            Status = reader.GetInt32(reader.GetOrdinal("Status")),
+                            Avatar = 0, // Assuming Avatar is not mapped from Customer
+                            CountryId = reader.GetInt32(reader.GetOrdinal("CountryId")),
+                            DOB = reader.GetString(reader.GetOrdinal("DOB")),
+                            DateOfBirth = reader.GetString(reader.GetOrdinal("DateOfBirth")),
+                            TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
+                            TrainingCentre = reader.IsDBNull(reader.GetOrdinal("TrainingCentreName")) ? null : reader.GetString(reader.GetOrdinal("TrainingCentreName")),
+                            AvatarImage = reader.IsDBNull(reader.GetOrdinal("AvatarImage")) ? null : reader.GetString(reader.GetOrdinal("AvatarImage"))
+                        };
+
+                        customers.Add(customer);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing customers");
         }
 
         return customers;

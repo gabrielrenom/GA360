@@ -107,7 +107,7 @@ export default function CandidateProfile() {
               icon={<LockOutlined />}
               iconPosition="start"
             />
-            <Tab label="Cards & Certs" component={Link} to="/apps/profiles/candidate/profile" icon={<TeamOutlined />} iconPosition="start" />
+            <Tab label="Cards & Certs" component={Link} to="/apps/profiles/candidate/certificates" icon={<TeamOutlined />} iconPosition="start" />
             {/* <Tab label="Notes" component={Link} to="/apps/profiles/account/settings" icon={<SettingOutlined />} iconPosition="start" /> */}
           </Tabs>
         </Box>

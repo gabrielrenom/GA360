@@ -51,6 +51,7 @@ export interface CustomerListExtended extends CustomerList {
   qualifications: QualificationModel [];
   certificates: CertificateModel [];
   trainingCentreId?: number; // Make this property optional
+  employmentStatus: string;
 }
 
 export interface BasicCustomer {

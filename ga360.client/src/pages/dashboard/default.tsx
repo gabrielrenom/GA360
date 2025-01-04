@@ -367,6 +367,7 @@ export default function DashboardDefault() {
                   sx={{
                     backgroundColor: "#2E5A88",
                     color: "white",
+                    maxWidth: '30em', 
                   }}
                 >
                   <Stack spacing={2}>
@@ -385,6 +386,8 @@ export default function DashboardDefault() {
                   sx={{
                     backgroundColor: "#2E5A88",
                     color: "white",
+                    maxWidth: '30em', 
+
                   }}
                 >
                   <Stack spacing={2}>
@@ -403,6 +406,7 @@ export default function DashboardDefault() {
                   sx={{
                     backgroundColor: "#2E5A88",
                     color: "white",
+                    maxWidth: '30em', 
                   }}
                 >
                   <Stack spacing={2}>
@@ -423,6 +427,7 @@ export default function DashboardDefault() {
                     color: "white",
                     opacity: 0.5, // Reduce the opacity to give a disabled look
                     pointerEvents: "none", // Disable any pointer events
+                    maxWidth: '30em', 
                   }}
                 >
                   <Stack spacing={2}>

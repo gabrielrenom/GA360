@@ -75,6 +75,8 @@ const CandidateTabCandidateProfile = Loadable(lazy(() => import('sections/apps/p
 const CandidateTabQualifications = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateQualification')));
 const CandidateTabCandidateCourses = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateCourses')));
 const CandidateTabCandidateDocuments = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateDocuments')));
+const CandidateCardAndCerts = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateCardAndCerts')));
+
 
 const TrainingCentreTabProfile = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreProfile')));
 const TrainingCentreQualification = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreQualification')));
@@ -322,7 +324,7 @@ const MainRoutes = {
                     },
                     {
                       path: 'certificates',
-                      element: <CandidateTabCandidateProfile />
+                      element: <CandidateCardAndCerts />
                     },
                     {
                       path: 'notes',

@@ -36,6 +36,7 @@ export default function DashboardLayout() {
   const downLG = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
 
   const { container, miniDrawer, menuOrientation } = useConfig();
+  const { user, isLoggedIn } = useContext(DuendeContext);
 
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downLG;
 
@@ -53,7 +54,9 @@ export default function DashboardLayout() {
     <AuthGuard>
       <Box sx={{ display: 'flex', width: '100%' }}>
         <Header />
-        {!isHorizontal ? <Drawer /> : <HorizontalBar />}
+        {user && user.role !=="Candidate"?( 
+        !isHorizontal ? <Drawer /> : <HorizontalBar />):<></>
+        }
         {/* <DummyComponent></DummyComponent> */}
         <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
           <></>

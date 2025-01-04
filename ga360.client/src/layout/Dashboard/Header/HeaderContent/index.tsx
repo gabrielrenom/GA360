@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 
 // material-ui
 import { Theme } from '@mui/material/styles';
@@ -19,6 +19,8 @@ import MegaMenuSection from './MegaMenuSection';
 import useConfig from 'hooks/useConfig';
 import { MenuOrientation } from 'config';
 import DrawerHeader from 'layout/Dashboard/Drawer/DrawerHeader';
+import GA360LogoIcon from 'components/logo/GA360LogoIcon';
+import DuendeContext from 'contexts/DuendeContext';
 
 // ==============================|| HEADER - CONTENT ||============================== //
 
@@ -30,10 +32,25 @@ export default function HeaderContent() {
   const localization = useMemo(() => <Localization />, []);
 
   const megaMenu = useMemo(() => <MegaMenuSection />, []);
+  const { user, isLoggedIn } = useContext(DuendeContext);
 
   return (
     <>
       {menuOrientation === MenuOrientation.HORIZONTAL && !downLG && <DrawerHeader open={true} />}
+      {user && user.role === 'Candidate'?
+      <Box
+      sx={{
+        paddingTop:'1em',
+        width: '70px', // set the desired width
+        height: '70px', // set the desired height
+        '& svg': {
+          width: '70%', // scale the SVG to the parent's width
+          height: '70%', // scale the SVG to the parent's height
+        },
+      }}
+    >
+      <GA360LogoIcon />
+    </Box>:<></>}
       {!downLG && <Search />}
       {/* {!downLG && megaMenu} */}
       {/* {!downLG && localization} */}
@@ -42,7 +59,7 @@ export default function HeaderContent() {
       {/* <Notification /> */}
       {/* <Message /> */}
       {!downLG && <FullScreen />}
-      <Customization />
+      {/* <Customization /> */}
       {!downLG && <Profile />}
       {downLG && <MobileSection />}
     </>

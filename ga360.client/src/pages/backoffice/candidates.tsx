@@ -41,7 +41,6 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
       };
-      
     const columns = useMemo<ColumnDef<CustomerListExtended>[]>(
         () => [
             {
@@ -194,7 +193,7 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
         const fetchCustomerData = async () => {
             try {
                 const customers = await fetchCustomerList();
-                // const s = await fetchCustomerList1();
+                console.log(customers);
                 const mappedCustomers = customers.map((customer: CustomerApiModelExtended) => mapCustomerApiModelToCustomerListExtended(customer));
                 console.log(customers)
                 setAllowedCustomers(mappedCustomers);
