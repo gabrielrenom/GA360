@@ -61,6 +61,8 @@ public class QualificationService : IQualificationService
             Status = q.Status,
             TrainingCentreId = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Id).FirstOrDefault(),
             TrainingCentre = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Name).FirstOrDefault(),
+            InternalReference = q.InternalReference,
+            QAN = q.QAN
         }).ToList();
 
         return result;
@@ -82,7 +84,9 @@ public class QualificationService : IQualificationService
             ExpectedDate = qualification.ExpectedDate,
             CertificateDate = qualification.CertificateDate,
             CertificateNumber = qualification.CertificateNumber,
+            InternalReference = qualification.InternalReference,
             Status = qualification.Status,
+            QAN = qualification.QAN,
         };
 
         var result = await _qualificationRepository.AddAsync(qualificationEntity);
@@ -107,7 +111,9 @@ public class QualificationService : IQualificationService
             CertificateDate = result.CertificateDate,
             CertificateNumber = result.CertificateNumber,
             Status = result.Status,
+            InternalReference = result.InternalReference,
             TrainingCentreId = qualification.TrainingCentreId,
+            QAN = result.QAN,
             TrainingCentre = trainingCentre?.Name // Assuming training centre's name as string
         };
 
@@ -129,6 +135,8 @@ public class QualificationService : IQualificationService
         qualificationEntity.CertificateDate = qualification.CertificateDate;
         qualificationEntity.CertificateNumber = qualification.CertificateNumber;
         qualificationEntity.Status = qualification.Status;
+        qualificationEntity.InternalReference = qualification.InternalReference;
+        qualificationEntity.QAN = qualification.QAN;
 
         var result = await _qualificationRepository.UpdateAsync(qualificationEntity);
 
@@ -164,7 +172,9 @@ public class QualificationService : IQualificationService
             CertificateNumber = result.CertificateNumber,
             Status = result.Status,
             TrainingCentreId = qualification.TrainingCentreId,
-            TrainingCentre = trainingCentre?.Name // Assuming training centre's name as string
+            TrainingCentre = trainingCentre?.Name,
+            InternalReference = result.InternalReference,
+            QAN = result.QAN,
         };
 
         return qualificationWithTraining;
@@ -277,9 +287,9 @@ public class QualificationService : IQualificationService
 
             // Fetch TrainingCentreId using email
             var getTrainingCentreIdQuery = @"
-            SELECT TrainingCentreId
-            FROM [dbo].[Customers]
-            WHERE Email = @Email;";
+        SELECT TrainingCentreId
+        FROM [dbo].[Customers]
+        WHERE Email = @Email;";
 
             int trainingCentreId;
 
@@ -298,22 +308,22 @@ public class QualificationService : IQualificationService
 
             // Fetch qualifications using TrainingCentreId
             var getQualificationsQuery = @"
-            SELECT 
-                q.Id, 
-                q.Name, 
-                q.RegistrationDate, 
-                q.ExpectedDate, 
-                q.CertificateDate, 
-                q.CertificateNumber, 
-                q.Status, 
-                q.AwardingBody, 
-                q.InternalReference
-            FROM 
-                [dbo].[QualificationTrainingCentre] qt
-            JOIN 
-                [dbo].[Qualifications] q ON qt.QualificationId = q.Id
-            WHERE 
-                qt.TrainingCentreId = @TrainingCentreId;";
+        SELECT 
+            q.Id, 
+            q.Name, 
+            q.RegistrationDate, 
+            q.ExpectedDate, 
+            q.CertificateDate, 
+            q.CertificateNumber, 
+            q.Status, 
+            q.AwardingBody, 
+            q.InternalReference
+        FROM 
+            [dbo].[QualificationTrainingCentre] qt
+        JOIN 
+            [dbo].[Qualifications] q ON qt.QualificationId = q.Id
+        WHERE 
+            qt.TrainingCentreId = @TrainingCentreId;";
 
             using (var command = new SqlCommand(getQualificationsQuery, connection))
             {
@@ -327,10 +337,10 @@ public class QualificationService : IQualificationService
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            RegistrationDate = reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
-                            ExpectedDate = reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
-                            CertificateDate = reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
-                            CertificateNumber = reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
+                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("RegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            ExpectedDate = reader.IsDBNull(reader.GetOrdinal("ExpectedDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
+                            CertificateDate = reader.IsDBNull(reader.GetOrdinal("CertificateDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
+                            CertificateNumber = reader.IsDBNull(reader.GetOrdinal("CertificateNumber")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
                             Status = reader.GetInt32(reader.GetOrdinal("Status")),
                             AwardingBody = reader.IsDBNull(reader.GetOrdinal("AwardingBody")) ? null : reader.GetString(reader.GetOrdinal("AwardingBody")),
                             InternalReference = reader.IsDBNull(reader.GetOrdinal("InternalReference")) ? null : reader.GetString(reader.GetOrdinal("InternalReference"))
@@ -356,26 +366,26 @@ public class QualificationService : IQualificationService
             await connection.OpenAsync();
 
             var query = @"
-        SELECT 
-            q.Id,
-            q.Name,
-            q.RegistrationDate,
-            q.ExpectedDate,
-            q.CertificateDate,
-            q.CertificateNumber,
-            q.Status,
-            q.AwardingBody,
-            q.InternalReference
-        FROM 
-            [dbo].[Qualifications] q
-        JOIN 
-            [dbo].[QualificationCustomerCourseCertificates] qc ON q.Id = qc.QualificationId
-        JOIN 
-            [dbo].[Customers] c ON qc.CustomerId = c.Id
-        WHERE 
-            c.Email = @Email
-        ORDER BY 
-            q.Name;";
+            SELECT 
+                q.Id,
+                q.Name,
+                q.RegistrationDate,
+                q.ExpectedDate,
+                q.CertificateDate,
+                q.CertificateNumber,
+                q.Status,
+                q.AwardingBody,
+                q.InternalReference
+            FROM 
+                [dbo].[Qualifications] q
+            JOIN 
+                [dbo].[QualificationCustomerCourseCertificates] qc ON q.Id = qc.QualificationId
+            JOIN 
+                [dbo].[Customers] c ON qc.CustomerId = c.Id
+            WHERE 
+                c.Email = @Email
+            ORDER BY 
+                q.Name;";
 
             using (var command = new SqlCommand(query, connection))
             {
@@ -389,10 +399,10 @@ public class QualificationService : IQualificationService
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            RegistrationDate = reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
-                            ExpectedDate = reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
-                            CertificateDate = reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
-                            CertificateNumber = reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
+                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("RegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            ExpectedDate = reader.IsDBNull(reader.GetOrdinal("ExpectedDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
+                            CertificateDate = reader.IsDBNull(reader.GetOrdinal("CertificateDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
+                            CertificateNumber = reader.IsDBNull(reader.GetOrdinal("CertificateNumber")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
                             Status = reader.GetInt32(reader.GetOrdinal("Status")),
                             AwardingBody = reader.IsDBNull(reader.GetOrdinal("AwardingBody")) ? null : reader.GetString(reader.GetOrdinal("AwardingBody")),
                             InternalReference = reader.IsDBNull(reader.GetOrdinal("InternalReference")) ? null : reader.GetString(reader.GetOrdinal("InternalReference"))
@@ -406,5 +416,6 @@ public class QualificationService : IQualificationService
 
         return qualifications;
     }
+
 
 }

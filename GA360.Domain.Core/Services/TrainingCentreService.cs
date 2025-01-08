@@ -2,6 +2,7 @@
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.DAL.Infrastructure.Repositories;
 using GA360.Domain.Core.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace GA360.Domain.Core.Services;
@@ -21,7 +22,9 @@ public class TrainingCentreService : ITrainingCentreService
 
     public TrainingCentre GetTrainingCentre(int id)
     {
-        return _trainingCentreRepository.Get(id);
+        var trainingCentre = _trainingCentreRepository.Context.TrainingCentres.Include(x=>x.Address).FirstOrDefault(x=>x.Id == id);
+
+        return trainingCentre;
     }
 
     public async Task<List<TrainingCentre>> GetAllTrainingCentres()

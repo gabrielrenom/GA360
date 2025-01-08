@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,11 +11,13 @@ public class QualificationWithTrainingModel
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public DateTime RegistrationDate { get; set; }
-    public DateTime ExpectedDate { get; set; }
-    public DateTime CertificateDate { get; set; }
-    public int CertificateNumber { get; set; }
+    public DateTime? RegistrationDate { get; set; }
+    public DateTime? ExpectedDate { get; set; }
+    public DateTime? CertificateDate { get; set; }
+    public int? CertificateNumber { get; set; }
     public int Status { get; set; }
     public int? TrainingCentreId { get; set; }
     public string? TrainingCentre { get; set; }  // Assuming training centre's name as string
+    public string? InternalReference { get; set; }
+    public string? QAN { get; set; }
 }

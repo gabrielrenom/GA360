@@ -68,6 +68,29 @@ export interface CustomerUploadResponse {
   nationalInsurance: string;
 }
 
+export interface CustomerProfileModel {
+  id: number;
+  firstName: string;
+  lastName: string;
+  contact: string;
+  about: string;
+  gender: string;
+  email: string;
+  location: string;
+  country: string;
+  tenantId?: string; // Using string because JavaScript doesn't have native GUID support, usually stored as a string
+  dob: string;
+  ni: string;
+  employmentStatus: string;
+  employer: string;
+  avatarImage: string;
+  street: string;
+  city: string;
+  number: string;
+  postcode: string;
+  avgQualificationProgression: number;
+}
+
 
 
 // utils
@@ -91,7 +114,8 @@ export const endpoints = {
   get: '/get',
   user:'/user',
   batchupload:'/api/customer/batchupload',
-  getdocuments: '/api/customer/get/documents'
+  getdocuments: '/api/customer/get/documents',
+  getcustomerprofilehighperformance: '/api/customer/get/profile',
 };
 
 export async function getDocumentsByUser(email: string): Promise<DocumentFileModel[]> {
@@ -187,61 +211,8 @@ export function useGetCustomer() {
   return memoizedValue;
 }
 
-//export function useGetCustomer() {
-//    const [data, setData] = useState<any>(null);
-//    const [isLoading, setIsLoading] = useState<boolean>(true);
-//    const [error, setError] = useState<Error | null>(null);
-//    const [isValidating, setIsValidating] = useState<boolean>(false);
-
-//    useEffect(() => {
-//        const fetchData = async () => {
-//            setIsValidating(true);
-//            try {
-//                const result = await fetcher(endpoints.key + endpoints.list);
-//                setData(result);
-//            } catch (err) {
-//                setError(err);
-//            } finally {
-//                setIsLoading(false);
-//                setIsValidating(false);
-//            }
-//        };
-
-//        fetchData();
-//    }, []);
-
-//    const memoizedValue = useMemo(
-//        () => ({
-//            customers: data?.customers as CustomerList[],
-//            customersLoading: isLoading,
-//            customersError: error,
-//            customersValidating: isValidating,
-//            customersEmpty: !isLoading && !data?.customers?.length
-//        }),
-//        [data, error, isLoading, isValidating]
-//    );
-
-//    return memoizedValue;
-//}
-
 export async function insertCustomer(newCustomer: CustomerListExtended) {
-  // to update local state based on key
-  // mutate(
-  //   endpoints.key + endpoints.list,
-  //   (currentCustomer: any) => {
-  //     newCustomer.id = currentCustomer.customers.length + 1;
-  //     const addedCustomer: CustomerList[] = [...currentCustomer.customers, newCustomer];
-
-  //     return {
-  //       ...currentCustomer,
-  //       customers: addedCustomer
-  //     };
-  //   },
-  //   false
-  // );
-  console.log("Insert New customer:",newCustomer);
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(newCustomer);
-  console.log(mappedCustomer);
   const response = await fetch('/api/customer/create',{
     method: 'POST',
     headers: {
@@ -250,39 +221,29 @@ export async function insertCustomer(newCustomer: CustomerListExtended) {
     body: JSON.stringify(mappedCustomer)
   });
   const data = response.json();
-
-
-  // to hit server
-  // you may need to refetch latest data after server hit and based on your logic
-  //   const data = { newCustomer };
-  //   await axios.post(endpoints.key + endpoints.insert, data);
 }
 
-// export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]) {
+export async function getCustomerProfileHighPerformance(id: number): Promise<CustomerProfileModel> {
+  try {
+      const response = await fetch(`${endpoints.getcustomerprofilehighperformance}/${id}`, {
+          headers: {
+              "X-CSRF": "Dog",
+          },
+      });
 
-//   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
 
-//   const formData = new FormData();
-//   formData.append('Customer', JSON.stringify(mappedCustomer));
-//   documents.forEach((file) => formData.append('Files', file));
+      const result: CustomerProfileModel = await response.json();
+      return result;
 
-//   //formData.append('Files', new File([''], '133694255036516995.jpg', { type: 'image/jpeg' }));
+  } catch (error) {
+      console.error('Error fetching customer profile:', error);
+      throw error;
+  }
+}
 
-// const options: RequestInit = {
-//   method: 'PUT',
-//   headers: {
-//     'accept': '*/*',
-//     // 'Content-Type' should not be set when sending FormData
-//   },
-//   body: formData,
-// };
-
-// // fetch('/api/customer/updatewithdocuments/'+customerId, options)
-// //   .then(response => response.json())
-// //   .then(data => console.log(data))
-// //   .catch(error => console.error('Error:', error));
- 
-// }
 
 export async function getBasicCandidates(): Promise<BasicCustomer[]> {
   const response = await fetch("/api/customer/list/basic", {

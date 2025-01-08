@@ -28,6 +28,7 @@ export interface Qualification {
 
   export interface QualificationTable {
     id: number;
+    internalReference:string;
     name: string;
     registrationDate: Date;
     expectedDate: Date;
@@ -36,6 +37,7 @@ export interface Qualification {
     status: number;
     trainingCentreId: number;
     trainingCentre:string;
+    qan:string;
   }
 
 export interface QualificationStatus {

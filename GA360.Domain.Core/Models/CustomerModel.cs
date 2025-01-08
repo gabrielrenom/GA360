@@ -58,10 +58,10 @@ namespace GA360.Domain.Core.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public DateTime RegistrationDate { get; set; }
-        public DateTime ExpectedDate { get; set; }
-        public DateTime CertificateDate { get; set; }
-        public int CertificateNumber { get; set; }
+        public DateTime? RegistrationDate { get; set; }
+        public DateTime? ExpectedDate { get; set; }
+        public DateTime? CertificateDate { get; set; }
+        public int? CertificateNumber { get; set; }
         public int Progression { get; set; }
         public string Status { get; set; }
     }
@@ -94,5 +94,29 @@ namespace GA360.Domain.Core.Models
         public string Charge { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
         public DateTime Date { get; set; }
+    }
+
+    public class CustomerProfileModel
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Contact { get; set; }
+        public string About { get; set; }
+        public string Gender { get; set; }
+        public string Email { get; set; }
+        public string Location { get; set; }
+        public string Country { get; set; }
+        public Guid? TenantId { get; set; }
+        public string DOB { get; set; }
+        public string NI { get; set; }
+        public string EmploymentStatus { get; set; }
+        public string Employer { get; set; }
+        public string AvatarImage { get; set; }
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string Number { get; set; }
+        public string Postcode { get; set; }
+        public int? AvgQualificationProgression { get; set; }
     }
 }

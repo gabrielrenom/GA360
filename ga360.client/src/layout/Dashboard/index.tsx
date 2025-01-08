@@ -60,7 +60,8 @@ export default function DashboardLayout() {
         {/* <DummyComponent></DummyComponent> */}
         <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
           <></>
-          <Toolbar sx={{ mt: isHorizontal ? 8 : 'inherit' }} />
+          {user && user.role !=="Candidate"?
+            <Toolbar sx={{ mt: isHorizontal ? 8 : 'inherit' }} /> :<></>}
           <Container
             maxWidth={container ? 'xl' : false}
             sx={{

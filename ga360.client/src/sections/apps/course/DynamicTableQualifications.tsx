@@ -177,7 +177,9 @@ export default function DynamicTableQualifications() {
       certificateNumber: row.certificateNumber as number,
       status: row.status as number,
       trainingCentreId: row.trainingCentre as number,
-      trainingCentre: row.trainingCentre
+      trainingCentre: row.trainingCentre,
+      internalReference: row.internalReference,
+      qan: row.qan
     };
   };
   const fetchQualifications = async () => {
@@ -226,11 +228,27 @@ export default function DynamicTableQualifications() {
 const columns: GridColDef[] = [
   {
     field: "id",
+    headerName: "#",
+    editable: false,
+    type: "number",
+    headerAlign: 'center',
+    align: 'center',
+  },
+  {
+    field: "qan",
     headerName: "QAN",
     editable: true,
-    type: "number",
-    headerAlign: 'center', // Aligns the header text to the center
-    align: 'center', // Aligns the cell content to the center
+    type: "string",
+    headerAlign: 'center',
+    align: 'center',
+  },
+  {
+    field: "internalReference",
+    headerName: "INTERNAL REF",
+    editable: true,
+    type: "string",
+    headerAlign: 'center',
+    align: 'center',
   },
   {
     field: 'name',
@@ -392,7 +410,15 @@ const columns: GridColDef[] = [
                 processRowUpdate={processRowUpdate}
                 disableRowSelectionOnClick 
                 onCellDoubleClick={(params, event) => { event.stopPropagation(); }}
-            
+                initialState={{
+                  columns: {
+                    columnVisibilityModel: {
+                      certificateDate: false,
+                      registrationDate: false,
+                      certificateNumber: false
+                    },
+                  },
+                }}
                 slots={{
                   toolbar: EditToolbar as GridSlots['toolbar'],
                 }}

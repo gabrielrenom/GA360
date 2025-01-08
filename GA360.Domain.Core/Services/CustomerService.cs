@@ -44,6 +44,74 @@ public class CustomerService : ICustomerService
         return _customerRepository.Get(id);
     }
 
+    public async Task<CustomerProfileModel> GetCustomerProfileHighPerformance(int id)
+    {
+        CustomerProfileModel profile = null;
+
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(_customerRepository.Context.Database.GetConnectionString()))
+            {
+                await connection.OpenAsync();
+
+                string query = @"SELECT 
+                             c.Id, c.FirstName, c.LastName, c.Contact, c.About, c.Gender, c.Email, 
+                             c.Location, co.Name AS Country, c.TenantId, c.DOB, c.NI, c.EmploymentStatus, 
+                             c.Employer, c.AvatarImage, a.Street, a.City, a.Number, a.Postcode,
+                             (SELECT AVG(q.QualificationProgression) FROM QualificationCustomerCourseCertificates q WHERE q.CustomerId = c.Id) AS AvgQualificationProgression
+                          FROM 
+                             Customers c
+                          JOIN 
+                             Addresses a ON c.AddressId = a.Id
+                          JOIN 
+                             Countries co ON c.CountryId = co.Id
+                          WHERE c.Id = @Id";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            profile = new CustomerProfileModel
+                            {
+                                Id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0),
+                                FirstName = reader.IsDBNull(1) ? null : reader.GetString(1),
+                                LastName = reader.IsDBNull(2) ? null : reader.GetString(2),
+                                Contact = reader.IsDBNull(3) ? null : reader.GetString(3),
+                                About = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                Gender = reader.IsDBNull(5) ? null : reader.GetString(5),
+                                Email = reader.IsDBNull(6) ? null : reader.GetString(6),
+                                Location = reader.IsDBNull(7) ? null : reader.GetString(7),
+                                Country = reader.IsDBNull(8) ? null : reader.GetString(8),
+                                TenantId = reader.IsDBNull(9) ? (Guid?)null : reader.GetGuid(9),
+                                DOB = reader.IsDBNull(10) ? null : reader.GetString(10),
+                                NI = reader.IsDBNull(11) ? null : reader.GetString(11),
+                                EmploymentStatus = reader.IsDBNull(12) ? null : reader.GetString(12),
+                                Employer = reader.IsDBNull(13) ? null : reader.GetString(13),
+                                AvatarImage = reader.IsDBNull(14) ? null : reader.GetString(14),
+                                Street = reader.IsDBNull(15) ? null : reader.GetString(15),
+                                City = reader.IsDBNull(16) ? null : reader.GetString(16),
+                                Number = reader.IsDBNull(17) ? null : reader.GetString(17),
+                                Postcode = reader.IsDBNull(18) ? null : reader.GetString(18),
+                                AvgQualificationProgression = reader.IsDBNull(19) ? 0 : reader.GetInt32(19) // Added field for average qualification progression
+                            };
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred: {ex.Message}");
+        }
+
+        return profile;
+    }
+
+
     public async Task<CustomerModel> GetCustomerByEmail(string email)
     {
         var result = await _customerRepository.GetCustomerByEmail(email);

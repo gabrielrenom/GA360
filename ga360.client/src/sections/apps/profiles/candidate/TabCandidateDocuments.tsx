@@ -1,293 +1,353 @@
-// // material-ui
-import { Theme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+// material-ui
+import { Theme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Link from "@mui/material/Link";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // third-party
-import { PatternFormat } from 'react-number-format';
+import { PatternFormat } from "react-number-format";
 
 // project import
-import MainCard from 'components/MainCard';
-import Avatar from 'components/@extended/Avatar';
-import LinearWithLabel from 'components/@extended/progress/LinearWithLabel';
+import MainCard from "components/MainCard";
+import Avatar from "components/@extended/Avatar";
+import LinearWithLabel from "components/@extended/progress/LinearWithLabel";
 
 // assets
-import AimOutlined from '@ant-design/icons/AimOutlined';
-import EnvironmentOutlined from '@ant-design/icons/EnvironmentOutlined';
-import MailOutlined from '@ant-design/icons/MailOutlined';
-import PhoneOutlined from '@ant-design/icons/PhoneOutlined';
+import AimOutlined from "@ant-design/icons/AimOutlined";
+import EnvironmentOutlined from "@ant-design/icons/EnvironmentOutlined";
+import MailOutlined from "@ant-design/icons/MailOutlined";
+import PhoneOutlined from "@ant-design/icons/PhoneOutlined";
+import DownloadOutlined from "@ant-design/icons/DownloadOutlined";
 
-import defaultImages from 'assets/images/users/default.png';
+import defaultImages from "assets/images/users/default.png";
+import { DocumentViewDataProps, TableDataProps } from "types/table";
+import makeData from "data/react-table";
+import { useMemo, useState, useEffect, useContext } from "react";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  HeaderGroup,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import ReactTable from "data/react-table";
+import {
+  Box,
+  Button,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TableHead,
+  TableRow,
+  Tooltip,
+} from "@mui/material";
+import {
+  CSVExport,
+  HeaderSort,
+  SelectColumnSorting,
+  TablePagination,
+} from "components/third-party/react-table";
+import ScrollX from "components/ScrollX";
 
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
+// types
+import { LabelKeyObject } from "react-csv/lib/core";
+import EditOutlined from "@ant-design/icons/EditOutlined";
+import { CustomerListExtended } from "types/customer";
+import { getCandidate, getDocumentsByUser } from "api/customer";
+import { DocumentFileModel } from "types/customerApiModel";
+import CandidateProfile from "./CandidateProfile";
+import MyQualificationsProfile from "./MyQualificationsProfile";
+import DuendeContext from "contexts/DuendeContext";
+//import Button from 'themes/overrides/Button';
 
+interface ReactTableProps {
+  columns: ColumnDef<DocumentViewDataProps>[];
+  data: DocumentViewDataProps[];
+}
 export default function TabCandidateDocuments() {
-  const matchDownMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
+  const [candidate,setCandidate] =  useState<CustomerListExtended>(null);
+  const [documents, setDocuments] = useState<DocumentViewDataProps[]>([]);
+  const [avatar, setAvatar] = useState<string | undefined>(
+    candidate?.avatarImage
+      ? candidate.avatarImage
+      : defaultImages
+  );
+  
+  const matchDownMD = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.down("md")
+  );
+  const columns = useMemo<ColumnDef<DocumentViewDataProps>[]>(
+    () => [
+      {
+        header: "Document Name",
+        footer: "Document Name",
+        accessorKey: "name",
+        enableSorting: false,
+      },
+      {
+        accessorKey: "url",
+        header: " ",
+        meta: {
+          className: "cell-right",
+        },
+        disableSortBy: true,
+        cell: ({ row }) => {
+          const url = row.original.url;
+          return (
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="flex-end" // Aligns actions to the right
+              spacing={0}
+            >
+              <IconButton size="medium">
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                <DownloadOutlined />
+                </a>
+              </IconButton>
+              <Tooltip title="Delete">
+                <IconButton
+                  color="error"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.stopPropagation();
+                  }}
+                />
+              </Tooltip>
+            </Stack>
+          );
+        },
+      },
+    ],
+    []
+  );
+
+  const { user, isLoggedIn } = useContext(DuendeContext);
+
+  function mapDocumentFilesToViewData(files: DocumentFileModel[]): DocumentViewDataProps[] {
+    return files.map(file => {
+        const nameParts = file.name.split('/');
+        const fileName = nameParts[nameParts.length - 1];
+        return {
+            name: fileName,
+            url: file.url
+        };
+    });
+}
+  
+useEffect(() => {
+  const fetchDocuments = async () => {
+    try {
+      const response = await getDocumentsByUser(user.email);
+      console.log("DOCS CANDIDATES",response);
+      setAvatar(user.avatarImage);
+      const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response);
+      
+      setDocuments(mappedFiles)
+      
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+    }
+  };
+
+  fetchDocuments();
+}, []);
+
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const documentResponse = await getDocumentsByUser(user.email);
+  //       const response = await getCandidate();
+  //       setAvatar(response.avatarImage);
+  //       setCandidate(response);
+
+  //       const mappedFiles:DocumentViewDataProps[] = mapDocumentFilesToViewData(response.files);
+        
+  //       setDocuments(mappedFiles)
+
+  //     } catch (error) {
+  //       console.error("Error fetching countries:", error);
+  //     }
+  //   };
+
+  //   fetchUser();
+  // }, []);
+
+  function ReactTable({ columns, data }: ReactTableProps) {
+    const matchDownSM = useMediaQuery((theme: Theme) =>
+      theme.breakpoints.down("sm")
+    );
+    const [sorting, setSorting] = useState<SortingState>([
+      {
+        id: "name",
+        desc: false,
+      },
+    ]);
+
+    const table = useReactTable({
+      data,
+      columns,
+      state: {
+        sorting,
+      },
+      onSortingChange: setSorting,
+      getCoreRowModel: getCoreRowModel(),
+      getSortedRowModel: getSortedRowModel(),
+      getPaginationRowModel: getPaginationRowModel(),
+    });
+
+    let headers: LabelKeyObject[] = [];
+    table.getAllColumns().map((columns) =>
+      headers.push({
+        label:
+          typeof columns.columnDef.header === "string"
+            ? columns.columnDef.header
+            : "#",
+        // @ts-ignore
+        key: columns.columnDef.accessorKey,
+      })
+    );
+
+    return (
+      <MainCard
+        title={matchDownSM ? "Sorting" : "Documents"}
+        content={false}
+
+      >
+        <ScrollX>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                {table
+                  .getHeaderGroups()
+                  .map((headerGroup: HeaderGroup<any>) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        if (
+                          header.column.columnDef.meta !== undefined &&
+                          header.column.getCanSort()
+                        ) {
+                          Object.assign(header.column.columnDef.meta, {
+                            className:
+                              header.column.columnDef.meta.className +
+                              " cursor-pointer prevent-select",
+                          });
+                        }
+
+                        return (
+                          <TableCell
+                            key={header.id}
+                            {...header.column.columnDef.meta}
+                            onClick={header.column.getToggleSortingHandler()}
+                            {...(header.column.getCanSort() &&
+                              header.column.columnDef.meta === undefined && {
+                                className: "cursor-pointer prevent-select",
+                              })}
+                          >
+                            {header.isPlaceholder ? null : (
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                alignItems="center"
+                              >
+                                <Box>
+                                  {flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                                </Box>
+                                {header.column.getCanSort() && (
+                                  <HeaderSort column={header.column} />
+                                )}
+                              </Stack>
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+              </TableHead>
+              <TableBody>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} {...cell.column.columnDef.meta}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                {table.getFooterGroups().map((footerGroup) => (
+                  <TableRow key={footerGroup.id}>
+                    {footerGroup.headers.map((footer) => (
+                      <TableCell
+                        key={footer.id}
+                        {...footer.column.columnDef.meta}
+                      >
+                        {footer.isPlaceholder
+                          ? null
+                          : flexRender(
+                              footer.column.columnDef.header,
+                              footer.getContext()
+                            )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableFooter>
+            </Table>
+          </TableContainer>
+
+          <Divider />
+          <Box sx={{ p: 2 }}>
+            <TablePagination
+              {...{
+                setPageSize: table.setPageSize,
+                setPageIndex: table.setPageIndex,
+                getState: table.getState,
+                getPageCount: table.getPageCount,
+              }}
+            />
+          </Box>
+        </ScrollX>
+      </MainCard>
+    );
+  }
 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={5} md={4} xl={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <MainCard>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Stack direction="row" justifyContent="flex-end">
-                    <Chip label="Pro" size="small" color="primary" />
-                  </Stack>
-                  <Stack spacing={2.5} alignItems="center">
-                    <Avatar alt="Avatar 1" size="xl" src={defaultImages} />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">Anshan H.</Typography>
-                      <Typography color="secondary">Project Manager</Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-                <Grid item xs={12}>
-                  <Stack direction="row" justifyContent="space-around" alignItems="center">
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">86</Typography>
-                      <Typography color="secondary">Post</Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">40</Typography>
-                      <Typography color="secondary">Project</Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem />
-                    <Stack spacing={0.5} alignItems="center">
-                      <Typography variant="h5">4.5K</Typography>
-                      <Typography color="secondary">Members</Typography>
-                    </Stack>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-                <Grid item xs={12}>
-                  <List component="nav" aria-label="main mailbox folders" sx={{ py: 0, '& .MuiListItem-root': { p: 0, py: 1 } }}>
-                    <ListItem>
-                      <ListItemIcon>
-                        <MailOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">anshan.dh81@gmail.com</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <PhoneOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">(+1-876) 8654 239 581</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <AimOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Typography align="right">New York</Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <EnvironmentOutlined />
-                      </ListItemIcon>
-                      <ListItemSecondaryAction>
-                        <Link align="right" href="https://google.com" target="_blank">
-                          https://anshan.dh.url
-                        </Link>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </List>
-                </Grid>
-              </Grid>
-            </MainCard>
+            <CandidateProfile candidate={candidate} defaultImages={avatar}></CandidateProfile>
           </Grid>
           <Grid item xs={12}>
-            <MainCard title="Skills">
-              <Grid container spacing={1.25}>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Junior</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={30} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">UX Reseacher</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={80} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Wordpress</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={90} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">HTML</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={30} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Graphic Design</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={95} />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="secondary">Code Style</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <LinearWithLabel value={75} />
-                </Grid>
-              </Grid>
-            </MainCard>
+            <MyQualificationsProfile/>
           </Grid>
         </Grid>
       </Grid>
       <Grid item xs={12} sm={7} md={8} xl={9}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <MainCard title="About me">
-              <Typography color="secondary">
-                Hello, I’m Anshan Handgun Creative Graphic Designer & User Experience Designer based in Website, I create digital Products a
-                more Beautiful and usable place. Morbid accusant ipsum. Nam nec tellus at.
-              </Typography>
-            </MainCard>
-          </Grid>
-          <Grid item xs={12}>
-            <MainCard title="Personal Details">
-              <List sx={{ py: 0 }}>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Full Name</Typography>
-                        <Typography>Anshan Handgun</Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Father Name</Typography>
-                        <Typography>Mr. Deepen Handgun</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Phone</Typography>
-                        <Typography>
-                          (+1-876) <PatternFormat value={8654239581} displayType="text" type="text" format="#### ### ###" />
-                        </Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Country</Typography>
-                        <Typography>New York</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Email</Typography>
-                        <Typography>anshan.dh81@gmail.com</Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Zip Code</Typography>
-                        <Typography>956 754</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem>
-                  <Stack spacing={0.5}>
-                    <Typography color="secondary">Address</Typography>
-                    <Typography>Street 110-B Kalians Bag, Dewan, M.P. New York</Typography>
-                  </Stack>
-                </ListItem>
-              </List>
-            </MainCard>
-          </Grid>
-          <Grid item xs={12}>
-            <MainCard title="Education">
-              <List sx={{ py: 0 }}>
-                <ListItem divider>
-                  <Grid container spacing={matchDownMD ? 0.5 : 3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Master Degree (Year)</Typography>
-                        <Typography>2014-2017</Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Institute</Typography>
-                        <Typography>-</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider>
-                  <Grid container spacing={matchDownMD ? 0.5 : 3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Bachelor (Year)</Typography>
-                        <Typography>2011-2013</Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Institute</Typography>
-                        <Typography>Imperial College London</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem>
-                  <Grid container spacing={matchDownMD ? 0.5 : 3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">School (Year)</Typography>
-                        <Typography>2009-2011</Typography>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Institute</Typography>
-                        <Typography>School of London, England</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-              </List>
-            </MainCard>
-          </Grid>
-        </Grid>
+        <ReactTable data={documents} columns={columns}/>
       </Grid>
     </Grid>
   );

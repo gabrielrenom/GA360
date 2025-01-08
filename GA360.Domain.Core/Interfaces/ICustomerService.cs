@@ -33,5 +33,6 @@ namespace GA360.Domain.Core.Interfaces
         Task<List<FileModel>> GetCustomerDocumentsByEmail(string email);
         Task<List<Customer>> GetAllCustomerWithCourseQualificationRecordsByCustomerId(int customerId);
         Task<CustomerBatchModel> UploadBatchCandidates(CustomerBatchModel batch);
+        Task<CustomerProfileModel> GetCustomerProfileHighPerformance(int id);
     }
 }

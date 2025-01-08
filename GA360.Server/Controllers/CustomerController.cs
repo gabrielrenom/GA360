@@ -87,6 +87,15 @@ namespace GA360.Server.Controllers
             return Ok(FromUserModelToViewModel(result));
         }
 
+        [Authorize]
+        [HttpGet("get/profile/{id}")]
+        public async Task<IActionResult> GetCustomerProfileHighPerfomance(int id)
+        {
+
+            var result = await _customerService.GetCustomerProfileHighPerformance(id);
+
+            return Ok(result);
+        }
 
         //[AllowAnonymous]
         [HttpGet("list/basic")]
@@ -179,7 +188,7 @@ namespace GA360.Server.Controllers
         [HttpPost("customerswithcoursequalificationrecords")]
         public async Task<IActionResult> CreateCustomersWithCourseQualificationRecords([FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
         {
-            if (customer.QualificationId == null && customer.QualificationStatusId == null && customer.CourseId == null && customer.CertificateId == null && customer.Email == null)
+            if (customer.QualificationId == null && customer.QualificationStatusId == null && customer.CourseId == null && customer.CertificateId == null && customer.Email.IsNullOrEmpty())
                 return Ok();
 
             var result = await _customerService.CreateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());

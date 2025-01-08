@@ -4,6 +4,7 @@ using GA360.DAL.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GA360.DAL.Infrastructure.Migrations
 {
     [DbContext(typeof(CRMDbContext))]
-    partial class CRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250105134451_QAN")]
+    partial class QAN
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1082,10 +1085,10 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<string>("AwardingBody")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CertificateDate")
+                    b.Property<DateTime>("CertificateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CertificateNumber")
+                    b.Property<int>("CertificateNumber")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1101,7 +1104,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("ExpectedDate")
+                    b.Property<DateTime>("ExpectedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("InternalReference")
@@ -1124,7 +1127,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<string>("QAN")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("RegistrationDate")
+                    b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")

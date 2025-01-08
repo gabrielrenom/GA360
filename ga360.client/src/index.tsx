@@ -7,7 +7,7 @@ import 'slick-carousel/slick/slick-theme.css';
 
 // apex-chart
 import './assets/third-party/apex-chart.css';
-import 'assets/third-party/react-table.css';
+import './assets/third-party/react-table.css';
 
 // map
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -35,9 +35,10 @@ import '@fontsource/public-sans/700.css';
 
 // project import
 import App from './App';
-import { ConfigProvider } from 'contexts/ConfigContext';
+//import { ConfigProvider } from 'ConfigContext';
 // import { ConfigProvider } from 'contexts/ConfigContext';
 import reportWebVitals from './reportWebVitals';
+import { ConfigProvider } from 'contexts/ConfigContext';
 
 const container = document.getElementById('root');
 const root = createRoot(container!);

@@ -28,22 +28,20 @@ namespace GA360.DAL.Infrastructure.Repositories
         public async Task<Customer> GetCustomerByEmail(string email)
         {
             var result = await GetDbContext()?.Customers
-           ?.Include(x => x.EthnicOrigin)
-           ?.Include(x => x.Country)
-           ?.Include(x => x.DocumentCustomers)
-           .ThenInclude(x => x.Document)
-           .Include(x => x.CustomerSkills)
-           .ThenInclude(x => x.Skill)
-           .Include(x => x.Address)
-           .Include(x => x.QualificationCustomerCourseCertificates)
-           .ThenInclude(x => x.Course)
-           .Include(x => x.QualificationCustomerCourseCertificates)
-           .ThenInclude(x => x.Qualification)
-           .Include(x => x.QualificationCustomerCourseCertificates)
-           .ThenInclude(x => x.Certificate)
-           .Include(x => x.QualificationCustomerCourseCertificates)
-           .ThenInclude(x => x.QualificationStatus)
-           .FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
+               ?.Include(x => x.EthnicOrigin)
+               ?.Include(x => x.Country)
+               ?.Include(x => x.DocumentCustomers).ThenInclude(x => x.Document)
+               ?.Include(x => x.CustomerSkills).ThenInclude(x => x.Skill)
+               ?.Include(x => x.Address)
+               ?.Include(x => x.QualificationCustomerCourseCertificates)
+                    .ThenInclude(x => x.Course)
+               ?.Include(x => x.QualificationCustomerCourseCertificates)
+                    .ThenInclude(x => x.Qualification)
+               ?.Include(x => x.QualificationCustomerCourseCertificates)
+                    .ThenInclude(x => x.Certificate)
+               ?.Include(x => x.QualificationCustomerCourseCertificates)
+                    .ThenInclude(x => x.QualificationStatus)
+               ?.FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
 
             return result;
         }

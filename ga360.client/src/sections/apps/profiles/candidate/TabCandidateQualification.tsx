@@ -108,7 +108,7 @@ export default function TabCandidateQualification() {
         const fetchUser = async () => {
             try {
                 const response = await getCandidate();
-                console.log("HEYY", response)
+                console.log("QUALIFICATION", response)
                 setAvatar(response.avatarImage);
                 setCandidate(response);
                 const qualificationsResponse = mapQualifications(response.qualifications);

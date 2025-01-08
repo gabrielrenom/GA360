@@ -158,7 +158,8 @@ export const mapCustomerApiModelToCustomerListExtended = (
     fileDocuments: source.fileDocuments,
     courses: source.courses,
     qualifications: source.qualifications,
-    certificates: source.certificates
+    certificates: source.certificates,
+    employmentStatus: source.employeeStatus
   };
 };
 
