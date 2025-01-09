@@ -157,26 +157,51 @@ export default function DynamicTableCourse() {
     }
   };
 
+  // const mapToGridRowModel = (course: Course): GridRowModel => {
+  //   return {
+  //     id: course.id,
+  //     name: course.name,
+  //     description: course.description,
+  //     duration: course.duration,
+  //     // registrationDate: course.registrationDate ? course.registrationDate.toISOString().split('T')[0] : '',
+  //     // expectedDate: course.expectedDate ? course.expectedDate.toISOString().split('T')[0] : '',
+  //     // certificateDate: course.certificateDate ? course.certificateDate.toISOString().split('T')[0] : '',
+  //     certificateNumber: course.certificateNumber,
+  //     status: course.status,
+  //     sector: course.sector,
+  //     trainingCentre: course.trainingCentre ? course.trainingCentre.toString() : '',
+  //   };
+  // };
+  
+  const formatDate = (date: Date | null) => {
+    if (!date) return '';
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    return formatter.format(date);
+  };
+  
   const mapToGridRowModel = (course: Course): GridRowModel => {
     return {
       id: course.id,
       name: course.name,
       description: course.description,
       duration: course.duration,
-      // registrationDate: course.registrationDate ? course.registrationDate.toISOString().split('T')[0] : '',
-      // expectedDate: course.expectedDate ? course.expectedDate.toISOString().split('T')[0] : '',
-      // certificateDate: course.certificateDate ? course.certificateDate.toISOString().split('T')[0] : '',
+      registrationDate: new Date(course.registrationDate),
+      expectedDate: new Date(course.expectedDate),
+      certificateDate: new Date(course.certificateDate),
       certificateNumber: course.certificateNumber,
       status: course.status,
       sector: course.sector,
       trainingCentre: course.trainingCentre ? course.trainingCentre.toString() : '',
     };
   };
-  
 
   const mapToCourse = (row: GridRowModel): Course => {
     return {
-      id: row.id as number,  // Assuming id is a string, adjust if necessary
+      id: row.id as number,
       name: row.name as string,
       description: row.description as string,
       duration: row.duration as number,
@@ -190,6 +215,22 @@ export default function DynamicTableCourse() {
       trainingCentre: row.trainingCentre
     };
   };
+  // const mapToCourse = (row: GridRowModel): Course => {
+  //   return {
+  //     id: row.id as number,  // Assuming id is a string, adjust if necessary
+  //     name: row.name as string,
+  //     description: row.description as string,
+  //     duration: row.duration as number,
+  //     registrationDate: row.registrationDate ? new Date(row.registrationDate as string) : null,
+  //     expectedDate: row.expectedDate ? new Date(row.expectedDate as string) : null,
+  //     certificateDate: row.certificateDate ? new Date(row.certificateDate as string) : null,
+  //     certificateNumber: row.certificateNumber as string,
+  //     status: row.status as number,
+  //     sector: row.sector as string,
+  //     trainingCentreId: row.trainingCentre as number,
+  //     trainingCentre: row.trainingCentre
+  //   };
+  // };
   
   const fetchCourses = async () => {
     try {
