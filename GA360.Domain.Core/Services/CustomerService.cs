@@ -1054,6 +1054,222 @@ public class CustomerService : ICustomerService
         return customers;
     }
 
+    public async Task<List<CustomerModelHighPerformance>> GetLeadsAllUltraHighPerformance(int? trainingCentreId)
+    {
+        var customers = new List<CustomerModelHighPerformance>();
+
+        try
+        {
+            using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
+            {
+                // Base query with DISTINCT
+                var query = @"
+                SELECT DISTINCT
+                    c.Id,
+                    c.FirstName,
+                    c.LastName,
+                    CONCAT(c.FirstName, ' ', c.LastName) AS Name,
+                    c.Contact,
+                    c.Email,
+                    co.Name AS Country,
+                    c.Location,
+                    c.Status,
+                    c.CountryId,
+                    c.DOB,
+                    c.DOB AS DateOfBirth,
+                    c.TrainingCentreId,
+                    tc.Name AS TrainingCentreName,
+                    c.AvatarImage
+                FROM 
+                    Customers c
+                LEFT JOIN 
+                    Countries co ON c.CountryId = co.Id
+                LEFT JOIN 
+                    TrainingCentres tc ON c.TrainingCentreId = tc.Id
+                INNER JOIN 
+                    QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
+                WHERE 
+                    q.QualificationId IS NOT NULL";
+
+                // Add WHERE clause if trainingCentreId is provided
+                if (trainingCentreId.HasValue)
+                {
+                    query += " AND c.TrainingCentreId = @TrainingCentreId";
+                }
+
+                query += " ORDER BY c.Id";
+
+                var command = new SqlCommand(query, connection);
+
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var customer = new CustomerModelHighPerformance
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Contact = reader.GetString(reader.GetOrdinal("Contact")),
+                            Email = reader.GetString(reader.GetOrdinal("Email")),
+                            Country = reader.GetString(reader.GetOrdinal("Country")),
+                            Location = reader.GetString(reader.GetOrdinal("Location")),
+                            Status = reader.GetInt32(reader.GetOrdinal("Status")),
+                            Avatar = 0, // Assuming Avatar is not mapped from Customer
+                            CountryId = reader.GetInt32(reader.GetOrdinal("CountryId")),
+                            DOB = reader.GetString(reader.GetOrdinal("DOB")),
+                            DateOfBirth = reader.GetString(reader.GetOrdinal("DateOfBirth")),
+                            TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
+                            TrainingCentre = reader.IsDBNull(reader.GetOrdinal("TrainingCentreName")) ? null : reader.GetString(reader.GetOrdinal("TrainingCentreName")),
+                            AvatarImage = reader.IsDBNull(reader.GetOrdinal("AvatarImage")) ? null : reader.GetString(reader.GetOrdinal("AvatarImage"))
+                        };
+
+                        customers.Add(customer);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing customers");
+        }
+
+        return customers;
+    }
+
+    public async Task<List<LeadsApproachingExpirationModel>> GetAllLeadsApproachingExpiration(int? trainingCentreId)
+    {
+        var leads = new List<LeadsApproachingExpirationModel>();
+
+        try
+        {
+            using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
+            {
+                // Base query with required fields and calculations
+                var query = @"
+            SELECT DISTINCT
+                c.Id,
+                CONCAT(c.FirstName, ' ', c.LastName) AS Name,
+                c.CreatedAt AS DateAdded,
+                DATEADD(week, 3, c.CreatedAt) AS ExpiryDate,
+                CASE 
+                    WHEN DATEADD(week, 3, c.CreatedAt) >= DATEADD(day, 14, GETDATE()) THEN 'Green'
+                    WHEN DATEADD(week, 3, c.CreatedAt) >= DATEADD(day, 7, GETDATE()) THEN 'Amber'
+                    ELSE 'Red'
+                END AS Status
+            FROM 
+                Customers c
+            INNER JOIN 
+                QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
+            WHERE 
+                q.QualificationId IS NOT NULL";
+
+                // Add WHERE clause if trainingCentreId is provided
+                if (trainingCentreId.HasValue)
+                {
+                    query += " AND c.TrainingCentreId = @TrainingCentreId";
+                }
+
+                query += " ORDER BY c.Id";
+
+                var command = new SqlCommand(query, connection);
+
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var lead = new LeadsApproachingExpirationModel
+                        {
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")).ToString("yyyy-MM-dd"),
+                            ExpiryDate = reader.GetDateTime(reader.GetOrdinal("ExpiryDate")).ToString("yyyy-MM-dd"),
+                            Status = reader.GetString(reader.GetOrdinal("Status"))
+                        };
+
+                        leads.Add(lead);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing leads approaching expiration");
+        }
+
+        return leads;
+    }
+
+    public async Task<List<ActiveLearnersPerMonth>> GetActiveLearnersPerMonth(int trainingCentreId)
+    {
+        var activeLearnersPerMonth = new List<ActiveLearnersPerMonth>();
+
+        try
+        {
+            using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
+            {
+                // Query to get the number of unique active learners per month
+                var query = @"
+            SELECT 
+                YEAR(q.ModifiedAt) AS Year,
+                MONTH(q.ModifiedAt) AS Month,
+                COUNT(DISTINCT q.CustomerId) AS LearnersCount
+            FROM 
+                QualificationCustomerCourseCertificates q
+            INNER JOIN 
+                Customers c ON q.CustomerId = c.Id
+            WHERE 
+                c.TrainingCentreId = @TrainingCentreId
+            GROUP BY 
+                YEAR(q.ModifiedAt), MONTH(q.ModifiedAt)
+            ORDER BY 
+                Year, Month";
+
+                var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId);
+
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var year = reader.GetInt32(reader.GetOrdinal("Year"));
+                        var month = reader.GetInt32(reader.GetOrdinal("Month"));
+                        var learnersCount = reader.GetInt32(reader.GetOrdinal("LearnersCount"));
+
+                        var activeLearner = new ActiveLearnersPerMonth
+                        {
+                            Year = year,
+                            Month = month,
+                            LearnersCount = learnersCount
+                        };
+
+                        activeLearnersPerMonth.Add(activeLearner);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting active learners per month");
+        }
+
+        return activeLearnersPerMonth;
+    }
+
+
     public async Task<List<FileModel>> GetCustomerDocumentsByEmail(string email)
     {
         var documents = new List<FileModel>();

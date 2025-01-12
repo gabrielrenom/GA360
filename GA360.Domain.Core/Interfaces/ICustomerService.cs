@@ -34,5 +34,8 @@ namespace GA360.Domain.Core.Interfaces
         Task<List<Customer>> GetAllCustomerWithCourseQualificationRecordsByCustomerId(int customerId);
         Task<CustomerBatchModel> UploadBatchCandidates(CustomerBatchModel batch);
         Task<CustomerProfileModel> GetCustomerProfileHighPerformance(int id);
+        Task<List<CustomerModelHighPerformance>> GetLeadsAllUltraHighPerformance(int? trainingCentreId);
+        Task<List<LeadsApproachingExpirationModel>> GetAllLeadsApproachingExpiration(int? trainingCentreId);
+        Task<List<ActiveLearnersPerMonth>> GetActiveLearnersPerMonth(int trainingCentreId);
     }
 }

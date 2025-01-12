@@ -38,5 +38,6 @@ namespace GA360.Server.Controllers
 
             return Ok(await _dashboardService.GetIndustryPercentageAsync(emailClaim));
         }
+
     }
 }

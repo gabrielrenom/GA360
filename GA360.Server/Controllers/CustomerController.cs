@@ -78,6 +78,41 @@ namespace GA360.Server.Controllers
         }
 
         [Authorize]
+        [HttpGet("list/leads")]
+        public async Task<IActionResult> GetAllLeads(int page = 1, int pageSize = 10, int? trainingCentreId = null)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            var permissions = await _permissionService.GetPermissions(emailClaim);
+
+            return Ok(await _customerService.GetLeadsAllUltraHighPerformance(trainingCentreId));
+        }
+
+        [Authorize]
+        [HttpGet("learners/month/{trainingCentreId}")]
+        public async Task<IActionResult> GetActiveLearnersPerMonth(int? trainingCentreId = null)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            var permissions = await _permissionService.GetPermissions(emailClaim);
+
+            return Ok(await _customerService.GetActiveLearnersPerMonth((int)trainingCentreId));
+        }
+
+        [Authorize]
+        [HttpGet("list/leads/expiration/{trainingCentreId}")]
+        public async Task<IActionResult> GetAllLeadsApproachingExpiration(int? trainingCentreId = null)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            var permissions = await _permissionService.GetPermissions(emailClaim);
+
+            return Ok(await _customerService.GetAllLeadsApproachingExpiration(trainingCentreId));
+        }
+
+
+
+        [Authorize]
         [HttpGet("get/full/{id}")]
         public async Task<IActionResult> GetCustomerById(int id)
         {

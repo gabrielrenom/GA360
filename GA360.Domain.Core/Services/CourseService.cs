@@ -5,16 +5,19 @@ using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GA360.Domain.Core.Services;
 
 public class CourseService : ICourseService
 {
     private readonly ICourseRepository _courseRepository;
+    private readonly ILogger<CourseService> _logger;
 
-    public CourseService(ICourseRepository courseRepository)
+    public CourseService(ICourseRepository courseRepository, ILogger<CourseService> logger)
     {
         _courseRepository = courseRepository;
+        _logger = logger;
     }
 
     public Course GetCourse(int id)
@@ -57,7 +60,7 @@ public class CourseService : ICourseService
         var courseEntity = await _courseRepository.Context.Courses
          .Include(x => x.CourseTrainingCentres)
          .ThenInclude(x => x.TrainingCentre)
-         .FirstOrDefaultAsync(x=> x.Id == course.Id);
+         .FirstOrDefaultAsync(x => x.Id == course.Id);
 
         var courseModels = new CourseModel
         {
@@ -129,55 +132,75 @@ public class CourseService : ICourseService
 
     public async Task<CourseModel> UpdateCourse(Course course, int? trainingCentreId)
     {
-        var courseentity = _courseRepository.Get(course.Id);
-
-        courseentity.Duration = course.Duration;
-        courseentity.CertificateNumber = course.CertificateNumber;
-        courseentity.CertificateDate = course.CertificateDate;
-        courseentity.Description = course.Description;
-        courseentity.ExpectedDate = course.ExpectedDate;
-        courseentity.Name = course.Name;
-        courseentity.Status = course.Status;
-        courseentity.RegistrationDate = course.RegistrationDate;
-        courseentity.Sector = course.Sector;
-
-        var result = await _courseRepository.UpdateAsync(courseentity);
-
-        if (trainingCentreId!=null)
+        try
         {
-            var trainingcentreentity = await _courseRepository.Context.CourseTrainingCentre.FirstOrDefaultAsync(x => x.CourseId == courseentity.Id);
-            trainingcentreentity.TrainingCentreId = (int)trainingCentreId;
-            _courseRepository.Context.CourseTrainingCentre.Update(trainingcentreentity);
-            await _courseRepository.SaveChangesAsync();
+            var courseentity = _courseRepository.Get(course.Id);
+
+            courseentity.Duration = course.Duration;
+            courseentity.CertificateNumber = course.CertificateNumber;
+            courseentity.CertificateDate = course.CertificateDate;
+            courseentity.Description = course.Description;
+            courseentity.ExpectedDate = course.ExpectedDate;
+            courseentity.Name = course.Name;
+            courseentity.Status = course.Status;
+            courseentity.RegistrationDate = course.RegistrationDate;
+            courseentity.Sector = course.Sector;
+
+            var result = await _courseRepository.UpdateAsync(courseentity);
+
+            if (trainingCentreId != null)
+            {
+                var trainingcentreentity = await _courseRepository.Context.CourseTrainingCentre.FirstOrDefaultAsync(x => x.CourseId == courseentity.Id);
+                if (trainingcentreentity == null)
+                {
+                    _courseRepository.Context.CourseTrainingCentre.Add(new CourseTrainingCentre
+                    {
+                        CourseId = courseentity.Id,
+                        TrainingCentreId = (int)trainingCentreId
+                    });
+                }
+                else
+                {
+                    trainingcentreentity.TrainingCentreId = (int)trainingCentreId;
+                    _courseRepository.Context.CourseTrainingCentre.Update(trainingcentreentity);
+                }
+                await _courseRepository.SaveChangesAsync();
+            }
+
+            var courseEntity = await _courseRepository.Context.Courses
+             .Include(x => x.CourseTrainingCentres)
+             .ThenInclude(x => x.TrainingCentre)
+             .FirstOrDefaultAsync(x => x.Id == course.Id);
+
+            var courseModel = new CourseModel
+            {
+                Id = courseEntity.Id,
+                Status = course.Status,
+                Name = course.Name,
+                Description = course.Description,
+                Progression = 0, // Assuming this value is calculated elsewhere
+                Assesor = string.Empty, // Assuming this value is populated elsewhere
+                Duration = course.Duration,
+                Date = course.RegistrationDate.ToString(),//course.RegistrationDate.ToString("yyyy-MM-dd"), // Using RegistrationDate for Date field
+                Card = string.Empty, // Assuming this value is populated elsewhere
+                Certification = string.Empty, // Assuming this value is populated elsewhere
+                TrainingCentreId = courseEntity.CourseTrainingCentres.FirstOrDefault()?.TrainingCentreId,
+                TrainingCentre = courseEntity.CourseTrainingCentres.FirstOrDefault()?.TrainingCentre?.Name,
+                RegistrationDate = courseEntity.RegistrationDate,
+                CertificateDate = courseEntity.CertificateDate,
+                ExpectedDate = courseEntity.ExpectedDate,
+                CertificateNumber = courseEntity.CertificateNumber
+
+            };
+
+            return courseModel;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating course");
         }
 
-        var courseEntity = await _courseRepository.Context.Courses
-         .Include(x => x.CourseTrainingCentres)
-         .ThenInclude(x => x.TrainingCentre)
-         .FirstOrDefaultAsync(x => x.Id == course.Id);
-
-        var courseModel = new CourseModel
-        {
-            Id = courseEntity.Id,
-            Status = course.Status,
-            Name = course.Name,
-            Description = course.Description,
-            Progression = 0, // Assuming this value is calculated elsewhere
-            Assesor = string.Empty, // Assuming this value is populated elsewhere
-            Duration = course.Duration,
-            Date = course.RegistrationDate.ToString(),//course.RegistrationDate.ToString("yyyy-MM-dd"), // Using RegistrationDate for Date field
-            Card = string.Empty, // Assuming this value is populated elsewhere
-            Certification = string.Empty, // Assuming this value is populated elsewhere
-            TrainingCentreId = courseEntity.CourseTrainingCentres.FirstOrDefault()?.TrainingCentreId,
-            TrainingCentre = courseEntity.CourseTrainingCentres.FirstOrDefault()?.TrainingCentre?.Name,
-            RegistrationDate = courseEntity.RegistrationDate,
-            CertificateDate = courseEntity.CertificateDate,
-            ExpectedDate = courseEntity.ExpectedDate,
-            CertificateNumber = courseEntity.CertificateNumber
-
-        };
-
-        return courseModel;
+        return null;
     }
 
     public void DeleteCourse(int id)
@@ -271,7 +294,7 @@ public class CourseService : ICourseService
     {
         var courses = await _courseRepository.Context.Courses
             .Include(x => x.CourseTrainingCentres)
-            .ThenInclude(x=>x.TrainingCentre)
+            .ThenInclude(x => x.TrainingCentre)
             .ToListAsync();
 
         var courseModels = courses.Select(course => new CourseModel
@@ -298,5 +321,4 @@ public class CourseService : ICourseService
 
         return courseModels;
     }
-
 }

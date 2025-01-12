@@ -4,6 +4,7 @@ using GA360.DAL.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GA360.DAL.Infrastructure.Migrations
 {
     [DbContext(typeof(CRMDbContext))]
-    partial class CRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250109221600_Prices")]
+    partial class Prices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -441,13 +444,7 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<double?>("Discount")
-                        .HasColumnType("float");
-
                     b.Property<double?>("Price")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("Sale")
                         .HasColumnType("float");
 
                     b.Property<int>("TrainingCentreId")
@@ -1130,6 +1127,9 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double?>("Price")
+                        .HasColumnType("float");
+
                     b.Property<string>("QAN")
                         .HasColumnType("nvarchar(max)");
 
@@ -1162,20 +1162,11 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<int?>("CertificateId")
                         .HasColumnType("int");
 
-                    b.Property<double?>("CourseDiscount")
-                        .HasColumnType("float");
-
                     b.Property<int?>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<double?>("CoursePrice")
-                        .HasColumnType("float");
-
                     b.Property<int>("CourseProgression")
                         .HasColumnType("int");
-
-                    b.Property<double?>("CourseSale")
-                        .HasColumnType("float");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1203,20 +1194,11 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("QualificationDiscount")
-                        .HasColumnType("float");
-
                     b.Property<int?>("QualificationId")
                         .HasColumnType("int");
 
-                    b.Property<double?>("QualificationPrice")
-                        .HasColumnType("float");
-
                     b.Property<int>("QualificationProgression")
                         .HasColumnType("int");
-
-                    b.Property<double?>("QualificationSale")
-                        .HasColumnType("float");
 
                     b.Property<int?>("QualificationStatusId")
                         .HasColumnType("int");
@@ -1307,9 +1289,6 @@ namespace GA360.DAL.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("Discount")
-                        .HasColumnType("float");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -1320,14 +1299,8 @@ namespace GA360.DAL.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("Price")
-                        .HasColumnType("float");
-
                     b.Property<int>("QualificationId")
                         .HasColumnType("int");
-
-                    b.Property<double?>("Sale")
-                        .HasColumnType("float");
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier");

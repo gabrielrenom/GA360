@@ -14,7 +14,6 @@ public class Qualification: Audit, IModel
     public string? AwardingBody { get; set; }
     public string? InternalReference { get; set; }
     public string? QAN { get; set; }
-
     public virtual List<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
     public virtual List<QualificationTrainingCentre> QualificationTrainingCentres { get; set; }
 }

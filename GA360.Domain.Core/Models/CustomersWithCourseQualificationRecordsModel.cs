@@ -16,4 +16,6 @@ public class CustomersWithCourseQualificationRecordsModel
     public int Progression { get; set; }
     public int? QualificationStatusId { get; set; }
     public string QualificationStatus { get; set; }
+    public double? QualificationPrice { get; set; }
+    public double? CoursePrice { get; set; }
 }

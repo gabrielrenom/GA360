@@ -13,6 +13,18 @@ public class QualificationCustomerCourseCertificate: Audit, IModel
     public int CourseProgression {  get; set; } = 0;
     public int? QualificationStatusId { get; set; } = 0;
     public string Assesor {  get; set; } = string.Empty;
+    // Initial price
+    public double? CoursePrice { get; set; }
+    // Discount
+    public double? CourseDiscount { get; set; }
+    // price+discount
+    public double? CourseSale { get; set; }
+    // Initial price
+    public double? QualificationPrice { get; set; }
+    // Discount
+    public double? QualificationDiscount { get; set; }
+    // price+discount
+    public double? QualificationSale { get; set; }
     public virtual Course Course { get; set; }
     public virtual Customer Customer { get; set; }
     public virtual Qualification Qualification { get; set; }
