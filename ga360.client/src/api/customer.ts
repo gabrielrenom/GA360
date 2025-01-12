@@ -91,6 +91,18 @@ export interface CustomerProfileModel {
   avgQualificationProgression: number;
 }
 
+export interface LeadsApproachingExpirationModel {
+  name: string;
+  dateAdded: string;
+  expiryDate: string;
+  status: string;
+}
+
+export interface ActiveLearnersPerMonth {
+  year: number;
+  month: number;
+  learnersCount: number;
+}
 
 
 // utils
@@ -116,7 +128,60 @@ export const endpoints = {
   batchupload:'/api/customer/batchupload',
   getdocuments: '/api/customer/get/documents',
   getcustomerprofilehighperformance: '/api/customer/get/profile',
+  getAllLeadsApproachingExpiration: '/api/customer/list/leads/expiration',
+  getActiveLearnersPerMonth: '/api/customer/learners/month'
 };
+
+
+export async function GetActiveLearnersPerMonth(trainingCentre: number): Promise<ActiveLearnersPerMonth[]> {
+  try {
+    console.log("before calll",trainingCentre )
+    const response = await fetch(`${endpoints.getActiveLearnersPerMonth}/${trainingCentre}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF': 'Dog',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.statusText}`);
+    }
+
+    const data:ActiveLearnersPerMonth[] =  await response.json();
+
+    return data;
+    
+  } catch (error) {
+    console.error('Failed to fetch learners per month:', error);
+    throw error;
+  }
+}
+
+
+export async function getAllLeadsApproachingExpiration(trainingCentre: number): Promise<LeadsApproachingExpirationModel[]> {
+  try {
+    const response = await fetch(`${endpoints.getAllLeadsApproachingExpiration}/${trainingCentre}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF': 'Dog',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.statusText}`);
+    }
+
+    const data:LeadsApproachingExpirationModel[] =  await response.json();
+
+    return data;
+    
+  } catch (error) {
+    console.error('Failed to fetch leads:', error);
+    throw error;
+  }
+}
 
 export async function getDocumentsByUser(email: string): Promise<DocumentFileModel[]> {
   try {
@@ -285,9 +350,7 @@ export async function getBasicCandidate() {
 }
 
 export async function insertCustomerWithDocuments(newCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
-  console.log("MYNEWINSERT", newCustomer)
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(newCustomer);
-  console.log("MYNEWINSERT 2", mappedCustomer)
   const formData = new FormData();
   formData.append('Customer', JSON.stringify(mappedCustomer));
 

@@ -30,6 +30,7 @@ import CSVCandidatesUploader from 'sections/apps/customer/CSVCandidatesUploader'
 import AboutUs from 'layout/Dashboard/Footer/AboutUs';
 import Terms from 'layout/Dashboard/Footer/Terms';
 import Privacy from 'layout/Dashboard/Footer/Privacy';
+import Leads from 'pages/backoffice/leads';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -183,6 +184,10 @@ const MainRoutes = {
             {
               path: 'candidates',
               element: <Candidates />
+            },
+            {
+              path: 'leads',
+              element: <Leads />
             },
             {
               path: 'trainingcentres',

@@ -16,8 +16,11 @@ import AnalyticEcommerce from "components/cards/statistics/AnalyticEcommerce";
 import MonthlyBarChart from "sections/dashboard/default/MonthlyBarChart";
 import ReportAreaChart from "sections/dashboard/default/ReportAreaChart";
 import UniqueVisitorCard from "sections/dashboard/default/UniqueVisitorCard";
+import ActiveLearnersChartCard from "sections/dashboard/default/ActiveLearnersChartCard";
+
 import SaleReportCard from "sections/dashboard/default/SaleReportCard";
 import OrdersTable from "sections/dashboard/default/OrdersTable";
+import LeadsApproachingExpiration from "sections/dashboard/default/LeadsApproachingExpiration";
 
 // assets
 import GiftOutlined from "@ant-design/icons/GiftOutlined";
@@ -60,6 +63,7 @@ import { ButtonBase } from "@mui/material";
 
 const Candidates = lazy(() => import("pages/backoffice/candidates"));
 import DuendeContext from 'contexts/DuendeContext';
+import OrdersList from 'sections/dashboard/analytics/OrdersList';
 
 import ClaimsDashboard from 'pages/claims/claims'
 // avatar style
@@ -592,6 +596,23 @@ export default function DashboardDefault() {
         sx={{ display: { sm: "none", md: "block", lg: "none" } }}
       />
       <LabelledIndustries />
+      <Grid item xs={12} md={8} lg={8}>
+        <Grid container alignItems="center" justifyContent="space-between">
+          <Grid item>
+            <Typography variant="h5">Active Learner By Month</Typography>
+          </Grid>
+          <Grid item />
+        </Grid>
+        <MainCard sx={{ mt: 2 }} content={false}>
+          <ActiveLearnersChartCard />
+        </MainCard>
+      </Grid>
+      <Grid item xs={12} md={4} lg={4}>
+        <MainCard sx={{ mt: 5 , border: '1px solid rgba(0, 0, 0, 0.1)'}} content={false}>
+          <LeadsApproachingExpiration/>
+        </MainCard>
+      </Grid>
+
       {/* row 2 */}
       {/* <Grid item xs={12} md={7} lg={8}>
         <UniqueVisitorCard />

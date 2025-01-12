@@ -135,6 +135,11 @@ export default defineConfig({
                 secure: false,
                 changeOrigin: true
             },
+            '^/api/customer/learners/month': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
             '^/api/certificate': {
                 target,
                 secure: false,
