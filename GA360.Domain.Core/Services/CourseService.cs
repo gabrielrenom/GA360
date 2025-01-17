@@ -6,6 +6,7 @@ using GA360.Domain.Core.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Data;
 
 namespace GA360.Domain.Core.Services;
 
@@ -320,5 +321,25 @@ public class CourseService : ICourseService
         }).ToList();
 
         return courseModels;
+    }
+
+    public async Task<List<CourseUserModel>> GetAllCoursesByUserId(int userId)
+    {
+        var courses = await (from c in _courseRepository.Context.Courses
+                             join qccc in _courseRepository.Context.QualificationCustomerCourseCertificates
+                             on c.Id equals qccc.CourseId
+                             where qccc.CustomerId == userId
+                             select new CourseUserModel
+                             {
+                                 Id = c.Id,
+                                 Name = c.Name,
+                                 RegistrationDate = qccc.CourseRegistrationDate,
+                                 ExpectedDate = qccc.CourseExpectedDate,
+                                 CertificateDate = qccc.CourseCertificateDate,
+                                 CertificateNumber = qccc.CertificateNumber,
+                                 Price = qccc.CoursePrice ?? 0.0
+                             }).ToListAsync();
+
+        return courses;
     }
 }

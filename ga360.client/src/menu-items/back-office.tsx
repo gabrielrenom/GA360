@@ -34,7 +34,7 @@ const backOffice: NavItemType = {
       children: [
         {
           id: 'group-back-office-candidates-candidate',
-          title: <FormattedMessage id="Candidate Details" />,
+          title: <FormattedMessage id="Learner Details" />,
           type: 'item',
           icon: icons.ProfileOutlined,
           url: '/backoffice/candidates'

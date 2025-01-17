@@ -26,6 +26,12 @@ const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUplo
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (initialFiles) {
+      setSelectedFiles(initialFiles);
+    }
+  }, [initialFiles]);
+
   function getUrlByFileName(documents: DocumentFileModel[], fileName: string): string | null {
     const document = documents.find(doc => doc.name === fileName);
     return document ? document.url : null;
@@ -101,7 +107,7 @@ const MultipleFileUploader: React.FC<MultipleFileUploaderProps> = ({ onFilesUplo
           Select Files
         </Button>
       </label>
-      {selectedFiles.length > 0 && (
+           {selectedFiles.length > 0 && (
         <div>
           <ul>
             {selectedFiles.map((file, index) => (

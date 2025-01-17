@@ -68,7 +68,7 @@ function EditToolbar(props: EditToolbarProps) {
     ]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "qan" },
     }));
   };
   
@@ -170,18 +170,23 @@ export default function DynamicTableQualifications() {
   const mapToQualification = (row: GridRowModel): QualificationTable => {
     return {
       id: row.id as number,
+      qan: row.qan,
       name: row.name as string,
       registrationDate: row.registrationDate ? new Date(row.registrationDate as string) : null,
       expectedDate: row.expectedDate ? new Date(row.expectedDate as string) : null,
       certificateDate: row.certificateDate ? new Date(row.certificateDate as string) : null,
       certificateNumber: row.certificateNumber as number,
       status: row.status as number,
-      trainingCentreId: row.trainingCentre as number,
+      trainingCentreId: typeof row.trainingCentreId === 'number' ? row.trainingCentreId : (row.trainingCentre as number),
       trainingCentre: row.trainingCentre,
       internalReference: row.internalReference,
-      qan: row.qan
+      learners: row.learners,
+      awardingBody: row.awardingBody,
+      price: row.price,
+      sector: row.sector
     };
   };
+  
   const fetchQualifications = async () => {
     try {
       const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable();
@@ -206,6 +211,7 @@ export default function DynamicTableQualifications() {
   
         await fetchQualifications();
       } else {
+        console.log("UPDATING", newRow)
         const qualification = mapToQualification(newRow);
         const updatedQualification = await updateQualification(qualification.id, qualification); // Call updateQualification for existing rows
         console.log(updatedQualification)
@@ -244,58 +250,26 @@ const columns: GridColDef[] = [
   },
   {
     field: "internalReference",
-    headerName: "INTERNAL REF",
+    headerName: "INT REF",
     editable: true,
     type: "string",
     headerAlign: 'center',
     align: 'center',
+    flex: 1,
+
   },
   {
     field: 'name',
-    headerName: 'QUALIFICATION NAME',
+    headerName: 'NAME',
     flex: 1,
-    editable: true,
+    editable: true
   },
-  {
-    field: 'registrationDate',
-    headerName: 'REGISTRATION DATE',
-    type: 'date',
-    flex: 1,
-    editable: true,
-    valueFormatter: (params) => {
-      const date = new Date(params as string);
-      return date.toLocaleDateString();
+    {
+      field: 'awardingBody',
+      headerName: 'AWARDING BODY',
+      flex: 1,
+      editable: true,
     },
-  },
-  {
-    field: 'expectedDate',
-    headerName: 'EXP DATE',
-    type: 'date',
-    flex: 1,
-    editable: true,
-    valueFormatter: (params) => {
-      const date = new Date(params as string);
-      return date.toLocaleDateString();
-    },
-  },
-  {
-    field: 'certificateDate',
-    headerName: 'CERTIFICATE DATE?',
-    type: 'date',
-    flex: 1,
-    editable: true,
-    valueFormatter: (params) => {
-      const date = new Date(params as string);
-      return date.toLocaleDateString();
-    },
-  },
-  {
-    field: 'certificateNumber',
-    headerName: 'CERTIFICATE NUMBER',
-    flex: 1,
-    type: "number",
-    editable: true,
-  },
   {
     field: 'trainingCentre',
     headerName: 'TRAINING CENTRE',
@@ -311,6 +285,50 @@ const columns: GridColDef[] = [
     ),
   },
   {
+    field: "sector",
+    headerName: "SECTOR",
+    flex: 1,
+    editable: true,
+    type: "singleSelect",
+    valueOptions: [
+        { value: "Technology", label: "Technology" },
+        { value: "Healthcare", label: "Healthcare" },
+        { value: "Finance", label: "Finance" },
+        { value: "Education", label: "Education" },
+        { value: "Engineering", label: "Engineering" },
+        { value: "Marketing", label: "Marketing" },
+        { value: "Hospitality", label: "Hospitality" },
+        { value: "Retail", label: "Retail" },
+        { value: "Manufacturing", label: "Manufacturing" },
+        { value: "Construction", label: "Construction" },
+    ],
+},
+  {
+    field: 'learners',
+    headerName: 'LEARNERS',
+    flex: 1,
+    editable: false,
+  },
+  {
+    field: 'expectedDate',
+    headerName: 'EXP DATE',
+    type: 'date',
+    flex: 1,
+    editable: true,
+    valueFormatter: (params) => {
+      const date = new Date(params as string);
+      return date.toLocaleDateString();
+    },
+  },
+  {
+    field: 'certificateNumber',
+    headerName: 'CERT NUMBER',
+    flex: 1,
+    type: "number",
+    editable: true,
+  },
+  
+  {
     field: 'status',
     headerName: 'STATUS',
     flex: 1,
@@ -320,6 +338,12 @@ const columns: GridColDef[] = [
       { value: 1, label: 'Active' },
       { value: 2, label: 'Not Active' },
     ],
+  },
+  {
+    field: 'price',
+    headerName: 'PRICE',
+    flex: 1,
+    editable: true,
   },
   {
     field: 'actions',
@@ -429,12 +453,14 @@ const columns: GridColDef[] = [
                   '& .MuiDataGrid-columnHeaders': {
                     borderBottom: `1px solid ${theme.palette.divider}`,
                     borderTop: `1px solid ${theme.palette.divider}`,
+                    fontSize: '8px',
+
                     padding: 0, // Remove padding from the header
                     '& .MuiDataGrid-columnHeaderTitle': {
                       fontWeight: 'bold',
                     },
                     '& .MuiDataGrid-columnHeaderTitle:first-child': {
-                      paddingLeft: 1, // Set the padding of the first column header
+                      //paddingLeft: 1, // Set the padding of the first column header
                     },  
                   },
                   '& .MuiDataGrid-cell': {

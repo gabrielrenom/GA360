@@ -59,6 +59,17 @@ public class CourseController : ControllerBase
     }
 
     [AllowAnonymous]
+    [HttpGet("userid/{userId}")]
+    public async Task<IActionResult> GetByUserId(int userId)
+    {
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+        var courses = await _courseService.GetAllCoursesByUserId(userId);
+
+        return Ok(courses);
+    }
+
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public IActionResult GetCourse(int id)
     {

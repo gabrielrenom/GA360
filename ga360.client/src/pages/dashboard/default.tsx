@@ -60,6 +60,7 @@ import { getDashboardStatuses } from "api/dashboardService";
 import LabelledIndustries from "sections/dashboard/analytics/LabelledIndustries";
 // import ButtonBase from "themes/overrides/ButtonBase";
 import { ButtonBase } from "@mui/material";
+import AnalyticsDataCard from 'components/cards/statistics/AnalyticsDataCard';
 
 const Candidates = lazy(() => import("pages/backoffice/candidates"));
 import DuendeContext from 'contexts/DuendeContext';
@@ -312,19 +313,19 @@ export default function DashboardDefault() {
     fetchCustomerData();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchDashboardStats = async () => {
-  //     try {
-  //       const data = await getDashboardStats();
-  //       setStats(data);
-  //       console.log(data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch for the dashboard", error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const data = await getDashboardStats(user.trainingCentreId);
+        setStats(data);
+        console.log(data);
+      } catch (error) {
+        console.error("Failed to fetch for the dashboard", error);
+      }
+    };
 
-  //   fetchDashboardStats();
-  // }, []);
+    fetchDashboardStats();
+  }, []);
 
   const getColor = (percentage) => {
     if (percentage > 10) return "success";
@@ -447,45 +448,47 @@ export default function DashboardDefault() {
           </Grid>
         </Grid>
       </Box>
-      <Grid item md={8} sx={{ display: { sm: "none", md: "block" } }} />
-
       {/* row 1 */}
-
-      <Grid container spacing={3} sx={{ flexGrow: 1, paddingLeft: 3 }}>
+      <Grid
+        item
+        md={8}
+        sx={{ display: { sm: "none", md: "block", lg: "none" } }}
+      />
+      <Grid container spacing={3} sx={{ flexGrow: 1, paddingLeft: 3, paddingTop:4 }}>
         {stats &&
           stats.find(
             (stat) =>
-              stat.statisticTypeDescription === "CANDIDATE_REGISTRATIONS"
+              stat.statisticTypeDescription === "NEW_LEADS"
           ) && (
             <Grid item xs={12} sm={6} md={4} lg={3}>
               <AnalyticEcommerce
-                title="Candidate Registrations"
+                title="New Leads (This Month)"
                 count={
                   stats.find(
                     (stat) =>
                       stat.statisticTypeDescription ===
-                      "CANDIDATE_REGISTRATIONS"
+                      "NEW_LEADS"
                   )?.total
                 }
                 percentage={
                   stats.find(
                     (stat) =>
                       stat.statisticTypeDescription ===
-                      "CANDIDATE_REGISTRATIONS"
+                      "NEW_LEADS"
                   )?.percentage
                 }
                 extra={
                   stats.find(
                     (stat) =>
                       stat.statisticTypeDescription ===
-                      "CANDIDATE_REGISTRATIONS"
+                      "NEW_LEADS"
                   )?.totalYear
                 }
                 color={getColor(
                   stats.find(
                     (stat) =>
                       stat.statisticTypeDescription ===
-                      "CANDIDATE_REGISTRATIONS"
+                      "NEW_LEADS"
                   )?.percentage
                 )}
               />
@@ -497,7 +500,7 @@ export default function DashboardDefault() {
           ) && (
             <Grid item xs={12} sm={6} md={4} lg={3}>
               <AnalyticEcommerce
-                title="New Learners"
+                title="New Learners (This Month)"
                 count={
                   stats.find(
                     (stat) => stat.statisticTypeDescription === "NEW_LEARNERS"
@@ -527,7 +530,7 @@ export default function DashboardDefault() {
           ) && (
             <Grid item xs={12} sm={6} md={4} lg={3}>
               <AnalyticEcommerce
-                title="Active Learners"
+                title="Active Learners (All)"
                 count={
                   stats.find(
                     (stat) =>
@@ -561,7 +564,7 @@ export default function DashboardDefault() {
           ) && (
             <Grid item xs={12} sm={6} md={4} lg={3}>
               <AnalyticEcommerce
-                title="Completed Learners"
+                title="Completed Learners (This Month)"
                 count={
                   stats.find(
                     (stat) =>

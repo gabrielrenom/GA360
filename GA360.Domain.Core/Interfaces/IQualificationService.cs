@@ -17,4 +17,6 @@ public interface IQualificationService
     Task<QualificationWithTrainingModel> AddQualification(QualificationWithTrainingModel qualification);
     Task<QualificationWithTrainingModel> UpdateQualification(QualificationWithTrainingModel qualification);
     Task<List<Qualification>> GetQualificationsByTrainingCentreWithEmail(string email);
+    Task<List<Qualification>> GetAllQualificationsByCandidateId(int id);
+    Task<List<QualificationLearnerModel>> GetAllDetailedQualificationsByCandidateId(int id);
 }

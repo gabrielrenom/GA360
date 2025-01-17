@@ -31,5 +31,6 @@ namespace GA360.DAL.Infrastructure.Interfaces
         CRMDbContext GetDbContext();
         Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords(int? pageNumber, int? pageSize, string orderBy, bool ascending = true);
         Task<List<Customer>> GetAllCustomersWithCourseQualificationRecords();
+        Task<Customer> GetWithAllEntitiesNoSkillsById(int id);
     }
 }

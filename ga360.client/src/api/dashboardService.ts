@@ -22,8 +22,8 @@ export interface IndustryPercentage {
 }
 
 
-export async function getDashboardStats(): Promise<DashboardStats> {
-  const response = await fetch(endpoints.learnerstats , {
+export async function getDashboardStats(trainingCentreId?: number): Promise<DashboardStats> {
+  const response = await fetch(trainingCentreId===null?endpoints.learnerstats:endpoints.learnerstats+"/"+trainingCentreId , {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

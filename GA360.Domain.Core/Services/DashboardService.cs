@@ -142,21 +142,115 @@ public class DashboardService : IDashboardService
     //    return industryList;
     //}
 
-    public async Task<List<DashboardModel>> GetAllStats()
+    public async Task<List<DashboardModel>> GetAllStats(int? trainingCentreId = null)
     {
         return new List<DashboardModel>
         {
-            await GetCompletedLearners(),
-            await GetActiveLearners(),
-            await GetRegistrations(),
-            await GetNewLearners(),
-            await GetRegistrations(),
+            await GetCompletedLearners(trainingCentreId),
+            await GetActiveLearners(trainingCentreId),
+            await GetRegistrations(trainingCentreId),
+            await GetNewLearners(trainingCentreId),
+            await GetTheNewLeadsFromThisMonthWithThePercentageIncreaseFromLastMonthAndTotalThisYear(trainingCentreId)
         };
     }
 
-    public async Task<DashboardModel> GetActiveLearners()
+    public async Task<DashboardModel> GetTheNewLeadsFromThisMonthWithThePercentageIncreaseFromLastMonthAndTotalThisYear(int? trainingCentreId)
     {
-        var dashboardModel = new DashboardModel();
+        var dashboardModel = new DashboardModel
+        {
+            StatisticType = StatisticType.NEW_LEADS
+        };
+
+        string connectionString = _cRMDbContext.Database.GetDbConnection().ConnectionString;
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            await connection.OpenAsync();
+
+            // Define the WHERE clause based on the trainingCentreId
+            string whereClause = trainingCentreId.HasValue
+                ? "AND c.TrainingCentreId = @TrainingCentreId"
+                : "";
+
+            // Get the total leads for this month (distinct customers without QualificationId)
+            string queryThisMonth = $@"
+            SELECT COUNT(DISTINCT c.Id) 
+            FROM Customers c
+            LEFT JOIN QualificationCustomerCourseCertificates qccc ON c.Id = qccc.CustomerId
+            WHERE qccc.QualificationId IS NULL 
+            AND MONTH(c.CreatedAt) = MONTH(GETDATE()) 
+            AND YEAR(c.CreatedAt) = YEAR(GETDATE()) 
+            {whereClause}";
+
+            using (SqlCommand command = new SqlCommand(queryThisMonth, connection))
+            {
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+                dashboardModel.Total = (int)await command.ExecuteScalarAsync();
+            }
+
+            // Get the total leads for last month (distinct customers without QualificationId)
+            string queryLastMonth = $@"
+            SELECT COUNT(DISTINCT c.Id) 
+            FROM Customers c
+            LEFT JOIN QualificationCustomerCourseCertificates qccc ON c.Id = qccc.CustomerId
+            WHERE qccc.QualificationId IS NULL 
+            AND MONTH(c.CreatedAt) = MONTH(DATEADD(MONTH, -1, GETDATE())) 
+            AND YEAR(c.CreatedAt) = YEAR(GETDATE()) 
+            {whereClause}";
+
+            decimal totalLastMonth = 0;
+            using (SqlCommand command = new SqlCommand(queryLastMonth, connection))
+            {
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+                totalLastMonth = (int)await command.ExecuteScalarAsync();
+            }
+
+            // Get the total leads for this year (distinct customers without QualificationId)
+            string queryTotalThisYear = $@"
+            SELECT COUNT(DISTINCT c.Id) 
+            FROM Customers c
+            LEFT JOIN QualificationCustomerCourseCertificates qccc ON c.Id = qccc.CustomerId
+            WHERE qccc.QualificationId IS NULL 
+            AND YEAR(c.CreatedAt) = YEAR(GETDATE()) 
+            {whereClause}";
+
+            using (SqlCommand command = new SqlCommand(queryTotalThisYear, connection))
+            {
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+                dashboardModel.TotalYear = (int)await command.ExecuteScalarAsync();
+            }
+
+            // Calculate the percentage increase from last month
+            if (totalLastMonth > 0)
+            {
+                dashboardModel.Percentage = ((dashboardModel.Total - totalLastMonth) / totalLastMonth) * 100;
+            }
+            else
+            {
+                dashboardModel.Percentage = 100; // If there were no leads last month, treat it as 100% increase
+            }
+        }
+
+        return dashboardModel;
+    }
+
+
+    public async Task<DashboardModel> GetActiveLearners(int? trainingCentreId = null)
+    {
+        var dashboardModel = new DashboardModel
+        {
+            StatisticType = StatisticType.ACTIVE_LEARNERS
+        };
+
         string connectionString = _cRMDbContext.Database.GetDbConnection().ConnectionString;
         string storedProcedureName = "[dbo].[GetActiveLearners]";
 
@@ -166,6 +260,16 @@ public class DashboardService : IDashboardService
             {
                 command.CommandType = CommandType.StoredProcedure;
 
+                // Add the parameter for trainingCentreId
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+                else
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", DBNull.Value);
+                }
+
                 await connection.OpenAsync();
                 using (SqlDataReader reader = await command.ExecuteReaderAsync())
                 {
@@ -173,24 +277,16 @@ public class DashboardService : IDashboardService
                     {
                         while (await reader.ReadAsync())
                         {
-                            dashboardModel = new DashboardModel
-                            {
-                                Percentage = Convert.ToDecimal(reader.GetValue(3)),
-                                StatisticType = StatisticType.ACTIVE_LEARNERS,
-                                Total = Convert.ToDecimal(reader.GetValue(1)),
-                                TotalYear = Convert.ToDecimal(reader.GetValue(0))
-                            };
+                            dashboardModel.Total = Convert.ToInt32(reader["TotalCandidates"]);
+                            dashboardModel.TotalYear = Convert.ToInt32(reader["CandidatesLast365Days"]);
+                            dashboardModel.Percentage = Convert.ToDecimal(reader["PercentageChangeLastMonth"]);
                         }
                     }
                     else
                     {
-                        dashboardModel = new DashboardModel
-                        {
-                            Percentage = 0,
-                            StatisticType = StatisticType.NEW_LEARNERS,
-                            Total = 0,
-                            TotalYear = 0
-                        };
+                        dashboardModel.Percentage = 0;
+                            dashboardModel.Total = 0;
+                        dashboardModel.TotalYear =0 ;
                     }
                 }
             }
@@ -198,8 +294,7 @@ public class DashboardService : IDashboardService
 
         return dashboardModel;
     }
-
-    public async Task<DashboardModel> GetTrainingCentreStats()
+    public async Task<DashboardModel> GetTrainingCentreStats(int? trainingCentreId = null)
     {
         var dashboardModel = new DashboardModel();
         string connectionString = _cRMDbContext.Database.GetDbConnection().ConnectionString;
@@ -210,6 +305,16 @@ public class DashboardService : IDashboardService
             using (SqlCommand command = new SqlCommand(storedProcedureName, connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
+
+                // Add the parameter for trainingCentreId
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+                else
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", DBNull.Value);
+                }
 
                 await connection.OpenAsync();
                 using (SqlDataReader reader = await command.ExecuteReaderAsync())
@@ -232,7 +337,7 @@ public class DashboardService : IDashboardService
                         dashboardModel = new DashboardModel
                         {
                             Percentage = 0,
-                            StatisticType = StatisticType.NEW_LEARNERS,
+                            StatisticType = StatisticType.TRAINING_CENTRES_STATS,
                             Total = 0,
                             TotalYear = 0
                         };
@@ -244,7 +349,8 @@ public class DashboardService : IDashboardService
         return dashboardModel;
     }
 
-    public async Task<DashboardModel> GetCompletedLearners()
+
+    public async Task<DashboardModel> GetCompletedLearners(int? trainingCentreId = null)
     {
         var dashboardModel = new DashboardModel();
         string connectionString = _cRMDbContext.Database.GetDbConnection().ConnectionString;
@@ -255,6 +361,16 @@ public class DashboardService : IDashboardService
             using (SqlCommand command = new SqlCommand(storedProcedureName, connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
+
+                // Add the parameter for trainingCentreId
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+                else
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", DBNull.Value);
+                }
 
                 await connection.OpenAsync();
                 using (SqlDataReader reader = await command.ExecuteReaderAsync())
@@ -278,7 +394,7 @@ public class DashboardService : IDashboardService
                         dashboardModel = new DashboardModel
                         {
                             Percentage = 0,
-                            StatisticType = StatisticType.NEW_LEARNERS,
+                            StatisticType = StatisticType.COMPLETED_LEARNERS,
                             Total = 0,
                             TotalYear = 0
                         };
@@ -290,7 +406,7 @@ public class DashboardService : IDashboardService
         return dashboardModel;
     }
 
-    public async Task<DashboardModel> GetRegistrations()
+    public async Task<DashboardModel> GetRegistrations(int? trainingCentreId = null)
     {
         var dashboardModel = new DashboardModel();
         string connectionString = _cRMDbContext.Database.GetDbConnection().ConnectionString;
@@ -302,6 +418,16 @@ public class DashboardService : IDashboardService
             {
                 command.CommandType = CommandType.StoredProcedure;
 
+                // Add the parameter for trainingCentreId
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+                else
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", DBNull.Value);
+                }
+
                 await connection.OpenAsync();
                 using (SqlDataReader reader = await command.ExecuteReaderAsync())
                 {
@@ -311,9 +437,9 @@ public class DashboardService : IDashboardService
                         {
                             dashboardModel = new DashboardModel
                             {
-                                Percentage = Convert.ToDecimal(reader.GetValue(1)),
+                                Percentage = Convert.ToDecimal(reader.GetValue(2)),
                                 StatisticType = StatisticType.CANDIDATE_REGISTRATIONS,
-                                Total = Convert.ToDecimal(reader.GetValue(2)),
+                                Total = Convert.ToDecimal(reader.GetValue(1)),
                                 TotalYear = Convert.ToDecimal(reader.GetValue(0))
                             };
                         }
@@ -324,7 +450,7 @@ public class DashboardService : IDashboardService
                         dashboardModel = new DashboardModel
                         {
                             Percentage = 0,
-                            StatisticType = StatisticType.NEW_LEARNERS,
+                            StatisticType = StatisticType.CANDIDATE_REGISTRATIONS,
                             Total = 0,
                             TotalYear = 0
                         };
@@ -336,7 +462,8 @@ public class DashboardService : IDashboardService
         return dashboardModel;
     }
 
-    public async Task<DashboardModel> GetNewLearners()
+
+    public async Task<DashboardModel> GetNewLearners(int? trainingCentreId = null)
     {
         var dashboardModel = new DashboardModel();
         string connectionString = _cRMDbContext.Database.GetDbConnection().ConnectionString;
@@ -347,6 +474,16 @@ public class DashboardService : IDashboardService
             using (SqlCommand command = new SqlCommand(storedProcedureName, connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
+
+                // Add the parameter for trainingCentreId
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
+                else
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", DBNull.Value);
+                }
 
                 await connection.OpenAsync();
                 using (SqlDataReader reader = await command.ExecuteReaderAsync())
@@ -381,5 +518,6 @@ public class DashboardService : IDashboardService
 
         return dashboardModel;
     }
+
 
 }

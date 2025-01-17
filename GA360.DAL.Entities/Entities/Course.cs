@@ -10,8 +10,8 @@ public class Course:Audit, IModel
 
     public DateTime RegistrationDate { get; set; }
     public DateTime ExpectedDate { get; set; }
-    public int Duration { get; set; }
     public DateTime CertificateDate { get; set; }
+    public int Duration { get; set; }
     public string CertificateNumber { get; set; }
     public int Status { get; set; }
     public string Sector { get; set; }

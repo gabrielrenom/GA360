@@ -48,7 +48,19 @@ public class QualificationService : IQualificationService
 
     public async Task<List<QualificationWithTrainingModel>> GetAllQualificationsWithTrainingCentres()
     {
-        var qualifications = await _qualificationRepository.Context.Qualifications.Include(x => x.QualificationTrainingCentres).ThenInclude(x => x.TrainingCentre).ToListAsync();
+        var qualifications = await _qualificationRepository.Context.Qualifications
+            .Include(x => x.QualificationTrainingCentres)
+            .ThenInclude(x => x.TrainingCentre)
+            .ToListAsync();
+
+        var qualificationCustomerCounts = await _qualificationRepository.Context.QualificationCustomerCourseCertificates
+            .GroupBy(qccc => qccc.QualificationId)
+            .Select(g => new
+            {
+                QualificationId = g.Key,
+                LearnersCount = g.Select(qccc => qccc.CustomerId).Distinct().Count()
+            })
+            .ToListAsync();
 
         var result = qualifications.Select(q => new QualificationWithTrainingModel
         {
@@ -62,11 +74,16 @@ public class QualificationService : IQualificationService
             TrainingCentreId = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Id).FirstOrDefault(),
             TrainingCentre = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Name).FirstOrDefault(),
             InternalReference = q.InternalReference,
-            QAN = q.QAN
+            QAN = q.QAN,
+            AwardingBody = q.AwardingBody,
+            Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == q.Id)?.LearnersCount ?? 0,
+            Price = q.QualificationTrainingCentres.Select(qtc => qtc.Price).FirstOrDefault(),
+            Sector = q.Sector
         }).ToList();
 
         return result;
     }
+
 
 
     public async Task<Qualification> AddQualification(Qualification qualification)
@@ -87,6 +104,8 @@ public class QualificationService : IQualificationService
             InternalReference = qualification.InternalReference,
             Status = qualification.Status,
             QAN = qualification.QAN,
+            AwardingBody = qualification.AwardingBody,
+            Sector = qualification.Sector
         };
 
         var result = await _qualificationRepository.AddAsync(qualificationEntity);
@@ -96,6 +115,7 @@ public class QualificationService : IQualificationService
         {
             QualificationId = result.Id,
             TrainingCentreId = (int)qualification.TrainingCentreId,
+            Price = qualification.Price
         };
         _qualificationRepository.Context.QualificationTrainingCentre.Add(qualificationTrainingCentre);
         await _qualificationRepository.Context.SaveChangesAsync();
@@ -114,7 +134,8 @@ public class QualificationService : IQualificationService
             InternalReference = result.InternalReference,
             TrainingCentreId = qualification.TrainingCentreId,
             QAN = result.QAN,
-            TrainingCentre = trainingCentre?.Name // Assuming training centre's name as string
+            TrainingCentre = trainingCentre?.Name,
+            Sector = result.Sector
         };
 
         return qualificationWithTraining;
@@ -137,6 +158,10 @@ public class QualificationService : IQualificationService
         qualificationEntity.Status = qualification.Status;
         qualificationEntity.InternalReference = qualification.InternalReference;
         qualificationEntity.QAN = qualification.QAN;
+        qualificationEntity.AwardingBody = qualification.AwardingBody;
+        qualificationEntity.ModifiedAt = DateTime.Now;
+        qualificationEntity.Sector = qualification.Sector;
+
 
         var result = await _qualificationRepository.UpdateAsync(qualificationEntity);
 
@@ -147,6 +172,9 @@ public class QualificationService : IQualificationService
         if (existingTrainingCentre != null)
         {
             existingTrainingCentre.TrainingCentreId = (int)qualification.TrainingCentreId;
+            var qualificationTrainingCentre = await _qualificationRepository.Context.QualificationTrainingCentre.FirstOrDefaultAsync(x => x.QualificationId == qualification.Id && x.TrainingCentreId == (int)qualification.TrainingCentreId);
+            qualificationTrainingCentre.Price = qualification.Price;
+            _qualificationRepository.Context.QualificationTrainingCentre.Update(qualificationTrainingCentre);
         }
         else
         {
@@ -154,6 +182,8 @@ public class QualificationService : IQualificationService
             {
                 QualificationId = qualification.Id,
                 TrainingCentreId = (int)qualification.TrainingCentreId,
+                Price = qualification.Price,
+                ModifiedAt = DateTime.Now
             };
             _qualificationRepository.Context.QualificationTrainingCentre.Add(qualificationTrainingCentre);
         }
@@ -175,6 +205,8 @@ public class QualificationService : IQualificationService
             TrainingCentre = trainingCentre?.Name,
             InternalReference = result.InternalReference,
             QAN = result.QAN,
+            Price = qualification.Price,
+            Sector = qualification.Sector
         };
 
         return qualificationWithTraining;
@@ -416,6 +448,135 @@ public class QualificationService : IQualificationService
 
         return qualifications;
     }
+
+    public async Task<List<Qualification>> GetAllQualificationsByCandidateId(int id)
+    {
+        var qualifications = new List<Qualification>();
+
+        using (var connection = new SqlConnection(_qualificationRepository.Context.Database.GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            var query = @"
+            SELECT 
+                q.Id,
+                q.Name,
+                q.RegistrationDate,
+                q.ExpectedDate,
+                q.CertificateDate,
+                q.CertificateNumber,
+                q.Status,
+                q.AwardingBody,
+                q.InternalReference
+            FROM 
+                [dbo].[Qualifications] q
+            JOIN 
+                [dbo].[QualificationCustomerCourseCertificates] qc ON q.Id = qc.QualificationId
+            JOIN 
+                [dbo].[Customers] c ON qc.CustomerId = c.Id
+            WHERE 
+                c.id = @id
+            ORDER BY 
+                q.Name;";
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@id", id);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var qualification = new Qualification
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("RegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            ExpectedDate = reader.IsDBNull(reader.GetOrdinal("ExpectedDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
+                            CertificateDate = reader.IsDBNull(reader.GetOrdinal("CertificateDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
+                            CertificateNumber = reader.IsDBNull(reader.GetOrdinal("CertificateNumber")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
+                            Status = reader.GetInt32(reader.GetOrdinal("Status")),
+                            AwardingBody = reader.IsDBNull(reader.GetOrdinal("AwardingBody")) ? null : reader.GetString(reader.GetOrdinal("AwardingBody")),
+                            InternalReference = reader.IsDBNull(reader.GetOrdinal("InternalReference")) ? null : reader.GetString(reader.GetOrdinal("InternalReference"))
+                        };
+
+                        qualifications.Add(qualification);
+                    }
+                }
+            }
+        }
+
+        return qualifications;
+    }
+
+    public async Task<List<QualificationLearnerModel>> GetAllDetailedQualificationsByCandidateId(int id)
+    {
+        var qualifications = new List<QualificationLearnerModel>();
+
+        using (var connection = new SqlConnection(_qualificationRepository.Context.Database.GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            var query = @"
+                SELECT 
+                    q.Id,
+                    q.Name,
+                    q.RegistrationDate,
+                    q.ExpectedDate,
+                    q.CertificateDate,
+                    q.CertificateNumber,
+                    q.Status,
+                    q.AwardingBody,
+                    q.InternalReference,
+                    q.QAN,
+                    qc.QualificationProgression,
+                    qc.Assesor,
+                    qc.QualificationPrice
+                FROM 
+                    [dbo].[Qualifications] q
+                JOIN 
+                    [dbo].[QualificationCustomerCourseCertificates] qc ON q.Id = qc.QualificationId
+                JOIN 
+                    [dbo].[Customers] c ON qc.CustomerId = c.Id
+                WHERE 
+                    c.id = @id
+                ORDER BY 
+                    q.Name;";
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@id", id);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var qualification = new QualificationLearnerModel
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("RegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            ExpectedDate = reader.IsDBNull(reader.GetOrdinal("ExpectedDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
+                            CertificateDate = reader.IsDBNull(reader.GetOrdinal("CertificateDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
+                            CertificateNumber = reader.IsDBNull(reader.GetOrdinal("CertificateNumber")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
+                            Status = reader.GetInt32(reader.GetOrdinal("Status")),
+                            AwardingBody = reader.IsDBNull(reader.GetOrdinal("AwardingBody")) ? null : reader.GetString(reader.GetOrdinal("AwardingBody")),
+                            InternalReference = reader.IsDBNull(reader.GetOrdinal("InternalReference")) ? null : reader.GetString(reader.GetOrdinal("InternalReference")),
+                            QAN = reader.IsDBNull(reader.GetOrdinal("QAN")) ? null : reader.GetString(reader.GetOrdinal("QAN")),
+                            Progression = reader.IsDBNull(reader.GetOrdinal("QualificationProgression")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("QualificationProgression")),
+                            Assessor = reader.IsDBNull(reader.GetOrdinal("Assesor")) ? null : reader.GetString(reader.GetOrdinal("Assesor")),
+                            Price = reader.IsDBNull(reader.GetOrdinal("QualificationPrice")) ? (double?)null : reader.GetDouble(reader.GetOrdinal("QualificationPrice"))
+                        };
+
+                        qualifications.Add(qualification);
+                    }
+                }
+            }
+        }
+
+        return qualifications;
+    }
+
 
 
 }

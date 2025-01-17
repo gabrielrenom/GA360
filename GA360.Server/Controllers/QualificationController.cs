@@ -23,6 +23,7 @@ namespace GA360.Server.Controllers
         private const string QualificationsCacheKey = "qualificationsCache";
         private const string QualificationsTrainingCentreCacheKey = "qualificationsTrainingCentreCache";
         private const string UserQualifications = "userqualifications";
+        private const string UserDetailedQualifications = "userdetailedqualifications";
 
 
         public QualificationController(
@@ -111,6 +112,44 @@ namespace GA360.Server.Controllers
                     .SetSlidingExpiration(TimeSpan.FromMinutes(10));
 
                 _cache.Set($"{UserQualifications}{emailClaim}", qualifications, cacheEntryOptions);
+            }
+
+            return Ok(qualifications);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("GetQualificationsByUserId/{id}")]
+        public async Task<IActionResult> GetQualificationsByUserId(int id)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            if (!_cache.TryGetValue($"{UserQualifications}{id}", out List<Qualification> qualifications))
+            {
+                qualifications = await _qualificationService.GetAllQualificationsByCandidateId(id);
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+                _cache.Set($"{UserQualifications}{id}", qualifications, cacheEntryOptions);
+            }
+
+            return Ok(qualifications);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("GetQualificationsByUserId/detail/{id}")]
+        public async Task<IActionResult> GetQualificationsDetailedByUserId(int id)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            if (!_cache.TryGetValue($"{UserDetailedQualifications}{id}", out List<QualificationLearnerModel> qualifications))
+            {
+                qualifications = await _qualificationService.GetAllDetailedQualificationsByCandidateId(id);
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+                _cache.Set($"{UserDetailedQualifications}{id}", qualifications, cacheEntryOptions);
             }
 
             return Ok(qualifications);

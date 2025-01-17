@@ -10,8 +10,12 @@ import Logo from './LogoMain';
 import LogoIcon from './LogoIcon';
 import { APP_DEFAULT_PATH } from 'config';
 import useAuth from 'hooks/useAuth';
-import GA360LogoIcon from './GA360LogoIcon';
+import GA360LogoIcon2 from './GA360LogoIcon2';
 import { Typography } from '@mui/material';
+import { ReactSVG } from 'react-svg';
+import GA360LogoPNG from './GA360Logo_colour.png'
+import GA360LogoPNGWhite from './GA360Logo_White.png'
+import { padding } from '@mui/system';
 
 // ==============================|| MAIN LOGO ||============================== //
 
@@ -28,7 +32,7 @@ export default function LogoSection({ reverse, isIcon, sx, to }: Props) {
   return (
     <div style ={{paddingRight:'13px', paddingTop:'0.9rem'}}>
     <ButtonBase disableRipple {...(isLoggedIn && { component: Link, to: !to ? APP_DEFAULT_PATH : to, sx })}>
-      {isIcon ? <GA360LogoIcon /> : <Logo reverse={reverse} />}
+    {isIcon ? <div style={{paddingLeft:'2.5em'}}><img src={GA360LogoPNGWhite} alt="Global Alliance 360" style={{ width: '50px'}}/></div>:<img src={GA360LogoPNG} alt="Global Alliance 360" style={{ width: '110px'}}/> }
       {/* {isIcon ? <LogoIcon /> : <Logo reverse={reverse} />} */}
     </ButtonBase>
     {isIcon ?<></>:

@@ -24,10 +24,10 @@ namespace GA360.Server.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("learnersstats")]
-        public async Task<IActionResult> GetLearnersStats()
+        [HttpGet("learnersstats/{trainingCentreId?}")]
+        public async Task<IActionResult> GetLearnersStats(int? trainingCentreId=null)
         {
-            return Ok(await _dashboardService.GetAllStats()); 
+            return Ok(await _dashboardService.GetAllStats(trainingCentreId)); 
         }
 
         [Authorize]

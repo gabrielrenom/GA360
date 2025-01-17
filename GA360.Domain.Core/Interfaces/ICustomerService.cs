@@ -36,6 +36,6 @@ namespace GA360.Domain.Core.Interfaces
         Task<CustomerProfileModel> GetCustomerProfileHighPerformance(int id);
         Task<List<CustomerModelHighPerformance>> GetLeadsAllUltraHighPerformance(int? trainingCentreId);
         Task<List<LeadsApproachingExpirationModel>> GetAllLeadsApproachingExpiration(int? trainingCentreId);
-        Task<List<ActiveLearnersPerMonth>> GetActiveLearnersPerMonth(int trainingCentreId);
+        Task<List<ActiveLearnersPerMonth>> GetActiveLearnersPerMonth(int? trainingCentreId);
     }
 }

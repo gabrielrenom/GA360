@@ -8,6 +8,7 @@ using GA360.DAL.Infrastructure.Repositories;
 using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Services;
 using GA360.Server.Middlewares;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -69,6 +70,16 @@ builder.Services.AddBff(x =>
     //x.BackchannelLogoutAllUserSessions = true;
 })
 .AddRemoteApis();
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 1048576000; // Set the limit to 1 GB or desired size
+});
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 1048576000; // Set the limit to 1 GB or desired size
+});
 
 builder.Services.AddAuthentication(options =>
 {

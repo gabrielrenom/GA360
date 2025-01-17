@@ -1,8 +1,6 @@
-﻿using GA360.DAL.Entities.BaseEntities;
+﻿namespace GA360.Domain.Core.Models;
 
-namespace GA360.DAL.Entities.Entities;
-
-public class Qualification: Audit, IModel
+public class QualificationLearnerModel
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -15,6 +13,7 @@ public class Qualification: Audit, IModel
     public string? InternalReference { get; set; }
     public string? QAN { get; set; }
     public string? Sector { get; set; }
-    public virtual List<QualificationCustomerCourseCertificate> QualificationCustomerCourseCertificates { get; set; }
-    public virtual List<QualificationTrainingCentre> QualificationTrainingCentres { get; set; }
+    public int? Progression { get; set; }
+    public string? Assessor { get; set; }
+    public double? Price { get; set; }
 }

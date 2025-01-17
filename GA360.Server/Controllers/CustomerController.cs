@@ -89,18 +89,18 @@ namespace GA360.Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("learners/month/{trainingCentreId}")]
+        [HttpGet("learners/month/{trainingCentreId?}")]
         public async Task<IActionResult> GetActiveLearnersPerMonth(int? trainingCentreId = null)
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
             var permissions = await _permissionService.GetPermissions(emailClaim);
 
-            return Ok(await _customerService.GetActiveLearnersPerMonth((int)trainingCentreId));
+            return Ok(await _customerService.GetActiveLearnersPerMonth(trainingCentreId));
         }
 
         [Authorize]
-        [HttpGet("list/leads/expiration/{trainingCentreId}")]
+        [HttpGet("list/leads/expiration/{trainingCentreId?}")]
         public async Task<IActionResult> GetAllLeadsApproachingExpiration(int? trainingCentreId = null)
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
@@ -109,8 +109,6 @@ namespace GA360.Server.Controllers
 
             return Ok(await _customerService.GetAllLeadsApproachingExpiration(trainingCentreId));
         }
-
-
 
         [Authorize]
         [HttpGet("get/full/{id}")]
@@ -463,7 +461,7 @@ namespace GA360.Server.Controllers
                 BlobId = x.BlobId,
                 Content = x.Content,
                 Name = x.Name,
-                Url = $"{x.Url}?{_configuration.GetSection("BlobStorageSettings:SharedAccessSignature").Value}"
+                Url = x.Url// $"{x.Url}?{_configuration.GetSection("BlobStorageSettings:SharedAccessSignature").Value}"
             }).ToList() : new List<FileModel>();
             return destination;
         }

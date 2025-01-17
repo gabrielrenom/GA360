@@ -1,3 +1,5 @@
+import Qualifications from "pages/backoffice/qualifications";
+
 export interface CustomersWithCourseQualificationRecordsViewModel {
   isNew: any;
   id: number;
@@ -26,6 +28,12 @@ export interface Qualification {
     status: number;
   }
 
+  export interface QualificationExtended extends Qualification {
+    progression?: number;
+    qan?: string;
+    assessor?: string;
+    price?: number;
+  }
   export interface QualificationTable {
     id: number;
     internalReference:string;
@@ -38,6 +46,10 @@ export interface Qualification {
     trainingCentreId: number;
     trainingCentre:string;
     qan:string;
+    learners: number;
+    awardingBody: string;
+    price: number;
+    sector: string;
   }
 
 export interface QualificationStatus {
@@ -77,6 +89,9 @@ export const endpoints = {
   qualificationstrainingcentres: '/api/qualification/getqualificationsbytrainingId',
   qualificationsbyuser: '/api/qualification/getqualificationsbyUser',
   qualificationswithtrainingcentres: '/api/qualification/getqualificationswithtrainingcentres',
+  qualificationsbyuserid: '/api/qualification/getqualificationsbyuserid',
+  qualificationsdetailbyuserid: '/api/qualification/getqualificationsbyuserid/detail'
+
 };
 
 export async function GetQualificationsByUser(): Promise<Qualification[]> {
@@ -181,6 +196,40 @@ export async function getQualification(id: number): Promise<Qualification> {
   }
 
   const data: Qualification = await response.json();
+  return data;
+}
+
+export async function getQualificationByUserId(id: number): Promise<Qualification[]> {
+  const response = await fetch(`${endpoints.qualificationsbyuserid}/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF': 'Dog',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data: Qualification[] = await response.json();
+  return data;
+}
+
+export async function getQualificationDetailByUserId(id: number): Promise<QualificationExtended[]> {
+  const response = await fetch(`${endpoints.qualificationsdetailbyuserid}/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF': 'Dog',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data: QualificationExtended[] = await response.json();
   return data;
 }
 

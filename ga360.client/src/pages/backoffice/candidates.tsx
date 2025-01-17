@@ -18,10 +18,12 @@ import { Gender } from "../../config";
 import {CustomerApiModel, CustomerApiModelExtended, mapCustomerApiModelToCustomerList, mapCustomerApiModelToCustomerListExtended} from "../../types/customerApiModel"
 import AlertCustomerDelete from "sections/apps/customer/AlertCustomerDelete";
 import DuendeContext from "contexts/DuendeContext";
-
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Candidates({ triggerAddCandidate = false, onModalClose = () => {} }) {
+    const navigate = useNavigate();
+
     const [open, setOpen] = useState<boolean>(false);
     const [allowedCustomers, setAllowedCustomers] = useState<CustomerListExtended[] | undefined>(undefined);
     const [customerModal, setCustomerModal] = useState<boolean>(false);
@@ -139,12 +141,19 @@ export default function Candidates({ triggerAddCandidate = false, onModalClose =
 
                     return (
                         <Stack direction="row" alignItems="center" justifyContent="center" spacing={0}>
-                            <Tooltip title="View">
+                            <Tooltip title="View"> 
+                                <IconButton 
+                                    color="secondary" 
+                                    onClick={() => navigate(`/apps/profiles/crudcandidate/profile/${row.original.id}`)}> 
+                                    {collapseIcon} 
+                                    </IconButton> 
+                            </Tooltip>
+                            {/* <Tooltip title="View">
                                 <IconButton color={row.getIsExpanded() ? 'error' : 'secondary'} 
                                 onClick={row.getToggleExpandedHandler()}>
                                     {collapseIcon}
                                 </IconButton>
-                            </Tooltip>
+                            </Tooltip> */}
                             <Tooltip title="Edit">
                                     <IconButton
                                         color="primary"

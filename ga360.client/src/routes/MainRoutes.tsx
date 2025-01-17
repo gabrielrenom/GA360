@@ -21,6 +21,8 @@ import Careers from '../pages/backoffice/careers';
 // Profile
 import CandidateProfile from 'pages/apps/profiles/candidate';
 import TrainingCentreProfile from 'pages/apps/profiles/trainingcentre';
+import CRUDCandidateProfile from 'pages/apps/profiles/crudcandidate';
+
 
 
 // Develoment API
@@ -78,12 +80,15 @@ const CandidateTabCandidateCourses = Loadable(lazy(() => import('sections/apps/p
 const CandidateTabCandidateDocuments = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateDocuments')));
 const CandidateCardAndCerts = Loadable(lazy(() => import('sections/apps/profiles/candidate/TabCandidateCardAndCerts')));
 
-
 const TrainingCentreTabProfile = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreProfile')));
 const TrainingCentreQualification = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreQualification')));
 const TrainingCentreCourses = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreCourses')));
 const TrainingCentreDocuments = Loadable(lazy(() => import('sections/apps/profiles/trainingcentre/TabTrainingCentreDocuments')));
 
+const TabCRUDCandidateProfile = Loadable(lazy(() => import('sections/apps/profiles/crudcandidate/TabCRUDCandidateProfile')));
+const TabCRUDCandidateQualification= Loadable(lazy(() => import('sections/apps/profiles/crudcandidate/TabCRUDCandidateQualification')));
+const TabCRUDCandidateCourses = Loadable(lazy(() => import('sections/apps/profiles/crudcandidate/TabCRUDCandidateCourses')));
+const TabCRUDCandidateDocuments = Loadable(lazy(() => import('sections/apps/profiles/crudcandidate/TabCRUDCandidateDocuments')));
 
 const AppECommProducts = Loadable(lazy(() => import('pages/apps/e-commerce/products')));
 const AppECommProductDetails = Loadable(lazy(() => import('pages/apps/e-commerce/product-details')));
@@ -360,6 +365,28 @@ const MainRoutes = {
                     {
                       path: 'certificates',
                       element: <TrainingCentreTabProfile />
+                    }
+                  ]
+                },
+                {
+                  path: 'crudcandidate',
+                  element: <CRUDCandidateProfile />,
+                  children: [
+                    {
+                      path: 'profile/:id',
+                      element: <TabCRUDCandidateProfile />
+                    },
+                    {
+                      path: 'qualifications/:id',
+                      element: <TabCRUDCandidateQualification />
+                    },
+                    {
+                      path: 'courses/:id',
+                      element: <TabCRUDCandidateCourses />
+                    },
+                    {
+                      path: 'documents/:id',
+                      element: <TabCRUDCandidateDocuments />
                     }
                   ]
                 },

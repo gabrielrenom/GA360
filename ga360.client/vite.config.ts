@@ -125,6 +125,11 @@ export default defineConfig({
                 secure: false,
                 changeOrigin: true
             },
+            '^/api/qualification/getqualificationsbyuserid/detail': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
             '^/api/trainingcentre': {
                 target,
                 secure: false,

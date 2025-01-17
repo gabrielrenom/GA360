@@ -70,11 +70,12 @@ interface Props {
   columns: ColumnDef<CustomerListExtended>[];
   modalToggler: () => void;
   onAddCustomer: () => void; // Event when add is clicked
+  type?: string;
 }
 
 // ==============================|| REACT TABLE - LIST ||============================== //
 
-export default function CustomerTable({ data, columns, modalToggler, onAddCustomer }: Props) {
+export default function CustomerTable({ data, columns, modalToggler, onAddCustomer, type="learner" }: Props) {
   const theme = useTheme();
   const downSM = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -140,13 +141,15 @@ export default function CustomerTable({ data, columns, modalToggler, onAddCustom
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ width: { xs: '100%', sm: 'auto' } }}>
           <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
           <Stack direction="row" spacing={2} alignItems="center">
+            {type && type === "learner"?
             <Button variant="contained" startIcon={<PlusOutlined />}
             onClick={() => { 
                onAddCustomer(); 
                modalToggler(); }}
             >
-              Add Candidate
+              Add Learner
             </Button>
+            :<></>}
             <CSVExport
               {...{
                 data:

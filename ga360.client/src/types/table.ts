@@ -74,6 +74,16 @@ export type CourseViewDataProps = {
   certification: string;
 };
 
+export type CourseUserViewDataProps = {
+  coursename: string;
+  registrationDate: string;
+  expectedDate: string;
+  certificateDate: string;
+  certificateNumber: string;
+  price: number;
+};
+
+
 export type CourseTrainingViewDataProps = {
   coursename: string;
   date: string;
@@ -94,6 +104,16 @@ export type QualificationViewDataProps ={
   regDate: string;
   status: string;
   progress: string;
+}
+
+export type QualificationLearnerViewDataProps ={
+  name: string;
+  qan: string;
+  regDate: string;
+  status: string;
+  assessor: string;
+  price: number;
+  completeDate: string;
 }
 
 export type QualificationTrainingCentreViewDataProps ={

@@ -307,14 +307,12 @@ public class CustomerService : ICustomerService
 
     public async Task<Customer> UpdateCustomer(int id, Models.CustomerModel customer)
     {
-        
         var ethnicOrigin = await _ethnicityRepository.Get<EthnicOrigin>(x => x.Name.ToLower() == customer.Ethnicity.ToLower());
-
-        var customerdb = await _customerRepository.GetWithAllEntitiesById(id);
+        var customerdb = await _customerRepository.GetWithAllEntitiesNoSkillsById(id);
 
         try
         {
-            if ((customer.TrainingCentre != null || customer.TrainingCentre > 0) && customer.TrainingCentre!=0)
+            if (customer.TrainingCentre != null && customer.TrainingCentre > 0)
             {
                 var trainingCentreEntity = await _customerRepository.Get<TrainingCentre>(x => x.Id == customer.TrainingCentre);
                 customerdb.TrainingCentre = trainingCentreEntity;
@@ -342,37 +340,34 @@ public class CustomerService : ICustomerService
             customerdb.Disability = customer.Disability;
             customerdb.Employer = customer.Employer;
             customerdb.EmploymentStatus = customer.EmploymentStatus;
-            customerdb.Employer = customerdb.Employer;
             customerdb.NI = customer.NI;
             customerdb.NI = customer.NationalInsurance;
-            customerdb.Role = customer.Role;
             customerdb.Gender = customer.Gender;
-            customerdb.Status = (DAL.Entities.Enums.StatusEnum.Status)Enum.ToObject(typeof(DAL.Entities.Enums.StatusEnum.Status), customer.Status); ;
-            customerdb.Contact = customer.Contact;
+            customerdb.Status = (DAL.Entities.Enums.StatusEnum.Status)Enum.ToObject(typeof(DAL.Entities.Enums.StatusEnum.Status), customer.Status);
             customerdb.Address.City = customer.City;
             customerdb.Address.Street = customer.Street;
             customerdb.Address.Number = customer.Number;
             customerdb.Address.Postcode = customer.Postcode;
-            customerdb.Location = customer.Location;
             customerdb.ePortfolio = customer.ePortfolio;
             customerdb.EthnicOrigin = ethnicOrigin;
             customerdb.AvatarImage = customer.AvatarImage;
 
-            _customerRepository.Update(customerdb);
+            _customerRepository.Context.Customers.Update(customerdb);
             await _customerRepository.SaveChangesAsync();
-
 
             var skills = new List<CustomerSkills>();
             await _skillRepository.Remove(customerdb.Id);
+
             var dbSkills = await _skillRepository.GetAll();
             foreach (var skill in customer.Skills)
             {
-                if (dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()) != null)
+                var existingSkill = dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower());
+                if (existingSkill != null)
                 {
                     skills.Add(new CustomerSkills
                     {
                         CustomerId = customerdb.Id,
-                        SkillId = dbSkills.FirstOrDefault(x => x.Name.ToLower() == skill.ToLower()).Id
+                        SkillId = existingSkill.Id
                     });
                 }
             }
@@ -381,7 +376,6 @@ public class CustomerService : ICustomerService
 
             var fileResult = await _fileService.UploadDocumentsAsync(customer.Files, customerdb.Id.ToString());
 
-            var documents = new List<DocumentCustomer>();
             var documentEntities = fileResult.Select(x => new Document
             {
                 BlobId = x.BlobId,
@@ -395,13 +389,14 @@ public class CustomerService : ICustomerService
             var docOrphansRemoved = await _fileService.CleanOrphans(customer.Files, customerdb.Id.ToString());
             var haveOrphansRemovedFromDb = await _documentRepository.CleanOrphans(customerdb.Id, documentEntities);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError("Error updating customer", ex);
         }
 
         return customerdb;
     }
+
 
     public async Task DeleteCustomer(int id)
     {
@@ -1212,7 +1207,7 @@ public class CustomerService : ICustomerService
         return leads;
     }
 
-    public async Task<List<ActiveLearnersPerMonth>> GetActiveLearnersPerMonth(int trainingCentreId)
+    public async Task<List<ActiveLearnersPerMonth>> GetActiveLearnersPerMonth(int? trainingCentreId)
     {
         var activeLearnersPerMonth = new List<ActiveLearnersPerMonth>();
 
@@ -1220,25 +1215,30 @@ public class CustomerService : ICustomerService
         {
             using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
             {
-                // Query to get the number of unique active learners per month
                 var query = @"
-            SELECT 
-                YEAR(q.ModifiedAt) AS Year,
-                MONTH(q.ModifiedAt) AS Month,
-                COUNT(DISTINCT q.CustomerId) AS LearnersCount
-            FROM 
-                QualificationCustomerCourseCertificates q
-            INNER JOIN 
-                Customers c ON q.CustomerId = c.Id
-            WHERE 
-                c.TrainingCentreId = @TrainingCentreId
-            GROUP BY 
-                YEAR(q.ModifiedAt), MONTH(q.ModifiedAt)
-            ORDER BY 
-                Year, Month";
+                SELECT 
+                    YEAR(q.ModifiedAt) AS Year,
+                    MONTH(q.ModifiedAt) AS Month,
+                    COUNT(DISTINCT q.CustomerId) AS LearnersCount
+                FROM 
+                    QualificationCustomerCourseCertificates q
+                INNER JOIN 
+                    Customers c ON q.CustomerId = c.Id
+                {0}
+                GROUP BY 
+                    YEAR(q.ModifiedAt), MONTH(q.ModifiedAt)
+                ORDER BY 
+                    Year, Month";
+
+                var whereClause = trainingCentreId.HasValue ? "WHERE c.TrainingCentreId = @TrainingCentreId" : string.Empty;
+                query = string.Format(query, whereClause);
 
                 var command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId);
+
+                if (trainingCentreId.HasValue)
+                {
+                    command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId.Value);
+                }
 
                 await connection.OpenAsync();
                 using (var reader = await command.ExecuteReaderAsync())

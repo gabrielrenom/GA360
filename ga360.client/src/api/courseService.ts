@@ -11,6 +11,7 @@ export interface Course {
     sector: string;
     trainingCentreId: number;
     trainingCentre: string;
+    price?: number
   }
 
   export interface CourseTrainingCentre {
@@ -31,6 +32,7 @@ export interface Course {
 export const endpoints = {
   key: '/api/course',
   coursetrainingcentre: '/api/course/GetCoursesByTrainingId',
+  courseuserid: '/api/course/userid',
 
 };
 
@@ -104,6 +106,22 @@ export async function getCourses(): Promise<Course[]> {
 // }
 
 
+export async function getCourseByUserId(id: number): Promise<Course[]> {
+  const response = await fetch(`${endpoints.courseuserid}/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF': 'Dog',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data: Course[] = await response.json();
+  return data;
+}
 
 export async function getCourse(id: number): Promise<Course> {
   const response = await fetch(`${endpoints.key}/${id}`, {

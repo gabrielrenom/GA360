@@ -20,4 +20,8 @@ public class QualificationWithTrainingModel
     public string? TrainingCentre { get; set; }  // Assuming training centre's name as string
     public string? InternalReference { get; set; }
     public string? QAN { get; set; }
+    public int? Learners { get; set; }
+    public string? AwardingBody { get; set; }
+    public double? Price { get; set; }
+    public string? Sector { get; set; }
 }

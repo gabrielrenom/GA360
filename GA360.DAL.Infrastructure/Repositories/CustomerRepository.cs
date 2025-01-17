@@ -88,6 +88,22 @@ namespace GA360.DAL.Infrastructure.Repositories
             return result;
         }
 
+        public async Task<Customer> GetWithAllEntitiesNoSkillsById(int id)
+        {
+            var result = await GetDbContext()
+                .Set<Customer>()
+                .Include(x => x.Address)
+                .Include(x => x.Country)
+                .Include(x => x.TrainingCentre)
+                .Include(x => x.EthnicOrigin)
+                .Include(x => x.QualificationCustomerCourseCertificates)
+                .Include(x => x.CustomerSkills)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            return result;
+        }
+
+
         public async Task<Customer> GetWithAllPossibleEntitiesById(int id)
         {
             var result = await GetDbContext()

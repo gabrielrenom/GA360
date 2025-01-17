@@ -133,10 +133,10 @@ export const endpoints = {
 };
 
 
-export async function GetActiveLearnersPerMonth(trainingCentre: number): Promise<ActiveLearnersPerMonth[]> {
+export async function GetActiveLearnersPerMonth(trainingCentre?: number): Promise<ActiveLearnersPerMonth[]> {
   try {
     console.log("before calll",trainingCentre )
-    const response = await fetch(`${endpoints.getActiveLearnersPerMonth}/${trainingCentre}`, {
+    const response = await fetch(trainingCentre===null?endpoints.getActiveLearnersPerMonth:`${endpoints.getActiveLearnersPerMonth}/${trainingCentre}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -159,9 +159,9 @@ export async function GetActiveLearnersPerMonth(trainingCentre: number): Promise
 }
 
 
-export async function getAllLeadsApproachingExpiration(trainingCentre: number): Promise<LeadsApproachingExpirationModel[]> {
+export async function getAllLeadsApproachingExpiration(trainingCentre?: number): Promise<LeadsApproachingExpirationModel[]> {
   try {
-    const response = await fetch(`${endpoints.getAllLeadsApproachingExpiration}/${trainingCentre}`, {
+    const response = await fetch(trainingCentre === null?endpoints.getAllLeadsApproachingExpiration: `${endpoints.getAllLeadsApproachingExpiration}/${trainingCentre}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -9,6 +9,7 @@ public interface ICourseService
     Task<List<Course>> GetAllCourses();
     Task<List<CourseModel>> GetAllCoursesWithTrainigCentres();
     Task<List<CourseTrainingModel>> GetAllCoursesByTrainingCentreId(int trainingCentreId);
+    Task<List<CourseUserModel>> GetAllCoursesByUserId(int userId);
     Task<Course> AddCourse(Course course);
     Task<Course> UpdateCourse(Course course);
     void DeleteCourse(int id);

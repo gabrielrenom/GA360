@@ -222,12 +222,13 @@ export default function Leads({ triggerAddCandidate = false, onModalClose = () =
         <Grid>
             {allowedCustomers === undefined ? <>Loading...</> : <>
                 <CustomerTable 
-                    data={allowedCustomers} 
+                    data={allowedCustomers}
                     columns={columns} modalToggler={() => {
-                    setCustomerModal(true);
-                    setSelectedCustomer(null);
-                    }} 
-                    onAddCustomer={handleAddCustomer} />
+                        setCustomerModal(true);
+                        setSelectedCustomer(null);
+                    } }
+                    onAddCustomer={handleAddCustomer}
+                    type ={"leads"} />
                 <AlertCustomerDelete id={Number(customerDeleteId)} title={customerDeleteId} open={open} handleClose={handleClose} />
                 <CustomerModal open={customerModal} modalToggler={setCustomerModal} customer={selectedCustomer} />
             </>
