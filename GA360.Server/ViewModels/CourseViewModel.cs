@@ -8,14 +8,15 @@ namespace GA360.Server.ViewModels
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
-        public DateTime RegistrationDate { get; set; }
+        public DateTime? RegistrationDate { get; set; }
         public DateTime ExpectedDate { get; set; }
         public int Duration { get; set; }
-        public DateTime CertificateDate { get; set; }
+        public DateTime? CertificateDate { get; set; }
         public string CertificateNumber { get; set; }
         public string Sector { get; set; }
         public int Status { get; set; }
         public int? TrainingCentreId { get; set; }
+        public double? Price { get; set; }
     }
 
     public static class CourseMapper
@@ -44,10 +45,10 @@ namespace GA360.Server.ViewModels
                 Id = courseViewModel.Id,
                 Name = courseViewModel.Name,
                 Description = courseViewModel.Description,
-                RegistrationDate = courseViewModel.RegistrationDate,
+                RegistrationDate = courseViewModel.RegistrationDate == null ? DateTime.Now : (DateTime)courseViewModel.RegistrationDate,
                 ExpectedDate = courseViewModel.ExpectedDate,
                 Duration = courseViewModel.Duration,
-                CertificateDate = courseViewModel.CertificateDate,
+                CertificateDate = courseViewModel.CertificateDate == null ? DateTime.Now : (DateTime)courseViewModel.CertificateDate,
                 CertificateNumber = courseViewModel.CertificateNumber,
                 Status = courseViewModel.Status,
                 QualificationCustomerCourseCertificates = new List<QualificationCustomerCourseCertificate>(), // Initialize with an empty list or map accordingly,

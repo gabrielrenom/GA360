@@ -39,6 +39,12 @@ import {
 } from "@tanstack/react-table";
 import {
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Modal,
   Paper,
   Table,
   TableBody,
@@ -69,10 +75,14 @@ import {
   getQualificationDetailByUserId,
   QualificationExtended,
 } from "api/qualificationService";
+import { PlusOutlined } from "@ant-design/icons";
+import DynamicTableCustomerWithCourseQualificationRecords from "sections/apps/course/DynamicTableCustomerWithCourseQualificationRecords";
 
 interface ReactTableProps {
   columns: ColumnDef<QualificationLearnerViewDataProps>[];
   data: QualificationLearnerViewDataProps[];
+  userId: number;
+  onClose: () => void // Callback function to be called when the dialog is closed
 }
 
 export default function TabCRUDCandidateQualification() {
@@ -94,18 +104,19 @@ export default function TabCRUDCandidateQualification() {
   ): QualificationLearnerViewDataProps[] => {
     return qualifications.map((certificate) => ({
       name: certificate.name,
-      regDate: new Date(certificate.registrationDate).toLocaleDateString(
-        "en-GB"
-      ), // Format date to UK format
+      regDate: certificate.registrationDate
+        ? new Date(certificate.registrationDate).toLocaleDateString("en-GB")
+        : "", // Display an empty string if the date is null
       status: certificate.status.toString(), // Assuming status is converted to string
       assessor: certificate.assessor,
       qan: certificate.qan,
       price: certificate.price,
-      completeDate: new Date(certificate.certificateDate).toLocaleDateString(
-        "en-GB"
-      ),
+      completeDate: certificate.certificateDate
+        ? new Date(certificate.certificateDate).toLocaleDateString("en-GB")
+        : "", // Display an empty string if the date is null
     }));
   };
+  
 
   const statusCellRenderer = (cell) => {
     console.log("CELL", cell);
@@ -169,13 +180,12 @@ export default function TabCRUDCandidateQualification() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        console.log("MY ID",id)
         const learner = await getUserById(Number(id));
         setAvatar(learner.avatarImage);
         setCandidate(learner);
-        
-        const response = await getQualificationDetailByUserId(Number(id));
 
+        const response = await getQualificationDetailByUserId(Number(id));
+        console.log(response)
         const qualificationsResponse = mapQualifications(response);
         setQualifications(qualificationsResponse);
       } catch (error) {
@@ -186,13 +196,21 @@ export default function TabCRUDCandidateQualification() {
     fetchUser();
   }, []);
 
-  function ReactTable({ columns, data }: ReactTableProps) {
+  const refreshTable = async () => {
+    const response = await getQualificationDetailByUserId(Number(id));
+
+    const qualificationsResponse = mapQualifications(response);
+    setQualifications(qualificationsResponse);
+  };
+
+  function ReactTable({ columns, data, userId, onClose }: ReactTableProps) {
+    const [open, setOpen] = useState(false);
     const matchDownSM = useMediaQuery((theme: Theme) =>
       theme.breakpoints.down("sm")
     );
     const [sorting, setSorting] = useState<SortingState>([
       {
-        id: "age",
+        id: "name",
         desc: false,
       },
     ]);
@@ -221,6 +239,12 @@ export default function TabCRUDCandidateQualification() {
       })
     );
 
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => {
+        setOpen(false);
+        onClose(); // Call the onClose callback when the dialog is close
+    }
+
     return (
       <MainCard
         title={matchDownSM ? "Sorting" : "Qualifications"}
@@ -234,6 +258,24 @@ export default function TabCRUDCandidateQualification() {
                 setSorting,
               }}
             />
+            <Button
+              variant="contained"
+              startIcon={<PlusOutlined />}
+              onClick={handleOpen}
+            >
+              Add Qualification
+            </Button>
+            <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+              <DialogTitle>Qualifications</DialogTitle>
+              <DialogContent>
+                <DynamicTableCustomerWithCourseQualificationRecords
+                  customerId={userId}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose}>Close</Button>
+              </DialogActions>
+            </Dialog>
             <CSVExport
               {...{
                 data,
@@ -357,7 +399,7 @@ export default function TabCRUDCandidateQualification() {
             <CandidateProfile
               candidate={candidate}
               defaultImages={avatar}
-            ></CandidateProfile >
+            ></CandidateProfile>
           </Grid>
           <Grid item xs={12}>
             {/* <CourseProgressions candidate={candidate} /> */}
@@ -366,7 +408,7 @@ export default function TabCRUDCandidateQualification() {
         </Grid>
       </Grid>
       <Grid item xs={12} sm={7} md={8} xl={9}>
-        <ReactTable data={qualifications} columns={columns} />
+        <ReactTable data={qualifications} columns={columns} userId={Number(id)} onClose={refreshTable} />
       </Grid>
     </Grid>
   );

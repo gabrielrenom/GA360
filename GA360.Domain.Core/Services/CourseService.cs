@@ -44,7 +44,7 @@ public class CourseService : ICourseService
         return result;
     }
 
-    public async Task<CourseModel> AddCourseByTrainingId(Course course, int trainingCentreId)
+    public async Task<CourseModel> AddCourseByTrainingId(Course course, int trainingCentreId, double? price)
     {
         var courseResult = _courseRepository.Context.Courses.Add(course);
 
@@ -53,7 +53,8 @@ public class CourseService : ICourseService
         var courseTraining = _courseRepository.Context.CourseTrainingCentre.Add(new CourseTrainingCentre
         {
             CourseId = course.Id,
-            TrainingCentreId = trainingCentreId
+            TrainingCentreId = trainingCentreId,
+            Price = price
         });
 
         await _courseRepository.Context.SaveChangesAsync();
@@ -131,7 +132,7 @@ public class CourseService : ICourseService
         return result;
     }
 
-    public async Task<CourseModel> UpdateCourse(Course course, int? trainingCentreId)
+    public async Task<CourseModel> UpdateCourse(Course course, int? trainingCentreId, double? price)
     {
         try
         {
@@ -157,12 +158,14 @@ public class CourseService : ICourseService
                     _courseRepository.Context.CourseTrainingCentre.Add(new CourseTrainingCentre
                     {
                         CourseId = courseentity.Id,
-                        TrainingCentreId = (int)trainingCentreId
+                        TrainingCentreId = (int)trainingCentreId,
+                        Price = price
                     });
                 }
                 else
                 {
                     trainingcentreentity.TrainingCentreId = (int)trainingCentreId;
+                    trainingcentreentity.Price = price;
                     _courseRepository.Context.CourseTrainingCentre.Update(trainingcentreentity);
                 }
                 await _courseRepository.SaveChangesAsync();
@@ -291,7 +294,7 @@ public class CourseService : ICourseService
         return courseTrainingModels;
     }
 
-    public async Task<List<CourseModel>> GetAllCoursesWithTrainigCentres()
+    public async Task<List<CourseModel>> GetAllCoursesWithTrainigCentresWithDetails()
     {
         var courses = await _courseRepository.Context.Courses
             .Include(x => x.CourseTrainingCentres)
@@ -322,6 +325,80 @@ public class CourseService : ICourseService
 
         return courseModels;
     }
+
+    public async Task<List<CourseModel>> GetAllCoursesWithTrainigCentres()
+    {
+        var courses = await _courseRepository.Context.Courses
+            .Include(x => x.CourseTrainingCentres)
+            .ThenInclude(x => x.TrainingCentre)
+            .ToListAsync();
+
+        var courseModels = courses.Select(course => new CourseModel
+        {
+            Id = course.Id,
+            Status = course.Status,
+            Name = course.Name,
+            Description = course.Description,
+            Progression = 0, // Assuming this value is calculated elsewhere
+            Assesor = string.Empty, // Assuming this value is populated elsewhere
+            Duration = course.Duration,
+            Date = course.RegistrationDate.ToString(),//course.RegistrationDate.ToString("yyyy-MM-dd"), // Using RegistrationDate for Date field
+            Card = string.Empty, // Assuming this value is populated elsewhere
+            Certification = string.Empty, // Assuming this value is populated elsewhere
+            TrainingCentreId = course.CourseTrainingCentres.FirstOrDefault()?.TrainingCentreId,
+            TrainingCentre = course.CourseTrainingCentres.FirstOrDefault()?.TrainingCentre?.Name,
+            RegistrationDate = course.RegistrationDate,
+            CertificateDate = course.CertificateDate,
+            ExpectedDate = course.ExpectedDate,
+            CertificateNumber = course.CertificateNumber,
+            Sector = course.Sector,
+            Price = course.CourseTrainingCentres.FirstOrDefault()?.Price
+        }).ToList();
+
+        return courseModels;
+    }
+
+    public async Task<List<CourseDetailsModel>> GetAllCoursesWithTrainigCentresAndLearners()
+    {
+        var courses = await _courseRepository.Context.Courses
+            .Include(x => x.CourseTrainingCentres)
+            .ThenInclude(x => x.TrainingCentre)
+            .ToListAsync();
+
+        var activeLearners = await _courseRepository.Context.QualificationCustomerCourseCertificates
+        .Where(qcc => qcc.CourseId.HasValue)
+        .GroupBy(qcc => qcc.Course.CourseTrainingCentres.FirstOrDefault().TrainingCentreId)
+        .Select(group => new { TrainingCentreId = group.Key, Count = group.Count() })
+        .ToListAsync();
+
+
+        var courseModels = courses.Select(course => new CourseDetailsModel
+        {
+            Id = course.Id,
+            Status = course.Status,
+            Name = course.Name,
+            Description = course.Description,
+            Progression = 0, // Assuming this value is calculated elsewhere
+            Assesor = string.Empty, // Assuming this value is populated elsewhere
+            Duration = course.Duration,
+            Date = course.RegistrationDate.ToString(), // Using RegistrationDate for Date field
+            Card = string.Empty, // Assuming this value is populated elsewhere
+            Certification = string.Empty, // Assuming this value is populated elsewhere
+            TrainingCentreId = course.CourseTrainingCentres.FirstOrDefault()?.TrainingCentreId,
+            TrainingCentre = course.CourseTrainingCentres.FirstOrDefault()?.TrainingCentre?.Name,
+            RegistrationDate = course.RegistrationDate,
+            CertificateDate = course.CertificateDate,
+            ExpectedDate = course.ExpectedDate,
+            CertificateNumber = course.CertificateNumber,
+            Sector = course.Sector,
+            Learners = activeLearners.FirstOrDefault(a => a.TrainingCentreId == course.CourseTrainingCentres.FirstOrDefault()?.TrainingCentreId)?.Count ?? 0,
+            Price = course.CourseTrainingCentres.FirstOrDefault()?.Price,
+        }).ToList();
+
+        return courseModels;
+    }
+
+
 
     public async Task<List<CourseUserModel>> GetAllCoursesByUserId(int userId)
     {

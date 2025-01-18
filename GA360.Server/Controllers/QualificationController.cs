@@ -142,15 +142,15 @@ namespace GA360.Server.Controllers
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            if (!_cache.TryGetValue($"{UserDetailedQualifications}{id}", out List<QualificationLearnerModel> qualifications))
-            {
-                qualifications = await _qualificationService.GetAllDetailedQualificationsByCandidateId(id);
+            //if (!_cache.TryGetValue($"{UserDetailedQualifications}{id}", out List<QualificationLearnerModel> qualifications))
+            //{
+               var qualifications = await _qualificationService.GetAllDetailedQualificationsByCandidateId(id);
 
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+            //    var cacheEntryOptions = new MemoryCacheEntryOptions()
+            //        .SetSlidingExpiration(TimeSpan.FromMinutes(10));
 
-                _cache.Set($"{UserDetailedQualifications}{id}", qualifications, cacheEntryOptions);
-            }
+            //    _cache.Set($"{UserDetailedQualifications}{id}", qualifications, cacheEntryOptions);
+            //}
 
             return Ok(qualifications);
         }

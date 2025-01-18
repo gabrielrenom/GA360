@@ -48,6 +48,30 @@ public class CourseController : ControllerBase
     }
 
     [AllowAnonymous]
+    [HttpGet("details")]
+    public async Task<IActionResult> GetCoursesWithDetails()
+    {
+        var courses = new List<Course>();
+
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+        //var permissions = await _permissionService.GetPermissions(emailClaim);
+
+        return Ok(await _courseService.GetAllCoursesWithTrainigCentresAndLearners());
+
+        //if (permissions.Role == RoleConstants.SUPER_ADMIN)
+        //{
+        //    return Ok(await _courseService.GetAllCoursesWithTrainigCentresAndLearners());
+        //}
+        //else if (permissions.Role == RoleConstants.TRAINING_CENTRE)
+        //{
+        //    courses = await _courseService.GetAllCoursesByTrainingId(emailClaim);
+        //}
+
+        //return Ok(courses);
+    }
+
+    [AllowAnonymous]
     [HttpGet("GetCoursesByTrainingId/{trainingCentreId}")]
     public async Task<IActionResult> GetCoursesByTrainingId(int trainingCentreId)
     {
@@ -101,7 +125,7 @@ public class CourseController : ControllerBase
             }
             else
             {
-                var finalResult = await _courseService.AddCourseByTrainingId(course.ToEntity(), (int)course.TrainingCentreId);
+                var finalResult = await _courseService.AddCourseByTrainingId(course.ToEntity(), (int)course.TrainingCentreId, course.Price);
                 return Ok(finalResult);
             }
         }
@@ -112,7 +136,7 @@ public class CourseController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCourse(int id, [FromBody] CourseViewModel course)
     {
-        var result = await _courseService.UpdateCourse(course.ToEntity(), course.TrainingCentreId);
+        var result = await _courseService.UpdateCourse(course.ToEntity(), course.TrainingCentreId, course.Price);
 
         return Ok(result);
     }

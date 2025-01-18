@@ -46,7 +46,7 @@ const TrainingCentreForCoursesDropdown: React.FC<TrainingCentreDropdownProps> = 
   };
 
   return (
-    <Box display="flex" flexDirection="column" width="100%">
+    <Box display="flex" flexDirection="column" width="100%" sx={{paddingTop:'0.4em'}}>
       <TextField
         select
         label="Training Centre"

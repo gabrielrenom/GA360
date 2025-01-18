@@ -85,6 +85,7 @@ namespace GA360.Domain.Core.Models
         public DateTime CertificateDate { get; set; }
         public string CertificateNumber { get; set; }
         public string Sector { get; set; }
+        public double? Price { get; set; }
     }
 
     public class CertificateModel

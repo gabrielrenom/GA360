@@ -105,8 +105,10 @@ const renderField = (field: string, value: string | undefined, multiline: boolea
           <DatePicker
             value={value ? new Date(value) : null}
             onChange={(newValue) => {
+              // @ts-ignore
               handleFieldChange({ target: { value: newValue } }, field);
             }}
+            // @ts-ignore
             onBlur={() => handleFieldBlur(field)}
             renderInput={(params) => <TextField {...params} size="small" fullWidth />}
             disableFuture
@@ -122,6 +124,7 @@ const renderField = (field: string, value: string | undefined, multiline: boolea
           variant="outlined"
           size="small"
           value={value || ""}
+          // @ts-ignore
           onChange={(e) => handleFieldChange(e, field)}
           onBlur={() => handleFieldBlur(field)}
           autoFocus
@@ -141,6 +144,7 @@ const renderField = (field: string, value: string | undefined, multiline: boolea
           variant="outlined"
           size="small"
           value={value || ""}
+          // @ts-ignore
           onChange={(e) => handleFieldChange(e, field)}
           onBlur={() => handleFieldBlur(field)}
           autoFocus

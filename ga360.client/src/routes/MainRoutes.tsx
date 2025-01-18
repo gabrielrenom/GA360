@@ -33,6 +33,7 @@ import AboutUs from 'layout/Dashboard/Footer/AboutUs';
 import Terms from 'layout/Dashboard/Footer/Terms';
 import Privacy from 'layout/Dashboard/Footer/Privacy';
 import Leads from 'pages/backoffice/leads';
+import TrainingCentreQualifications from 'pages/backoffice/trainingcentrequalifications';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -202,9 +203,13 @@ const MainRoutes = {
               path: 'courses',
               element: <Courses />
             },
-              {
+            {
                 path: 'qualifications',
               element: <Qualifications />
+            },
+            {
+              path: 'trainingcentrequalifications',
+              element: <TrainingCentreQualifications />
             },
             {
               path: 'careers',

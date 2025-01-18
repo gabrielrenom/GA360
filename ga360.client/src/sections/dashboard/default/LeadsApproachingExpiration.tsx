@@ -125,6 +125,7 @@ export default function LeadsApproachingExpiration() {
 
   const headers = table.getAllColumns().map((column) => ({
     label: typeof column.columnDef.header === 'string' ? column.columnDef.header : '#',
+    // @ts-ignore
     key: column.columnDef.accessorKey as string
   }));
 

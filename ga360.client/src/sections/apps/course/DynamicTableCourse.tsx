@@ -24,12 +24,13 @@ import {
   GridSlots,
 } from "@mui/x-data-grid";
 import MainCard from "components/MainCard";
-import { MenuItem, Select, Stack, Tooltip, useMediaQuery } from "@mui/material";
+import { Grid, MenuItem, Select, Stack, TextField, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
-import { addCourse, Course, deleteCourse, getCourses, updateCourse } from "api/courseService";
+import { addCourse, Course, CourseDetails, deleteCourse, getCourses, getCoursesDetails, updateCourse } from "api/courseService";
 import { useEffect, useState } from "react";
 import { getTrainingCentres, TrainingCentre } from "api/trainingcentreService";
 import TrainingCentreForCoursesDropdown from "./components/TrainingCentreForCoursesDropdown";
+import { padding } from "@mui/system";
 
 
 const initialRows: GridRowsProp = [];
@@ -105,7 +106,7 @@ export default function DynamicTableCourse() {
   React.useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const courses: Course[] = await getCourses();
+        const courses: CourseDetails[] = await getCoursesDetails();
         console.log("COURSES",courses)
         setRows(courses);
       } catch (error) {
@@ -157,33 +158,8 @@ export default function DynamicTableCourse() {
     }
   };
 
-  // const mapToGridRowModel = (course: Course): GridRowModel => {
-  //   return {
-  //     id: course.id,
-  //     name: course.name,
-  //     description: course.description,
-  //     duration: course.duration,
-  //     // registrationDate: course.registrationDate ? course.registrationDate.toISOString().split('T')[0] : '',
-  //     // expectedDate: course.expectedDate ? course.expectedDate.toISOString().split('T')[0] : '',
-  //     // certificateDate: course.certificateDate ? course.certificateDate.toISOString().split('T')[0] : '',
-  //     certificateNumber: course.certificateNumber,
-  //     status: course.status,
-  //     sector: course.sector,
-  //     trainingCentre: course.trainingCentre ? course.trainingCentre.toString() : '',
-  //   };
-  // };
   
-  const formatDate = (date: Date | null) => {
-    if (!date) return '';
-    const formatter = new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-    return formatter.format(date);
-  };
-  
-  const mapToGridRowModel = (course: Course): GridRowModel => {
+  const mapToGridRowModel = (course: CourseDetails): GridRowModel => {
     return {
       id: course.id,
       name: course.name,
@@ -196,10 +172,12 @@ export default function DynamicTableCourse() {
       status: course.status,
       sector: course.sector,
       trainingCentre: course.trainingCentre ? course.trainingCentre.toString() : '',
+      learners: course.learners,
+      price: course.price
     };
   };
 
-  const mapToCourse = (row: GridRowModel): Course => {
+  const mapToCourse = (row: GridRowModel): CourseDetails => {
     return {
       id: row.id as number,
       name: row.name as string,
@@ -211,26 +189,12 @@ export default function DynamicTableCourse() {
       certificateNumber: row.certificateNumber as string,
       status: row.status as number,
       sector: row.sector as string,
-      trainingCentreId: row.trainingCentre as number,
-      trainingCentre: row.trainingCentre
+      trainingCentreId: row.trainingCentreId as number,
+      trainingCentre: row.trainingCentre,
+      learners: row.learners,
+      price: row.price,
     };
   };
-  // const mapToCourse = (row: GridRowModel): Course => {
-  //   return {
-  //     id: row.id as number,  // Assuming id is a string, adjust if necessary
-  //     name: row.name as string,
-  //     description: row.description as string,
-  //     duration: row.duration as number,
-  //     registrationDate: row.registrationDate ? new Date(row.registrationDate as string) : null,
-  //     expectedDate: row.expectedDate ? new Date(row.expectedDate as string) : null,
-  //     certificateDate: row.certificateDate ? new Date(row.certificateDate as string) : null,
-  //     certificateNumber: row.certificateNumber as string,
-  //     status: row.status as number,
-  //     sector: row.sector as string,
-  //     trainingCentreId: row.trainingCentre as number,
-  //     trainingCentre: row.trainingCentre
-  //   };
-  // };
   
   const fetchCourses = async () => {
     try {
@@ -240,7 +204,6 @@ export default function DynamicTableCourse() {
       console.error('Failed to fetch courses:', error);
     }
   };
-  
 
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
@@ -248,13 +211,9 @@ export default function DynamicTableCourse() {
       if (newRow.isNew) {
         const course = mapToCourse(newRow);
         course.id = 0;
-        const createdCourse = await addCourse(course);
-        console.log("MY COURSE", createdCourse);
-  
-        console.log("BEFORE FETCHING", createdCourse);
+        const createdCourse = await addCourse(course);  
   
         if (typeof createdCourse === 'object' && createdCourse !== null && createdCourse.id > 0) {
-          console.log("FETCHING");
           await fetchCourses();
         } else {
           console.error('Failed to create course: createdCourse is invalid');
@@ -263,6 +222,17 @@ export default function DynamicTableCourse() {
         return;
       } else {
         const course = mapToCourse(newRow);
+        console.log(newRow)
+
+        const trainingCentreId = Number(newRow.trainingCentre);
+
+        if (!isNaN(trainingCentreId)) {
+          // It's a number, so you can use it
+          course.trainingCentreId = trainingCentreId;
+        } else {
+          course.trainingCentreId = trainingCentres.find(tc => tc.name === newRow.trainingCentre)?.id;
+        }
+
         const updatedCourse = await updateCourse(course.id, course); // Get the updated course
         // const updatedRowModel = {
         //   ...mapToGridRowModel(course),
@@ -312,37 +282,37 @@ export default function DynamicTableCourse() {
       type: "number",
       flex: 1,
       editable: true,
+      renderCell: (params) => {
+        return <div>{params.value || 0}</div>; // Render a simple div for cell display
+      },
+      renderEditCell: (params) => {
+        return (
+          <TextField
+            type="number"
+            inputProps={{
+              min: 0,
+              inputMode: 'numeric',
+              pattern: '[0-9]*'
+            }}
+            value={params.value || ''}
+            onChange={(event) => {
+              params.api.setEditCellValue({ ...params, id: params.id, field: params.field, value: event.target.value });
+            }}
+            sx={{
+              paddingTop: '0.4em',
+              width: '100px',
+              paddingRight: '0.6em',
+            }}
+          />
+        );
+      }
     },
     {
-      field: "registrationDate",
-      headerName: "REGISTRATION",
-      type: "date",
+      field: "learners",
+      headerName: "LEARNERS",
+      type: "number",
       flex: 1,
-      editable: true,
-      valueFormatter: (params) => { const date = new Date(params as string); return date.toLocaleDateString(); },
-    },
-    {
-      field: "expectedDate",
-      headerName: "EXPECTED",
-      type: "date",
-      flex: 1,
-      editable: true,
-      valueFormatter: (params) => { const date = new Date(params as string); return date.toLocaleDateString(); },
-
-    },
-    {
-      field: "certificateDate",
-      headerName: "CERTIFICATION DATE",
-      type: "date",
-      flex: 2,
-      editable: true,
-      valueFormatter: (params) => { const date = new Date(params as string); return date.toLocaleDateString(); },
-    },
-    {
-      field: "certificateNumber",
-      headerName: "CERT NUMBER",
-      flex: 1,
-      editable: true,
+      editable: false,
     },
     {
       field: 'trainingCentre',
@@ -357,6 +327,14 @@ export default function DynamicTableCourse() {
           }
         />
       ),
+    },
+    {
+      field: "expectedDate",
+      headerName: "EXPIRY DATE",
+      type: "date",
+      flex: 1,
+      editable: true,
+      valueFormatter: (params) => { const date = new Date(params as string); return date.toLocaleDateString(); },
     },
     {
       field: "status",
@@ -387,6 +365,48 @@ export default function DynamicTableCourse() {
           { value: "Manufacturing", label: "Manufacturing" },
           { value: "Construction", label: "Construction" },
       ],
+  },
+  {
+    field: "price",
+  headerName: "PRICE",
+  type: "number",
+  flex: 1,
+  editable: true,
+  renderCell: (params) => {
+    return <div>{params.value || 0}</div>; // Render a simple div for cell display
+  },
+  renderEditCell: (params) => {
+    return (
+      <TextField
+        type="number"
+        inputProps={{
+          min: 0,
+          inputMode: 'numeric',
+          pattern: '[0-9]*'
+        }}
+        value={params.value || ''}
+        onChange={(event) => {
+          params.api.setEditCellValue({ ...params, id: params.id, field: params.field, value: event.target.value });
+        }}
+        sx={{
+          paddingTop: '0.4em',
+          width: '100px',
+          paddingRight: '0.6em',
+        }}
+      />
+    );
+  },
+
+    // preProcessEditCellProps: (params) => {
+    //   return {
+    //     inputProps: {
+    //       min: 0, 
+    //       // type: 'number', 
+    //       // inputMode: 'numeric', 
+    //       // pattern: '[0-9]*' 
+    //     }
+    //   };
+    // },
   },
     {
         field: "actions",
