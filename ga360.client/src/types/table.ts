@@ -128,6 +128,27 @@ export type QualificationTrainingCentreViewDataProps ={
   status: string;
 }
 
+export type QualificationTrainingCentreViewDataPropsExtended ={
+  id: number;
+  qan: string;
+  name: string;
+  registrationDate: string;
+  expectedDate: string;
+  certificateDate: string;
+  certificateNumber: number;
+  trainingCentreId: number;
+  trainingCentre: string;
+  price: number;
+  sector: string;
+  internalReference: string;
+  qualificationName: string;
+  awardingBody: string;
+  learners: number;
+  assessors: number;
+  expirationDate: Date;
+  status: string;
+}
+
 export type CertificationViewDataProps ={
   name: string;
   // id: number;

@@ -109,7 +109,7 @@ export default function DynamicTableQualifications() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable();
+        const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable(0);
         console.log("QUALUFICATIONS",qualifications)
         setRows(qualifications);
       } catch (error) {
@@ -189,7 +189,7 @@ export default function DynamicTableQualifications() {
   
   const fetchQualifications = async () => {
     try {
-      const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable();
+      const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable(0);
       console.log("QUALIFICATIONS", qualifications);
       setRows(qualifications);
     } catch (error) {

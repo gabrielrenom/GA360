@@ -358,19 +358,19 @@ public class CourseService : ICourseService
         return courseModels;
     }
 
-    public async Task<List<CourseDetailsModel>> GetAllCoursesWithTrainigCentresAndLearners()
+    public async Task<List<CourseDetailsModel>> GetAllCoursesWithTrainigCentresAndLearners(int? trainingCentreId)
     {
         var courses = await _courseRepository.Context.Courses
             .Include(x => x.CourseTrainingCentres)
             .ThenInclude(x => x.TrainingCentre)
+            .Where(x => trainingCentreId == null || x.CourseTrainingCentres.Any(y => y.TrainingCentreId == trainingCentreId))
             .ToListAsync();
 
         var activeLearners = await _courseRepository.Context.QualificationCustomerCourseCertificates
-        .Where(qcc => qcc.CourseId.HasValue)
-        .GroupBy(qcc => qcc.Course.CourseTrainingCentres.FirstOrDefault().TrainingCentreId)
-        .Select(group => new { TrainingCentreId = group.Key, Count = group.Count() })
-        .ToListAsync();
-
+            .Where(qcc => qcc.CourseId.HasValue)
+            .GroupBy(qcc => qcc.Course.CourseTrainingCentres.FirstOrDefault().TrainingCentreId)
+            .Select(group => new { TrainingCentreId = group.Key, Count = group.Count() })
+            .ToListAsync();
 
         var courseModels = courses.Select(course => new CourseDetailsModel
         {
@@ -397,6 +397,7 @@ public class CourseService : ICourseService
 
         return courseModels;
     }
+
 
 
 

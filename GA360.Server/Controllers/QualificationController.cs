@@ -87,14 +87,24 @@ namespace GA360.Server.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("GetQualificationsWithTrainingCentres")]
-        public async Task<IActionResult> GetQualificationsWithTrainingCentres()
+        [HttpGet("GetQualificationsWithTrainingCentres/{id?}")]
+        public async Task<IActionResult> GetQualificationsWithTrainingCentres(int? id)
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            var qualifications = await _qualificationService.GetAllQualificationsWithTrainingCentres();
+            var permissions = await _permissionService.GetPermissions(emailClaim);
 
-            return Ok(qualifications);
+            if (permissions.Role == RoleConstants.SUPER_ADMIN)
+            {
+                return Ok(await _qualificationService.GetAllQualificationsWithTrainingCentres());
+            }
+            else if (permissions.Role == RoleConstants.TRAINING_CENTRE)
+            {
+                return Ok(await _qualificationService.GetAllQualificationsWithTrainingCentres(id));
+            }
+
+            return Ok();
+
         }
 
 
@@ -102,36 +112,46 @@ namespace GA360.Server.Controllers
         [HttpGet("GetQualificationsByUser")]
         public async Task<IActionResult> GetQualificationsByUser()
         {
+            //var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            //if (!_cache.TryGetValue($"{UserQualifications}{emailClaim}", out List<Qualification> qualifications))
+            //{
+            //    qualifications = await _qualificationService.GetAllQualificationsByEmail(emailClaim);
+
+            //    var cacheEntryOptions = new MemoryCacheEntryOptions()
+            //        .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+            //    _cache.Set($"{UserQualifications}{emailClaim}", qualifications, cacheEntryOptions);
+            //}
+
+            //return Ok(qualifications);
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            if (!_cache.TryGetValue($"{UserQualifications}{emailClaim}", out List<Qualification> qualifications))
-            {
-                qualifications = await _qualificationService.GetAllQualificationsByEmail(emailClaim);
-
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-                _cache.Set($"{UserQualifications}{emailClaim}", qualifications, cacheEntryOptions);
-            }
-
-            return Ok(qualifications);
+           
+            return Ok(await _qualificationService.GetAllQualificationsByEmail(emailClaim));
         }
 
         [AllowAnonymous]
         [HttpGet("GetQualificationsByUserId/{id}")]
         public async Task<IActionResult> GetQualificationsByUserId(int id)
         {
+            //var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            //if (!_cache.TryGetValue($"{UserQualifications}{id}", out List<Qualification> qualifications))
+            //{
+            //    qualifications = await _qualificationService.GetAllQualificationsByCandidateId(id);
+
+            //    var cacheEntryOptions = new MemoryCacheEntryOptions()
+            //        .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+            //    _cache.Set($"{UserQualifications}{id}", qualifications, cacheEntryOptions);
+            //}
+
+            //return Ok(qualifications);
+
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
-
-            if (!_cache.TryGetValue($"{UserQualifications}{id}", out List<Qualification> qualifications))
-            {
-                qualifications = await _qualificationService.GetAllQualificationsByCandidateId(id);
-
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-                _cache.Set($"{UserQualifications}{id}", qualifications, cacheEntryOptions);
-            }
+            
+            var qualifications = await _qualificationService.GetAllQualificationsByCandidateId(id);
 
             return Ok(qualifications);
         }
@@ -159,17 +179,23 @@ namespace GA360.Server.Controllers
         [HttpGet("GetQualificationsByTrainingId/{trainingCentreId}")]
         public async Task<IActionResult> GetQualificationsByTrainingId(int trainingCentreId)
         {
+            //var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            //if (!_cache.TryGetValue($"{QualificationsTrainingCentreCacheKey}{emailClaim}", out List<QualificationTrainingModel> qualifications))
+            //{
+            //    qualifications = await _qualificationService.GetAllQualificationsByTrainingCentreId(trainingCentreId);
+
+            //    var cacheEntryOptions = new MemoryCacheEntryOptions()
+            //        .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+            //    _cache.Set($"{QualificationsTrainingCentreCacheKey}{emailClaim}", qualifications, cacheEntryOptions);
+            //}
+
+            //return Ok(qualifications);
+
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            if (!_cache.TryGetValue($"{QualificationsTrainingCentreCacheKey}{emailClaim}", out List<QualificationTrainingModel> qualifications))
-            {
-                qualifications = await _qualificationService.GetAllQualificationsByTrainingCentreId(trainingCentreId);
-
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-                _cache.Set($"{QualificationsTrainingCentreCacheKey}{emailClaim}", qualifications, cacheEntryOptions);
-            }
+            var qualifications = await _qualificationService.GetAllQualificationsByTrainingCentreId(trainingCentreId);
 
             return Ok(qualifications);
         }

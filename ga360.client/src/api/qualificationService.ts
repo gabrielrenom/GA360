@@ -165,8 +165,8 @@ export async function getQualifications(): Promise<Qualification[]> {
   return data;
 }
 
-export async function getQualificationsWithTrainingCentresForTable(): Promise<QualificationTable[]> {
-  const response = await fetch(endpoints.qualificationswithtrainingcentres, {
+export async function getQualificationsWithTrainingCentresForTable(id?:number): Promise<QualificationTable[]> {
+  const response = await fetch(`${endpoints.qualificationswithtrainingcentres}/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

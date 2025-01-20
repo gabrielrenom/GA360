@@ -46,7 +46,7 @@ const setSession = (serviceToken) => {
 
 const DuendeContext = createContext(null);
 
-export  const DuendeProvider = ({ children }) => {
+export const DuendeProvider = ({ children }) => {
     const [state, dispatch] = useReducer(authReducer, initialState);
 
     useEffect(() => {

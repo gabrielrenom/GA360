@@ -54,13 +54,13 @@ const menuTrainingCentre: NavItemType = {
       icon: icons.SafetyCertificateOutlined,
       url: '/backoffice/trainingcentrequalifications'
     },
-    // {
-    //   id: 'training-centre-courses',
-    //   title: <FormattedMessage id="Courses" />,
-    //   type: 'item',
-    //   icon: icons.ProfileOutlined,
-    //   url: '/backoffice/courses'
-    // },
+    {
+      id: 'training-centre-courses',
+      title: <FormattedMessage id="Courses" />,
+      type: 'item',
+      icon: icons.ProfileOutlined,
+      url: '/backoffice/trainingcentrecourses'
+    },
     {
       id: 'training-centre-batch-upload',
       title: <FormattedMessage id="Batch Upload" />,

@@ -46,11 +46,11 @@ public class QualificationService : IQualificationService
         return await _qualificationRepository.GetAll();
     }
 
-    public async Task<List<QualificationWithTrainingModel>> GetAllQualificationsWithTrainingCentres()
+    public async Task<List<QualificationWithTrainingModel>> GetAllQualificationsWithTrainingCentres(int? id)
     {
-        var qualifications = await _qualificationRepository.Context.Qualifications
-            .Include(x => x.QualificationTrainingCentres)
-            .ThenInclude(x => x.TrainingCentre)
+        var qualificationTrainingCentres = await _qualificationRepository.Context.QualificationTrainingCentre
+            .Include(qtc => qtc.Qualification)
+            .Include(qtc => qtc.TrainingCentre)
             .ToListAsync();
 
         var qualificationCustomerCounts = await _qualificationRepository.Context.QualificationCustomerCourseCertificates
@@ -62,28 +62,70 @@ public class QualificationService : IQualificationService
             })
             .ToListAsync();
 
-        var result = qualifications.Select(q => new QualificationWithTrainingModel
-        {
-            Id = q.Id,
-            Name = q.Name,
-            RegistrationDate = q.RegistrationDate,
-            ExpectedDate = q.ExpectedDate,
-            CertificateDate = q.CertificateDate,
-            CertificateNumber = q.CertificateNumber,
-            Status = q.Status,
-            TrainingCentreId = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Id).FirstOrDefault(),
-            TrainingCentre = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Name).FirstOrDefault(),
-            InternalReference = q.InternalReference,
-            QAN = q.QAN,
-            AwardingBody = q.AwardingBody,
-            Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == q.Id)?.LearnersCount ?? 0,
-            Price = q.QualificationTrainingCentres.Select(qtc => qtc.Price).FirstOrDefault(),
-            Sector = q.Sector
-        }).ToList();
+        var result = qualificationTrainingCentres
+            .Where(qtc => id == null || qtc.TrainingCentreId == id.Value)
+            .Select(qtc => new QualificationWithTrainingModel
+            {
+                Id = qtc.Id,
+                Name = qtc.Qualification.Name,
+                RegistrationDate = qtc.Qualification.RegistrationDate,
+                ExpectedDate = qtc.Qualification.ExpectedDate,
+                CertificateDate = qtc.Qualification.CertificateDate,
+                CertificateNumber = qtc.Qualification.CertificateNumber,
+                Status = qtc.Qualification.Status,
+                TrainingCentreId = qtc.TrainingCentreId,
+                TrainingCentre = qtc.TrainingCentre.Name,
+                InternalReference = qtc.Qualification.InternalReference,
+                QAN = qtc.Qualification.QAN,
+                AwardingBody = qtc.Qualification.AwardingBody,
+                Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == qtc.Qualification.Id)?.LearnersCount ?? 0,
+                Price = qtc.Price,
+                Sector = qtc.Qualification.Sector
+            })
+            .ToList();
 
         return result;
     }
 
+
+
+    //public async Task<List<QualificationWithTrainingModel>> GetAllQualificationsWithTrainingCentres(int? id)
+    //{
+    //    var qualifications = await _qualificationRepository.Context.Qualifications
+    //        .Include(x => x.QualificationTrainingCentres)
+    //        .ThenInclude(x => x.TrainingCentre)
+    //        .ToListAsync();
+
+    //    var qualificationCustomerCounts = await _qualificationRepository.Context.QualificationCustomerCourseCertificates
+    //        .GroupBy(qccc => qccc.QualificationId)
+    //        .Select(g => new
+    //        {
+    //            QualificationId = g.Key,
+    //            LearnersCount = g.Select(qccc => qccc.CustomerId).Distinct().Count()
+    //        })
+    //        .ToListAsync();
+
+    //    var result = qualifications.Select(q => new QualificationWithTrainingModel
+    //    {
+    //        Id = q.Id,
+    //        Name = q.Name,
+    //        RegistrationDate = q.RegistrationDate,
+    //        ExpectedDate = q.ExpectedDate,
+    //        CertificateDate = q.CertificateDate,
+    //        CertificateNumber = q.CertificateNumber,
+    //        Status = q.Status,
+    //        TrainingCentreId = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Id).FirstOrDefault(),
+    //        TrainingCentre = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Name).FirstOrDefault(),
+    //        InternalReference = q.InternalReference,
+    //        QAN = q.QAN,
+    //        AwardingBody = q.AwardingBody,
+    //        Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == q.Id)?.LearnersCount ?? 0,
+    //        Price = q.QualificationTrainingCentres.Select(qtc => qtc.Price).FirstOrDefault(),
+    //        Sector = q.Sector
+    //    }).ToList();
+
+    //    return result;
+    //}
 
 
     public async Task<Qualification> AddQualification(Qualification qualification)

@@ -106,7 +106,7 @@ export default function DynamicTableCourse() {
   React.useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const courses: CourseDetails[] = await getCoursesDetails();
+        const courses: CourseDetails[] = await getCoursesDetails(0);
         console.log("COURSES",courses)
         setRows(courses);
       } catch (error) {
@@ -209,10 +209,12 @@ export default function DynamicTableCourse() {
     const updatedRow = { ...newRow, isNew: false };
     try {
       if (newRow.isNew) {
+        console.log("NEW COURSE", newRow)
         const course = mapToCourse(newRow);
         course.id = 0;
+        course.trainingCentreId = Number(newRow.trainingCentre)
         const createdCourse = await addCourse(course);  
-  
+        
         if (typeof createdCourse === 'object' && createdCourse !== null && createdCourse.id > 0) {
           await fetchCourses();
         } else {
@@ -234,11 +236,7 @@ export default function DynamicTableCourse() {
         }
 
         const updatedCourse = await updateCourse(course.id, course); // Get the updated course
-        // const updatedRowModel = {
-        //   ...mapToGridRowModel(course),
-        //   trainingCentre: trainingCentres.find(tc => tc.id === course.trainingCentreId)?.name || '',
-        // };
-        // console.log("NEWROW", newRow);
+
        newRow.trainingCentre = updatedCourse.trainingCentre;
        setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)));
         //return;

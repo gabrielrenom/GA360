@@ -57,8 +57,8 @@ export async function getCoursesByTrainingCentreId(trainingCentreId: number): Pr
   return data;
 }
 
-export async function getCoursesDetails(): Promise<CourseDetails[]> {
-  const response = await fetch(endpoints.coursedetails, {
+export async function getCoursesDetails(id:number): Promise<CourseDetails[]> {
+  const response = await fetch(endpoints.coursedetails+"/"+id.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

@@ -1,32 +1,13 @@
 // material-ui
 import { Theme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 
-// third-party
-import { PatternFormat } from "react-number-format";
+import Stack from "@mui/material/Stack";
 
 // project import
 import MainCard from "components/MainCard";
-import Avatar from "components/@extended/Avatar";
-import LinearWithLabel from "components/@extended/progress/LinearWithLabel";
-
-import defaultImages from "assets/images/users/default.png";
-import {
-  QualificationLearnerViewDataProps,
-  QualificationViewDataProps,
-  TableDataProps,
-} from "types/table";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -39,12 +20,6 @@ import {
 } from "@tanstack/react-table";
 import {
   Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Modal,
   Paper,
   Table,
   TableBody,
@@ -65,100 +40,76 @@ import ScrollX from "components/ScrollX";
 // ==============================|| ACCOUNT PROFILE - BASIC ||============================== //
 // types
 import { LabelKeyObject } from "react-csv/lib/core";
-import { CustomerListExtended } from "types/customer";
-import { getCandidate, getUserById } from "api/customer";
-import CandidateProfile from "./CandidateCRUDProfile";
-import { QualificationModel } from "types/customerApiModel";
-import MyQualificationsProfile from "./MyQualificationsCRUDProfile";
-import { useParams } from "react-router";
-import {
-  getQualificationDetailByUserId,
-  QualificationExtended,
-} from "api/qualificationService";
-import { PlusOutlined } from "@ant-design/icons";
-import DynamicTableCustomerWithCourseQualificationRecords from "sections/apps/course/DynamicTableCustomerWithCourseQualificationRecords";
+import DuendeContext from "contexts/DuendeContext";
+import { CourseDetails, getCoursesDetails } from "api/courseService";
 
 interface ReactTableProps {
-  columns: ColumnDef<QualificationLearnerViewDataProps>[];
-  data: QualificationLearnerViewDataProps[];
-  userId: number;
-  onClose: () => void // Callback function to be called when the dialog is closed
+  columns: ColumnDef<CourseViewDataProps>[];
+  data: CourseViewDataProps[];
 }
 
-export default function TabCRUDCandidateQualification() {
-  const { id } = useParams();
+interface CourseViewDataProps {
+  name: string;
+  description: string;
+  duration: number;
+  learners: number;
+  expectedDate: string;
+  status: number;
+  sector: string;
+  price: number;
+}
 
-  const [candidate, setCandidate] = useState<CustomerListExtended>(null);
-  const matchDownMD = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.down("md")
-  );
-  const [qualifications, setQualifications] = useState<
-    QualificationLearnerViewDataProps[]
-  >([]);
-  const [avatar, setAvatar] = useState<string | undefined>(
-    candidate?.avatarImage ? candidate.avatarImage : defaultImages
-  );
+export default function DynamicTableTrainingCentreCourse() {
+  const { user } = useContext(DuendeContext);
 
-  const mapQualifications = (
-    qualifications: QualificationExtended[]
-  ): QualificationLearnerViewDataProps[] => {
-    return qualifications.map((certificate) => ({
-      name: certificate.name,
-      regDate: certificate.registrationDate
-        ? new Date(certificate.registrationDate).toLocaleDateString("en-GB")
-        : "", // Display an empty string if the date is null
-      status: certificate.status.toString(), // Assuming status is converted to string
-      assessor: certificate.assessor,
-      qan: certificate.qan,
-      price: certificate.price,
-      completeDate: certificate.certificateDate
-        ? new Date(certificate.certificateDate).toLocaleDateString("en-GB")
-        : "", // Display an empty string if the date is null
+  const [courses, setCourses] = useState<CourseViewDataProps[]>([]);
+
+  const mapCourses = (
+    coursesModel: CourseDetails[]
+  ): CourseViewDataProps[] => {
+    return coursesModel.map((courseItem) => ({
+      name: courseItem.name,
+      description: courseItem.description,
+      duration: courseItem.duration,
+      learners:courseItem.learners,
+      expectedDate: courseItem.expectedDate
+      ? new Date(courseItem.expectedDate).toLocaleDateString("en-GB")
+      : "",
+      status: courseItem.status,
+      sector: courseItem.sector,
+      price: courseItem.price
     }));
   };
-  
 
-  const statusCellRenderer = (cell) => {
-    console.log("CELL", cell);
-    const status = cell.value;
-    return status === "1" ? "Active" : status === "2" ? "No Active" : "Unknown";
-  };
-
-  const columns = useMemo<ColumnDef<QualificationLearnerViewDataProps>[]>(
+  const columns = useMemo<
+    ColumnDef<CourseViewDataProps>[]
+  >(
     () => [
       {
-        header: "Qualification Name",
-        footer: "Qualification Name",
+        header: "Name",
+        footer: "Name",
         accessorKey: "name",
+      },
+      {
+        header: "Description",
+        footer: "Description",
+        accessorKey: "description",
+      },
+      {
+        header: "Hours",
+        footer: "Hours",
+        accessorKey: "duration",
         enableSorting: true,
       },
       {
-        header: "QAN",
-        footer: "QAN",
-        accessorKey: "qan",
-      },
-      {
-        header: "assessor",
-        footer: "assessor",
-        accessorKey: "assessor",
-      },
-      {
-        header: "Reg Date",
-        footer: "Reg Date",
-        accessorKey: "regDate",
-        enableSorting: true,
-        meta: {
-          className: "cell-right",
-        },
+        header: "Learners",
+        footer: "Learners",
+        accessorKey: "learners",
       },
       {
         header: "Exp Date",
         footer: "Exp Date",
-        accessorKey: "completeDate",
-        enableSorting: true,
-        meta: {
-          className: "cell-right",
-        },
+        accessorKey: "expectedDate",
       },
       {
         header: "Status",
@@ -169,8 +120,13 @@ export default function TabCRUDCandidateQualification() {
         },
       },
       {
-        header: "price",
-        footer: "price",
+        header: "Sector",
+        footer: "Sector",
+        accessorKey: "sector",
+      },
+      {
+        header: "Price",
+        footer: "Price",
         accessorKey: "price",
       },
     ],
@@ -180,31 +136,22 @@ export default function TabCRUDCandidateQualification() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const learner = await getUserById(Number(id));
-        setAvatar(learner.avatarImage);
-        setCandidate(learner);
+        const coursesResult: CourseDetails[] =
 
-        const response = await getQualificationDetailByUserId(Number(id));
-        console.log(response)
-        const qualificationsResponse = mapQualifications(response);
-        setQualifications(qualificationsResponse);
+          await getCoursesDetails(Number(user.trainingCentreId));
+
+        const coursesResponse = mapCourses(coursesResult);
+
+        setCourses(coursesResponse);
       } catch (error) {
-        console.error("Error fetching countries:", error);
+        console.error("Error fetching courses:", error);
       }
     };
 
     fetchUser();
   }, []);
 
-  const refreshTable = async () => {
-    const response = await getQualificationDetailByUserId(Number(id));
-
-    const qualificationsResponse = mapQualifications(response);
-    setQualifications(qualificationsResponse);
-  };
-
-  function ReactTable({ columns, data, userId, onClose }: ReactTableProps) {
-    const [open, setOpen] = useState(false);
+  function ReactTable({ columns, data }: ReactTableProps) {
     const matchDownSM = useMediaQuery((theme: Theme) =>
       theme.breakpoints.down("sm")
     );
@@ -228,7 +175,7 @@ export default function TabCRUDCandidateQualification() {
     });
 
     let headers: LabelKeyObject[] = [];
-    
+
     table.getAllColumns().map((columns) =>
       headers.push({
         label:
@@ -239,12 +186,6 @@ export default function TabCRUDCandidateQualification() {
         key: columns.columnDef.accessorKey,
       })
     );
-
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => {
-        setOpen(false);
-        onClose(); 
-    }
 
     return (
       <MainCard
@@ -259,24 +200,6 @@ export default function TabCRUDCandidateQualification() {
                 setSorting,
               }}
             />
-            <Button
-              variant="contained"
-              startIcon={<PlusOutlined />}
-              onClick={handleOpen}
-            >
-              Add Qualification
-            </Button>
-            <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-              <DialogTitle>Qualifications</DialogTitle>
-              <DialogContent>
-                <DynamicTableCustomerWithCourseQualificationRecords
-                  customerId={userId}
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleClose}>Close</Button>
-              </DialogActions>
-            </Dialog>
             <CSVExport
               {...{
                 data,
@@ -393,24 +316,11 @@ export default function TabCRUDCandidateQualification() {
   }
 
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} sm={5} md={4} xl={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <CandidateProfile
-              candidate={candidate}
-              defaultImages={avatar}
-            ></CandidateProfile>
-          </Grid>
-          <Grid item xs={12}>
-            {/* <CourseProgressions candidate={candidate} /> */}
-            <MyQualificationsProfile userId={Number(id)} />
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={12} sm={7} md={8} xl={9}>
-        <ReactTable data={qualifications} columns={columns} userId={Number(id)} onClose={refreshTable} />
-      </Grid>
-    </Grid>
+    <>
+      <ReactTable
+        data={courses}
+        columns={columns}
+      />
+    </>
   );
 }

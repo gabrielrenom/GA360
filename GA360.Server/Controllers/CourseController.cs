@@ -48,27 +48,25 @@ public class CourseController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("details")]
-    public async Task<IActionResult> GetCoursesWithDetails()
+    [HttpGet("details/{id?}")]
+    public async Task<IActionResult> GetCoursesWithDetails(int? id)
     {
         var courses = new List<Course>();
 
         var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-        //var permissions = await _permissionService.GetPermissions(emailClaim);
+        var permissions = await _permissionService.GetPermissions(emailClaim);
 
-        return Ok(await _courseService.GetAllCoursesWithTrainigCentresAndLearners());
+        if (permissions.Role == RoleConstants.SUPER_ADMIN)
+        {
+            return Ok(await _courseService.GetAllCoursesWithTrainigCentresAndLearners());
+        }
+        else if (permissions.Role == RoleConstants.TRAINING_CENTRE)
+        {
+            return Ok(await _courseService.GetAllCoursesWithTrainigCentresAndLearners(id));
+        }
 
-        //if (permissions.Role == RoleConstants.SUPER_ADMIN)
-        //{
-        //    return Ok(await _courseService.GetAllCoursesWithTrainigCentresAndLearners());
-        //}
-        //else if (permissions.Role == RoleConstants.TRAINING_CENTRE)
-        //{
-        //    courses = await _courseService.GetAllCoursesByTrainingId(emailClaim);
-        //}
-
-        //return Ok(courses);
+        return Ok(courses);
     }
 
     [AllowAnonymous]

@@ -17,5 +17,5 @@ public interface ICourseService
     Task<List<Course>> GetAllCoursesByTrainingId(string email);
     Task<CourseModel> AddCourseByTrainingId(Course course, int trainingCentreId, double? price);
     Task<CourseModel> UpdateCourse(Course course, int? trainingCentreId, double? price);
-    Task<List<CourseDetailsModel>> GetAllCoursesWithTrainigCentresAndLearners();
+    Task<List<CourseDetailsModel>> GetAllCoursesWithTrainigCentresAndLearners(int? id=null);
 }
