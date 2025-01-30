@@ -103,6 +103,10 @@ export default defineConfig({
                 target,
                 secure: false
             },
+            '^/api/trainingcentre/qualification': {
+                target,
+                secure: false
+            },
             '^/api/ethnicity/list': {
                 target,
                 secure: false

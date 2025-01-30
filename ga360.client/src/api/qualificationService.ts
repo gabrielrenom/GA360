@@ -50,6 +50,7 @@ export interface Qualification {
     awardingBody: string;
     price: number;
     sector: string;
+    trainingCentreIds: number[];
   }
 
 export interface QualificationStatus {

@@ -33,6 +33,7 @@ import Alert from '@mui/material/Alert';
 import TrainingCentreForCoursesDropdown from "./components/TrainingCentreForCoursesDropdown";
 import { getTrainingCentres, TrainingCentre } from "api/trainingcentreService";
 import { useEffect, useState } from "react";
+import TrainingCentreForCoursesMultiDropdown from "./components/TrainingCentreForCoursesMultiDropdown";
 
 
 const initialRows: GridRowsProp = [];
@@ -97,6 +98,7 @@ export default function DynamicTableQualifications() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [trainingCentres, setTrainingCentres] = useState([]);
+  const [trainingCentresForQualification, settrainingCentresForQualification] = useState([]);
 
   useEffect(() => {
     async function fetchTrainingCentres() {
@@ -167,7 +169,7 @@ export default function DynamicTableQualifications() {
     }
   };
 
-  const mapToQualification = (row: GridRowModel): QualificationTable => {
+  const mapToQualification = (row: GridRowModel, trainingCentreIds:number[]): QualificationTable => {
     return {
       id: row.id as number,
       qan: row.qan,
@@ -183,7 +185,8 @@ export default function DynamicTableQualifications() {
       learners: row.learners,
       awardingBody: row.awardingBody,
       price: row.price,
-      sector: row.sector
+      sector: row.sector,
+      trainingCentreIds: trainingCentreIds
     };
   };
   
@@ -200,24 +203,26 @@ export default function DynamicTableQualifications() {
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
     try {
+      console.log("SSS", newRow);
       if (newRow.isNew) {
         // const qualification = mapToQualification(newRow);
         // qualification.id = 0;
         // const createdQualification = await addQualification(qualification);
         // setRows(rows.map((row) => (row.id === newRow.id ? createdQualification : row)));
-        const qualification = mapToQualification(newRow);
+        const qualification = mapToQualification(newRow,trainingCentresForQualification);
         qualification.id = 0;
         const createdQualification = await addQualification(qualification);
-  
+        
         await fetchQualifications();
       } else {
         console.log("UPDATING", newRow)
-        const qualification = mapToQualification(newRow);
+        const qualification = mapToQualification(newRow,trainingCentresForQualification);
         const updatedQualification = await updateQualification(qualification.id, qualification); // Call updateQualification for existing rows
         console.log(updatedQualification)
         newRow.trainingCentre = updatedQualification.trainingCentre;
         setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)));
       }
+      settrainingCentresForQualification([]);
     } catch (error) {
       console.error('Failed to update qualification:', error);
     }
@@ -230,6 +235,14 @@ export default function DynamicTableQualifications() {
     setRowModesModel(newRowModesModel);
   };
 
+  const handleTrainingCentreChange = (qualificationId, selectedIds) => {
+    settrainingCentresForQualification(selectedIds);
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === qualificationId ? { ...row, trainingCentre: selectedIds } : row
+      )
+    );
+  };
 
 const columns: GridColDef[] = [
   {
@@ -276,11 +289,11 @@ const columns: GridColDef[] = [
     flex: 2,
     editable: true,
     renderEditCell: (params) => (
-      <TrainingCentreForCoursesDropdown
+      <TrainingCentreForCoursesMultiDropdown
+        qualificationId = {params.id}
         value={params.value}
-        onChange={(value) =>
-          params.api.setEditCellValue({ id: params.id, field: params.field, value }, event)
-        }
+        onChange={handleTrainingCentreChange}
+        
       />
     ),
   },
