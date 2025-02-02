@@ -35,6 +35,7 @@ import Privacy from 'layout/Dashboard/Footer/Privacy';
 import Leads from 'pages/backoffice/leads';
 import TrainingCentreQualifications from 'pages/backoffice/trainingcentrequalifications';
 import TrainingCentreTableCourses from 'pages/backoffice/trainingcentrestablecourses';
+import AuditTrail from 'pages/backoffice/audit';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -223,6 +224,10 @@ const MainRoutes = {
             {
               path: 'candidatebatchuploader',
               element: <CSVCandidatesUploader/>
+            },
+            {
+              path: 'audittrail',
+              element: <AuditTrail/>
             },
           ]
         },

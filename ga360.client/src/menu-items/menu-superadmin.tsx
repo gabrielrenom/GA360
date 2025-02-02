@@ -12,11 +12,12 @@ import { ProfileOutlined } from '@ant-design/icons';
 import { SolutionOutlined } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons'; // Import the UploadOutlined icon
 import { WechatOutlined, AppstoreAddOutlined, ContactsOutlined } from '@ant-design/icons';
+import { AuditOutlined } from '@ant-design/icons';
 // type
 import { NavItemType } from 'types/menu';
 
 // icons
-const icons = { PieChartOutlined, EnvironmentOutlined, BookOutlined, TeamOutlined, SafetyCertificateOutlined, UserOutlined, ProfileOutlined, SolutionOutlined, UploadOutlined, WechatOutlined, AppstoreAddOutlined, ContactsOutlined };
+const icons = { PieChartOutlined, EnvironmentOutlined, BookOutlined, TeamOutlined, SafetyCertificateOutlined, UserOutlined, ProfileOutlined, SolutionOutlined, UploadOutlined, WechatOutlined, AppstoreAddOutlined, ContactsOutlined,AuditOutlined };
 
 // ==============================|| MENU ITEMS - FORMS & TABLES ||============================== //
 
@@ -39,6 +40,13 @@ const menuSuperAdmin: NavItemType = {
       type: 'item',
       icon: icons.ContactsOutlined,
       url: '/backoffice/trainingcentres'    
+    },
+    {
+      id: 'menu-admin-leads',
+      title: <FormattedMessage id="Leads" />,
+      type: 'item',
+      icon: icons.WechatOutlined,
+      url: '/backoffice/leads'
     },
     {
       id: 'menu-admin-learners',
@@ -67,6 +75,13 @@ const menuSuperAdmin: NavItemType = {
       type: 'item',
       icon: icons.UploadOutlined,
       url: '/backoffice/candidatebatchuploader'
+    },
+    {
+      id: 'menu-admin-audit-trail',
+      title: <FormattedMessage id="Audit Trail" />,
+      type: 'item',
+      icon: icons.AuditOutlined,
+      url: '/backoffice/audittrail'
     },
   ]
 };

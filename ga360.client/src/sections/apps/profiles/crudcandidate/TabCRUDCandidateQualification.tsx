@@ -114,6 +114,9 @@ export default function TabCRUDCandidateQualification() {
       completeDate: certificate.certificateDate
         ? new Date(certificate.certificateDate).toLocaleDateString("en-GB")
         : "", // Display an empty string if the date is null
+      expectedDate: certificate.expectedDate
+      ? new Date(certificate.expectedDate).toLocaleDateString("en-GB")
+      : ""
     }));
   };
   
@@ -154,7 +157,7 @@ export default function TabCRUDCandidateQualification() {
       {
         header: "Exp Date",
         footer: "Exp Date",
-        accessorKey: "completeDate",
+        accessorKey: "expectedDate",
         enableSorting: true,
         meta: {
           className: "cell-right",

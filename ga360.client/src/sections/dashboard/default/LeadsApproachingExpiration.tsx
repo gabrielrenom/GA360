@@ -29,9 +29,10 @@ import { ColorProps } from 'types/extended';
 
 interface OrderStatusProps {
   status: string;
+  showTitle: boolean;
 }
 
-function OrderStatus({ status }: OrderStatusProps) {
+function OrderStatus({ status, showTitle }: OrderStatusProps) {
   let color: ColorProps;
   let title: string;
 
@@ -56,7 +57,7 @@ function OrderStatus({ status }: OrderStatusProps) {
   return (
     <Stack direction="row" spacing={1} alignItems="center">
       <Dot color={color} />
-      <Typography>{title}</Typography>
+      {showTitle && <Typography>{title}</Typography>}
     </Stack>
   );
 }
@@ -86,6 +87,11 @@ export default function LeadsApproachingExpiration() {
         header: 'Name'
       },
       {
+        accessorKey: 'status',
+        header: '',
+        cell: info => <OrderStatus status={info.getValue() as string} showTitle={false} />
+      },
+      {
         accessorKey: 'dateAdded',
         header: 'Date Added',
         cell: info => {
@@ -101,11 +107,7 @@ export default function LeadsApproachingExpiration() {
           return date.toLocaleDateString('en-GB'); // Format as DD/MM/YYYY
         }
       },
-      {
-        accessorKey: 'status',
-        header: 'Status',
-        cell: info => <OrderStatus status={info.getValue() as string} />
-      }
+     
     ],
     []
   );
@@ -135,7 +137,6 @@ export default function LeadsApproachingExpiration() {
       content={false}
       secondary={
         <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
-          <SelectColumnSorting {...{ getState: table.getState, getAllColumns: table.getAllColumns, setSorting }} />
           <CSVExport {...{ data: leads, headers, filename: 'leads_approaching_expiration.csv' }} />
         </Stack>
       }

@@ -95,10 +95,18 @@ export default function DynamicTableQualifications() {
   const [rows, setRows] = useState<GridRowsProp>(initialRows);
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
   const [trainingCentres, setTrainingCentres] = useState([]);
   const [trainingCentresForQualification, settrainingCentresForQualification] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const showSnackbar = (message, severity) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
 
   useEffect(() => {
     async function fetchTrainingCentres() {
@@ -144,8 +152,7 @@ export default function DynamicTableQualifications() {
       await deleteQualification(Number(id));
       setRows(rows.filter((row) => row.id !== id));
     } catch (error) {
-      console.error('Failed to delete course :', error);
-      setSnackbarMessage('Failed to delete course, it is probablu used by a candidate');
+      setSnackbarMessage('Failed to delete qualifucation, it is probablu used by a candidate');
       setSnackbarOpen(true);
     }
   };
@@ -205,22 +212,27 @@ export default function DynamicTableQualifications() {
     try {
       console.log("SSS", newRow);
       if (newRow.isNew) {
-        // const qualification = mapToQualification(newRow);
-        // qualification.id = 0;
-        // const createdQualification = await addQualification(qualification);
-        // setRows(rows.map((row) => (row.id === newRow.id ? createdQualification : row)));
+
         const qualification = mapToQualification(newRow,trainingCentresForQualification);
         qualification.id = 0;
         const createdQualification = await addQualification(qualification);
-        
+        if (createdQualification) {
+          showSnackbar("Record created successfully!", "success");
+          await fetchQualifications();
+        } else {
+          showSnackbar("Failed to create record due to dependencies.", "error");
+        }
         await fetchQualifications();
       } else {
-        console.log("UPDATING", newRow)
         const qualification = mapToQualification(newRow,trainingCentresForQualification);
-        const updatedQualification = await updateQualification(qualification.id, qualification); // Call updateQualification for existing rows
-        console.log(updatedQualification)
-        newRow.trainingCentre = updatedQualification.trainingCentre;
-        setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)));
+        const updatedQualification = await updateQualification(qualification.id, qualification);
+        if (updatedQualification) {
+          showSnackbar("Record updated successfully!", "success");
+          newRow.trainingCentre = updatedQualification.trainingCentre;
+          setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)));
+        } else {
+          showSnackbar("Failed to update record due to dependencies.", "error");
+        }
       }
       settrainingCentresForQualification([]);
     } catch (error) {
@@ -489,7 +501,17 @@ const columns: GridColDef[] = [
               />
             </Box>
           </Stack>
-          <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose} ></Snackbar>
-        </MainCard>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} 
+        //@ts-ignore
+        severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>        </MainCard>
       );
     }      

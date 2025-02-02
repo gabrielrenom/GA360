@@ -234,42 +234,55 @@ export async function getQualificationDetailByUserId(id: number): Promise<Qualif
   return data;
 }
 
-export async function addQualification(qualification: Qualification): Promise<Qualification> {
-  console.log("MY QUALI", qualification)
-  const response = await fetch(endpoints.key, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF': 'Dog',
-    },
-    body: JSON.stringify(qualification),
-  });
+export async function addQualification(qualification: Qualification): Promise<Qualification | null> {
+  try {
+    const response = await fetch(endpoints.key, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF': 'Dog',
+      },
+      body: JSON.stringify(qualification),
+    });
 
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
+    if (!response.ok) {
+      console.error('Network response was not ok');
+      return null;
+    }
+
+    const createdQualification: Qualification = await response.json(); 
+    return createdQualification;
+  } catch (error) {
+    console.error('Error occurred while adding qualification:', error);
+    return null;
   }
-
-  const createdQualification: Qualification = await response.json(); 
-  return createdQualification;
 }
 
-export async function updateQualification(id: number, qualification: Qualification): Promise<QualificationTable> {
-  const response = await fetch(`${endpoints.key}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF': 'Dog',
-    },
-    body: JSON.stringify(qualification),
-  });
 
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
+export async function updateQualification(id: number, qualification: Qualification): Promise<QualificationTable | null> {
+  try {
+    const response = await fetch(`${endpoints.key}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF': 'Dog',
+      },
+      body: JSON.stringify(qualification),
+    });
+
+    if (!response.ok) {
+      console.error('Network response was not ok');
+      return null;
+    }
+
+    const updatedQualification: QualificationTable = await response.json();
+    return updatedQualification;
+  } catch (error) {
+    console.error('Error occurred while updating qualification:', error);
+    return null;
   }
-
-  const updatedQualification: QualificationTable = await response.json();
-  return updatedQualification;
 }
+
 
 export async function deleteQualification(id: number): Promise<void> {
   const response = await fetch(`${endpoints.key}/${id}`, {

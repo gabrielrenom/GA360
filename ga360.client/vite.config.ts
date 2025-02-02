@@ -159,6 +159,10 @@ export default defineConfig({
                 secure: false,
                 changeOrigin: true
             },
+            '^/api/audittrail': {
+                target,
+                secure: false
+            },
             '^/api/configuration/redirecturl': {
                 target,
                 secure: false,

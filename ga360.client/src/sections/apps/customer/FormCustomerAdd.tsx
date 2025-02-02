@@ -349,23 +349,19 @@ export default function FormCustomerAdd({
                 } else {
                     setSubmitting(true); // Set submitting state to true
 
-                    console.log("TRAINING CENTRE",user.trainingCentreId, newCustomer.trainingCentre,user.role)
 
                     if (user.trainingCentreId === null && newCustomer.trainingCentre === 0 && user.role ==="Super Admin")
                     {
-                        console.log("HERE")
                         newCustomer.trainingCentre = 0;
                     }
                     else if (user.role ==="Training Centre" || user.role ==="Candidate")
                         newCustomer.trainingCentre = user.trainingCentreId;
 
-                    console.log("TRAINING CENTRE",user.trainingCentreId, newCustomer.trainingCentre)
 
                     insertCustomerWithDocuments(
                         newCustomer,
                         documents
                     ).then((success) => {
-                        console.log("INSERTED", success)
                         if (success) {
                             openSnackbar({
                                 open: true,

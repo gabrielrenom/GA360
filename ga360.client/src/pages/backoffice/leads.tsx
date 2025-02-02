@@ -202,6 +202,7 @@ export default function Leads({ triggerAddCandidate = false, onModalClose = () =
 
         const fetchCustomerData = async () => {
             try {
+                console.log ("LEADS!")
                 const customers = await fetchLeadsList();
                 console.log(customers);
                 const mappedCustomers = customers.map((customer: CustomerApiModelExtended) => mapCustomerApiModelToCustomerListExtended(customer));
@@ -218,7 +219,6 @@ export default function Leads({ triggerAddCandidate = false, onModalClose = () =
 
     const handleAddCustomer = () => { 
         setSelectedCustomer(null); 
-        console.log("NULL CUSTOMER" )
     };
     // function setCustomerModal(arg0: boolean) {
     //     throw new Error("Function not implemented.");
