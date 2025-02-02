@@ -7,6 +7,7 @@ using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using static GA360.Domain.Core.Interfaces.IAuditTrailService;
 
 namespace GA360.Server.Controllers;
 
@@ -17,12 +18,14 @@ public class CourseController : ControllerBase
     private readonly ILogger<CourseController> _logger;
     private readonly ICourseService _courseService;
     private readonly IPermissionService _permissionService;
+    private readonly IAuditTrailService _auditTrailService;
 
-    public CourseController(ILogger<CourseController> logger, ICourseService courseService, IPermissionService permissionService)
+    public CourseController(ILogger<CourseController> logger, ICourseService courseService, IPermissionService permissionService, IAuditTrailService auditTrailService)
     {
         _logger = logger;
         _courseService = courseService;
         _permissionService = permissionService;
+        _auditTrailService = auditTrailService;
     }
 
     [AllowAnonymous]
@@ -43,6 +46,8 @@ public class CourseController : ControllerBase
         {
             courses = await _courseService.GetAllCoursesByTrainingId(emailClaim);
         }
+        await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, "Retrieved courses.", emailClaim);
+
 
         return Ok(courses);
     }
@@ -65,6 +70,7 @@ public class CourseController : ControllerBase
         {
             return Ok(await _courseService.GetAllCoursesWithTrainigCentresAndLearners(id));
         }
+        await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, "Retrieved courses with details.", emailClaim);
 
         return Ok(courses);
     }
@@ -77,6 +83,8 @@ public class CourseController : ControllerBase
 
         var courses = await _courseService.GetAllCoursesByTrainingCentreId(trainingCentreId);
 
+        await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, $"Retrieved courses by training centre ID: {trainingCentreId}.", emailClaim);
+
         return Ok(courses);
     }
 
@@ -88,6 +96,8 @@ public class CourseController : ControllerBase
 
         var courses = await _courseService.GetAllCoursesByUserId(userId);
 
+        await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, $"Retrieved courses by user ID: {userId}.", emailClaim);
+
         return Ok(courses);
     }
 
@@ -95,11 +105,17 @@ public class CourseController : ControllerBase
     [HttpGet("{id}")]
     public IActionResult GetCourse(int id)
     {
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
         var course = _courseService.GetCourse(id);
         if (course == null)
         {
+            _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Warning, $"Course not found with ID: {id}.", emailClaim);
             return NotFound();
         }
+
+        _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, $"Retrieved course with ID: {id}.", emailClaim);
+
         return Ok(course);
     }
 
@@ -124,9 +140,12 @@ public class CourseController : ControllerBase
             else
             {
                 var finalResult = await _courseService.AddCourseByTrainingId(course.ToEntity(), (int)course.TrainingCentreId, course.Price);
+                await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, $"Added course: {finalResult.Id}.", emailClaim);
                 return Ok(finalResult);
             }
         }
+
+        await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, $"Added course: {courseResult.Id}.", emailClaim);
 
         return CreatedAtAction(nameof(GetCourse), new { id = courseResult.Id }, courseResult);
     }
@@ -134,20 +153,30 @@ public class CourseController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCourse(int id, [FromBody] CourseViewModel course)
     {
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
         var result = await _courseService.UpdateCourse(course.ToEntity(), course.TrainingCentreId, course.Price);
+
+        await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, $"Updated course with ID: {id}.", emailClaim);
 
         return Ok(result);
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteCourse(int id)
+    public async Task<IActionResult> DeleteCourse(int id)
     {
+        var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
         var existingCourse = _courseService.GetCourse(id);
         if (existingCourse == null)
         {
+            await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Warning, $"Course not found with ID: {id}.", emailClaim);
             return NotFound();
         }
         _courseService.DeleteCourse(id);
+
+        await _auditTrailService.InsertAudit(AuditTrailArea.Courses, AuditTrailType.Information, $"Deleted course with ID: {id}.", emailClaim);
+
         return NoContent();
     }
 }

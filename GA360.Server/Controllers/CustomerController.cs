@@ -11,11 +11,9 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static GA360.Commons.Helpers.JsonHelper;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Data.SqlClient;
 using GA360.DAL.Infrastructure.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using static GA360.Domain.Core.Interfaces.IAuditTrailService;
 
 namespace GA360.Server.Controllers
 {
@@ -29,9 +27,16 @@ namespace GA360.Server.Controllers
         private readonly IMemoryCache _memoryCache;
         private readonly ICustomerRepository _customerRepository;
         private readonly IPermissionService _permissionService;
+        private readonly IAuditTrailService _auditTrailService;
 
 
-        public CustomerController(ILogger<CustomerController> logger, ICustomerService customerService, IConfiguration configuration, IMemoryCache memoryCache, ICustomerRepository customerRepository, IPermissionService permissionService)
+        public CustomerController(ILogger<CustomerController> logger,
+            ICustomerService customerService,
+            IConfiguration configuration,
+            IMemoryCache memoryCache,
+            ICustomerRepository customerRepository,
+            IPermissionService permissionService,
+            IAuditTrailService auditTrailService)
         {
             _logger = logger;
             _customerService = customerService;
@@ -39,6 +44,7 @@ namespace GA360.Server.Controllers
             _memoryCache = memoryCache;
             _customerRepository = customerRepository;
             _permissionService = permissionService;
+            _auditTrailService = auditTrailService;
         }
 
         //[AllowAnonymous]
@@ -74,7 +80,7 @@ namespace GA360.Server.Controllers
 
             var permissions = await _permissionService.GetPermissions(emailClaim);
 
-            return Ok(await _customerService.GetAllUltraHighPerfomance(trainingCentreId));
+            return Ok(await _customerService.GetAllUltraHighPerformance(trainingCentreId));
         }
 
         [Authorize]
@@ -84,6 +90,8 @@ namespace GA360.Server.Controllers
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
             var permissions = await _permissionService.GetPermissions(emailClaim);
+
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Leads, IAuditTrailService.AuditTrailType.Information, "Getting Leads...", emailClaim);
 
             return Ok(await _customerService.GetLeadsAllUltraHighPerformance(trainingCentreId));
         }
@@ -96,6 +104,8 @@ namespace GA360.Server.Controllers
 
             var permissions = await _permissionService.GetPermissions(emailClaim);
 
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, $"Getting active learner per month TC:{trainingCentreId}.", emailClaim);
+
             return Ok(await _customerService.GetActiveLearnersPerMonth(trainingCentreId));
         }
 
@@ -107,6 +117,8 @@ namespace GA360.Server.Controllers
 
             var permissions = await _permissionService.GetPermissions(emailClaim);
 
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Leads, IAuditTrailService.AuditTrailType.Information, $"Getting leads by expiration date TC:{trainingCentreId}.", emailClaim);
+
             return Ok(await _customerService.GetAllLeadsApproachingExpiration(trainingCentreId));
         }
 
@@ -114,8 +126,11 @@ namespace GA360.Server.Controllers
         [HttpGet("get/full/{id}")]
         public async Task<IActionResult> GetCustomerById(int id)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
             var result = await _customerService.GetCustomerByIdWithAllEntities(id);
+
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, $"Getting full details from learner L:{id}", emailClaim);
 
             return Ok(FromUserModelToViewModel(result));
         }
@@ -124,8 +139,11 @@ namespace GA360.Server.Controllers
         [HttpGet("get/profile/{id}")]
         public async Task<IActionResult> GetCustomerProfileHighPerfomance(int id)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
             var result = await _customerService.GetCustomerProfileHighPerformance(id);
+
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, $"Get learner profile High Perfomance L:{id}", emailClaim);
 
             return Ok(result);
         }
@@ -134,6 +152,8 @@ namespace GA360.Server.Controllers
         [HttpGet("list/basic")]
         public async Task<IActionResult> GetAllBasicContacts()
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var cacheKey = "GetAllBasicContacts";
             if (!_memoryCache.TryGetValue(cacheKey, out List<BasicUserViewModel> cachedResult))
             {
@@ -149,6 +169,8 @@ namespace GA360.Server.Controllers
 
                 cachedResult = basicContacts;
             }
+
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, $"Getting basic learners", emailClaim);
 
             return Ok(cachedResult);
         }
@@ -166,7 +188,9 @@ namespace GA360.Server.Controllers
             var lambda = Expression.Lambda<Func<Customer, object>>(Expression.Convert(property, typeof(object)), parameter);
 
             var result = await _customerService.GetAllCustomerWithCourseQualificationRecords(emailClaim, pageNumber, pageSize, lambda, ascending);
-            
+
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, $"Getting course qualification records.", emailClaim);
+
             return Ok(result!=null?
                 result?.SelectMany(c => c.ToCustomersWithCourseQualificationRecordsViewModel()).ToList():
                 new List<CustomersWithCourseQualificationRecordsViewModel>());
@@ -180,6 +204,8 @@ namespace GA360.Server.Controllers
 
             var result = await _customerService.GetAllCustomerWithCourseQualificationRecordsByCustomerId(customerid);
 
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, $"Getting course qualification records by learner id L:{customerid}", emailClaim);
+
             return Ok(result != null ?
                 result?.SelectMany(c => c.ToCustomersWithCourseQualificationRecordsViewModel()).ToList() :
                 new List<CustomersWithCourseQualificationRecordsViewModel>());
@@ -191,6 +217,8 @@ namespace GA360.Server.Controllers
         public async Task<IActionResult> GetAllCustomersWithCourseQualificationRecords(
             int? pageNumber, int? pageSize, string orderBy = "Email", bool ascending = true)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var cacheKey = $"GetAllCustomersWithCourseQualificationRecords";
             if (!_memoryCache.TryGetValue(cacheKey, out List<CustomersWithCourseQualificationRecordsViewModel> cachedResult))
             {
@@ -213,6 +241,8 @@ namespace GA360.Server.Controllers
                 _memoryCache.Set(cacheKey, cachedResult, cacheEntryOptions);
             }
 
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, $"Getting course qualification records with pagination", emailClaim);
+
             return Ok(cachedResult);
         }
 
@@ -221,10 +251,23 @@ namespace GA360.Server.Controllers
         [HttpPost("customerswithcoursequalificationrecords")]
         public async Task<IActionResult> CreateCustomersWithCourseQualificationRecords([FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             if (customer.QualificationId == null && customer.QualificationStatusId == null && customer.CourseId == null && customer.CertificateId == null && customer.Email.IsNullOrEmpty())
                 return Ok();
 
             var result = await _customerService.CreateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());
+            // Convert the customer object to a detailed message
+
+            string auditMessage = $"Created new qualification with course. " +
+                                  $"QualificationId: {customer.QualificationId}, " +
+                                  $"QualificationStatusId: {customer.QualificationStatusId}, " +
+                                  $"CourseId: {customer.CourseId}, " +
+                                  $"CertificateId: {customer.CertificateId}, " +
+                                  $"Email: {customer.Email}";
+
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, auditMessage, emailClaim);
+
             _memoryCache.Remove("GetAllCustomersWithCourseQualificationRecords"); // Clear cache when data is modified
             return Ok(result);
         }
@@ -233,7 +276,19 @@ namespace GA360.Server.Controllers
         [HttpPut("customerswithcoursequalificationrecords/{id}")]
         public async Task<IActionResult> UpdateCustomersWithCourseQualificationRecords(int id, [FromBody] CustomersWithCourseQualificationRecordsViewModel customer)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var result = await _customerService.UpdateCustomersWithCourseQualificationRecords(customer.ToCustomersWithCourseQualificationRecordsModel());
+
+            string auditMessage = $"Updating qualification with course. " +
+                                  $"QualificationId: {customer.QualificationId}, " +
+                                  $"QualificationStatusId: {customer.QualificationStatusId}, " +
+                                  $"CourseId: {customer.CourseId}, " +
+                                  $"CertificateId: {customer.CertificateId}, " +
+                                  $"Email: {customer.Email}";
+
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Learners, IAuditTrailService.AuditTrailType.Information, auditMessage, emailClaim);
+
             _memoryCache.Remove("GetAllCustomersWithCourseQualificationRecords"); // Clear cache when data is modified
             return Ok(result);
         }
@@ -242,18 +297,25 @@ namespace GA360.Server.Controllers
         [HttpDelete("customerswithcoursequalificationrecords/{id}")]
         public async Task<IActionResult> DeleteCustomersWithCourseQualificationRecords(int id)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             await _customerService.DeleteCustomersWithCourseQualificationRecords(id);
             _memoryCache.Remove("GetAllCustomersWithCourseQualificationRecords"); // Clear cache when data is modified
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, $"Qualification removed for ID: {id}", emailClaim);
+
             return Ok();
         }
 
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpGet("get")]
         public async Task<IActionResult> GetCustomer()
         {
-            var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
             var result = await _customerService.GetCustomerByEmail(emailClaim);
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, "Customer information retrieved.", emailClaim);
 
             return Ok(result);
         }
@@ -261,18 +323,24 @@ namespace GA360.Server.Controllers
         [HttpGet("get/documents/{email}")]
         public async Task<IActionResult> GetDocuments(string email)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var result = await _customerService.GetCustomerDocumentsByEmail(email);
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, $"Documents retrieved for email: {email}", emailClaim);
 
             return Ok(result);
         }
 
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpGet("user")]
         public async Task<IActionResult> GetUser()
         {
-            var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
             var result = await _customerService.GetBasicCustomerByEmail(emailClaim);
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, "Basic customer information retrieved.", emailClaim);
 
             return Ok(result);
         }
@@ -280,12 +348,14 @@ namespace GA360.Server.Controllers
         [HttpGet("get/basic")]
         public async Task<IActionResult> GetBasicCustomer()
         {
-            if (User.Claims.FirstOrDefault(x => x.Type == "email") == null)
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            if (emailClaim == null)
                 return Forbid();
 
-            var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
-
             var result = await _customerService.GetBasicCustomerByEmail(emailClaim);
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, "Basic customer information retrieved.", emailClaim);
 
             return Ok(result);
         }
@@ -294,12 +364,12 @@ namespace GA360.Server.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> AddContact([FromForm] CustomerAddFilesViewModel contact)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             try
             {
-                if (User.Claims.FirstOrDefault(x => x.Type == "email") == null)
+                if (emailClaim == null)
                     return Forbid();
-
-                var emailClaim = User.Claims.FirstOrDefault(x => x.Type == "email").Value;
 
                 var permissions = await _permissionService.GetPermissions(emailClaim);
 
@@ -317,7 +387,7 @@ namespace GA360.Server.Controllers
                 {
                     customer.TrainingCentre = 0;
                 }
-                if (customer.Role.IsNullOrEmpty())
+                if (string.IsNullOrEmpty(customer.Role))
                 {
                     customer.Role = "Super Admin";
                 }
@@ -332,23 +402,30 @@ namespace GA360.Server.Controllers
 
                 var jsonResult = JsonSerializer.Serialize(result, options);
 
+                await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, $"Contact created: {jsonResult}", emailClaim);
+
                 _memoryCache.Remove("GetAllBasicContacts"); // Clear cache when data is modified
 
                 return Ok(jsonResult);
             }
             catch (Exception ex)
             {
+                await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Error, $"Error creating contact: {ex.Message}", emailClaim);
                 return BadRequest();
             }
-
         }
 
         [AllowAnonymous]
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateCustomer([FromBody] UserViewModel contact, int id)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var result = await _customerService.UpdateCustomer(id, FromUserViewModelToCustomerModel(contact));
             _memoryCache.Remove("GetAllBasicContacts"); // Clear cache when data is modified
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, $"Customer updated with ID: {id}", emailClaim);
+
             return Ok(result);
         }
 
@@ -356,6 +433,8 @@ namespace GA360.Server.Controllers
         [HttpPut("updatewithdocuments/{id}")]
         public async Task<IActionResult> UpdateCustomerWithDocuments([FromForm] CustomerUploadViewModel contact, int id)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var customer = JsonSerializer.Deserialize<UserViewModel>(contact.Customer, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new UpperCaseNamingPolicy()
@@ -373,6 +452,9 @@ namespace GA360.Server.Controllers
 
             var jsonResult = JsonSerializer.Serialize(result, options);
             _memoryCache.Remove("GetAllBasicContacts"); // Clear cache when data is modified
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, $"Customer with documents updated with ID: {id}", emailClaim);
+
             return Ok(jsonResult);
         }
 
@@ -380,8 +462,12 @@ namespace GA360.Server.Controllers
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteContact(int id)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             await _customerService.DeleteCustomer(id);
             _memoryCache.Remove("GetAllBasicContacts"); // Clear cache when data is modified
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, $"Contact deleted with ID: {id}", emailClaim);
 
             return Ok();
         }
@@ -390,28 +476,29 @@ namespace GA360.Server.Controllers
         [HttpPost("batchupload")]
         public async Task<IActionResult> BatchUpload([FromBody] CustomerBatchViewModel contacts)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             try
             {
-                var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
-
                 var permissions = await _permissionService.GetPermissions(emailClaim);
 
-                if (permissions.Role == "Training Centre")
-                {
-                    var result = await _customerService.UploadBatchCandidates(contacts.ToModel(), emailClaim);
-                    return Ok(result?.ToViewModel());
-                }
-                else
-                {
-                    var result = await _customerService.UploadBatchCandidates(contacts.ToModel());
-                    return Ok(result?.ToViewModel());
-                }
+                var result = (permissions.Role == "Training Centre") ?
+                    await _customerService.UploadBatchCandidates(contacts.ToModel(), emailClaim) :
+                    await _customerService.UploadBatchCandidates(contacts.ToModel());
+
+                var jsonResult = JsonSerializer.Serialize(result?.ToViewModel());
+
+                await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Information, $"Batch upload completed: {jsonResult}", emailClaim);
+
+                return Ok(result?.ToViewModel());
             }
             catch (Exception ex)
             {
+                await _auditTrailService.InsertAudit(AuditTrailArea.Learners, AuditTrailType.Error, $"Error during batch upload: {ex.Message}", emailClaim);
                 return BadRequest("Error doing the batch upload");
             }
         }
+
 
         private UserViewModel FromUserModelToViewModel(CustomerModel source)
         {

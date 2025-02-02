@@ -64,28 +64,73 @@ public class QualificationService : IQualificationService
 
         var result = qualificationTrainingCentres
             .Where(qtc => id == null || qtc.TrainingCentreId == id.Value)
-            .Select(qtc => new QualificationWithTrainingModel
+            .GroupBy(qtc => qtc.Qualification.Id) // Group by Qualification ID for distinct qualifications
+            .Select(g => new QualificationWithTrainingModel
             {
-                Id = qtc.Id,
-                Name = qtc.Qualification.Name,
-                RegistrationDate = qtc.Qualification.RegistrationDate,
-                ExpectedDate = qtc.Qualification.ExpectedDate,
-                CertificateDate = qtc.Qualification.CertificateDate,
-                CertificateNumber = qtc.Qualification.CertificateNumber,
-                Status = qtc.Qualification.Status,
-                TrainingCentreId = qtc.TrainingCentreId,
-                TrainingCentre = qtc.TrainingCentre.Name,
-                InternalReference = qtc.Qualification.InternalReference,
-                QAN = qtc.Qualification.QAN,
-                AwardingBody = qtc.Qualification.AwardingBody,
-                Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == qtc.Qualification.Id)?.LearnersCount ?? 0,
-                Price = qtc.Price,
-                Sector = qtc.Qualification.Sector
+                Id = g.First().Qualification.Id,
+                Name = g.First().Qualification.Name,
+                RegistrationDate = g.First().Qualification.RegistrationDate,
+                ExpectedDate = g.First().Qualification.ExpectedDate,
+                CertificateDate = g.First().Qualification.CertificateDate,
+                CertificateNumber = g.First().Qualification.CertificateNumber,
+                Status = g.First().Qualification.Status,
+                TrainingCentreId = g.First().TrainingCentreId, // Fill with the first one on the list
+                TrainingCentre = g.First().TrainingCentre.Name, // Fill with the first one on the list
+                TrainingCentreIds = g.Select(qtc => qtc.TrainingCentreId).Distinct().ToArray(), // Aggregate all associated training centre IDs
+                InternalReference = g.First().Qualification.InternalReference,
+                QAN = g.First().Qualification.QAN,
+                AwardingBody = g.First().Qualification.AwardingBody,
+                Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == g.Key)?.LearnersCount ?? 0,
+                Price = g.First().Price,
+                Sector = g.First().Qualification.Sector
             })
+            .OrderBy(q => q.Id) // Order by Qualification ID
             .ToList();
 
         return result;
     }
+
+
+    //public async Task<List<QualificationWithTrainingModel>> GetAllQualificationsWithTrainingCentres(int? id)
+    //{
+    //    var qualificationTrainingCentres = await _qualificationRepository.Context.QualificationTrainingCentre
+    //        .Include(qtc => qtc.Qualification)
+    //        .Include(qtc => qtc.TrainingCentre)
+    //        .ToListAsync();
+
+    //    var qualificationCustomerCounts = await _qualificationRepository.Context.QualificationCustomerCourseCertificates
+    //        .GroupBy(qccc => qccc.QualificationId)
+    //        .Select(g => new
+    //        {
+    //            QualificationId = g.Key,
+    //            LearnersCount = g.Select(qccc => qccc.CustomerId).Distinct().Count()
+    //        })
+    //        .ToListAsync();
+
+    //    var result = qualificationTrainingCentres
+    //        .Where(qtc => id == null || qtc.TrainingCentreId == id.Value)
+    //        .Select(qtc => new QualificationWithTrainingModel
+    //        {
+    //            Id = qtc.Id,
+    //            Name = qtc.Qualification.Name,
+    //            RegistrationDate = qtc.Qualification.RegistrationDate,
+    //            ExpectedDate = qtc.Qualification.ExpectedDate,
+    //            CertificateDate = qtc.Qualification.CertificateDate,
+    //            CertificateNumber = qtc.Qualification.CertificateNumber,
+    //            Status = qtc.Qualification.Status,
+    //            TrainingCentreId = qtc.TrainingCentreId,
+    //            TrainingCentre = qtc.TrainingCentre.Name,
+    //            InternalReference = qtc.Qualification.InternalReference,
+    //            QAN = qtc.Qualification.QAN,
+    //            AwardingBody = qtc.Qualification.AwardingBody,
+    //            Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == qtc.Qualification.Id)?.LearnersCount ?? 0,
+    //            Price = qtc.Price,
+    //            Sector = qtc.Qualification.Sector
+    //        })
+    //        .ToList();
+
+    //    return result;
+    //}
 
 
 
@@ -153,14 +198,20 @@ public class QualificationService : IQualificationService
         var result = await _qualificationRepository.AddAsync(qualificationEntity);
 
         // Adding the training centre relationship
-        var qualificationTrainingCentre = new QualificationTrainingCentre
+        if (qualification.TrainingCentreIds != null)
         {
-            QualificationId = result.Id,
-            TrainingCentreId = (int)qualification.TrainingCentreId,
-            Price = qualification.Price
-        };
-        _qualificationRepository.Context.QualificationTrainingCentre.Add(qualificationTrainingCentre);
-        await _qualificationRepository.Context.SaveChangesAsync();
+            foreach (var TrainingCentreId in qualification.TrainingCentreIds)
+            {
+                var qualificationTrainingCentre = new QualificationTrainingCentre
+                {
+                    QualificationId = result.Id,
+                    TrainingCentreId = TrainingCentreId,
+                    Price = qualification.Price
+                };
+                _qualificationRepository.Context.QualificationTrainingCentre.Add(qualificationTrainingCentre);
+                await _qualificationRepository.Context.SaveChangesAsync();
+            }
+        }
 
         // Get the training centre name
         var trainingCentre = await _qualificationRepository.Context.TrainingCentres.FindAsync(qualification.TrainingCentreId);
@@ -177,7 +228,8 @@ public class QualificationService : IQualificationService
             TrainingCentreId = qualification.TrainingCentreId,
             QAN = result.QAN,
             TrainingCentre = trainingCentre?.Name,
-            Sector = result.Sector
+            Sector = result.Sector,
+            TrainingCentreIds = qualification.TrainingCentreIds
         };
 
         return qualificationWithTraining;
@@ -207,30 +259,61 @@ public class QualificationService : IQualificationService
 
         var result = await _qualificationRepository.UpdateAsync(qualificationEntity);
 
+        var currentTrainingCentreIds = await _qualificationRepository
+        .Context
+        .QualificationTrainingCentre
+        .Where(x => x.QualificationId == qualification.Id)
+        .Select(x => x.TrainingCentreId)
+        .ToListAsync();
+
         // Update the training centre relationship
-        var existingTrainingCentre = await _qualificationRepository.Context.QualificationTrainingCentre
-            .FirstOrDefaultAsync(qtc => qtc.QualificationId == qualification.Id);
+        if (qualification.TrainingCentreIds != null)
+        {
+            // Remove TrainingCentreIds that are not in the new list
+            var trainingCentresToRemove = currentTrainingCentreIds
+                .Where(id => !qualification.TrainingCentreIds.Contains(id))
+                .ToList();
 
-        if (existingTrainingCentre != null)
-        {
-            existingTrainingCentre.TrainingCentreId = (int)qualification.TrainingCentreId;
-            var qualificationTrainingCentre = await _qualificationRepository.Context.QualificationTrainingCentre.FirstOrDefaultAsync(x => x.QualificationId == qualification.Id && x.TrainingCentreId == (int)qualification.TrainingCentreId);
-            qualificationTrainingCentre.Price = qualification.Price;
-            _qualificationRepository.Context.QualificationTrainingCentre.Update(qualificationTrainingCentre);
-        }
-        else
-        {
-            var qualificationTrainingCentre = new QualificationTrainingCentre
+            foreach (var TrainingCentreId in trainingCentresToRemove)
             {
-                QualificationId = qualification.Id,
-                TrainingCentreId = (int)qualification.TrainingCentreId,
-                Price = qualification.Price,
-                ModifiedAt = DateTime.Now
-            };
-            _qualificationRepository.Context.QualificationTrainingCentre.Add(qualificationTrainingCentre);
+                var qualificationTrainingCentre = await _qualificationRepository.Context.QualificationTrainingCentre
+                    .FirstOrDefaultAsync(qtc => qtc.QualificationId == qualification.Id && qtc.TrainingCentreId == TrainingCentreId);
+
+                if (qualificationTrainingCentre != null)
+                {
+                    _qualificationRepository.Context.QualificationTrainingCentre.Remove(qualificationTrainingCentre);
+                }
+            }
+
+            // Add or update TrainingCentreIds from the new list
+            foreach (var TrainingCentreId in qualification.TrainingCentreIds)
+            {
+                var existingTrainingCentre = await _qualificationRepository.Context.QualificationTrainingCentre
+                    .FirstOrDefaultAsync(qtc => qtc.QualificationId == qualification.Id && qtc.TrainingCentreId == TrainingCentreId);
+
+                if (existingTrainingCentre != null)
+                {
+                    existingTrainingCentre.Price = qualification.Price;
+                    existingTrainingCentre.ModifiedAt = DateTime.Now;
+                    _qualificationRepository.Context.QualificationTrainingCentre.Update(existingTrainingCentre);
+                }
+                else
+                {
+                    var qualificationTrainingCentre = new QualificationTrainingCentre
+                    {
+                        QualificationId = qualification.Id,
+                        TrainingCentreId = TrainingCentreId,
+                        Price = qualification.Price,
+                        ModifiedAt = DateTime.Now
+                    };
+                    _qualificationRepository.Context.QualificationTrainingCentre.Add(qualificationTrainingCentre);
+                }
+            }
+
+            await _qualificationRepository.Context.SaveChangesAsync();
         }
 
-        await _qualificationRepository.Context.SaveChangesAsync();
+
 
         // Get the training centre name
         var trainingCentre = await _qualificationRepository.Context.TrainingCentres.FindAsync(qualification.TrainingCentreId);
@@ -443,7 +526,7 @@ public class QualificationService : IQualificationService
             SELECT 
                 q.Id,
                 q.Name,
-                q.RegistrationDate,
+                qc.QualificationRegistrationDate,
                 q.ExpectedDate,
                 q.CertificateDate,
                 q.CertificateNumber,
@@ -473,7 +556,7 @@ public class QualificationService : IQualificationService
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("RegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("QualificationRegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("QualificationRegistrationDate")),
                             ExpectedDate = reader.IsDBNull(reader.GetOrdinal("ExpectedDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
                             CertificateDate = reader.IsDBNull(reader.GetOrdinal("CertificateDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
                             CertificateNumber = reader.IsDBNull(reader.GetOrdinal("CertificateNumber")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
@@ -503,7 +586,7 @@ public class QualificationService : IQualificationService
             SELECT 
                 q.Id,
                 q.Name,
-                q.RegistrationDate,
+                qc.QualificationRegistrationDate,
                 q.ExpectedDate,
                 q.CertificateDate,
                 q.CertificateNumber,
@@ -533,7 +616,7 @@ public class QualificationService : IQualificationService
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("RegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("QualificationRegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("QualificationRegistrationDate")),
                             ExpectedDate = reader.IsDBNull(reader.GetOrdinal("ExpectedDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
                             CertificateDate = reader.IsDBNull(reader.GetOrdinal("CertificateDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
                             CertificateNumber = reader.IsDBNull(reader.GetOrdinal("CertificateNumber")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("CertificateNumber")),
@@ -563,7 +646,7 @@ public class QualificationService : IQualificationService
                 SELECT 
                     q.Id,
                     q.Name,
-                    q.RegistrationDate,
+                    qc.QualificationRegistrationDate,
                     q.ExpectedDate,
                     q.CertificateDate,
                     q.CertificateNumber,
@@ -597,7 +680,7 @@ public class QualificationService : IQualificationService
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("RegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("RegistrationDate")),
+                            RegistrationDate = reader.IsDBNull(reader.GetOrdinal("QualificationRegistrationDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("QualificationRegistrationDate")),
                             ExpectedDate = reader.IsDBNull(reader.GetOrdinal("ExpectedDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("ExpectedDate")),
                             CertificateDate = reader.IsDBNull(reader.GetOrdinal("CertificateDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("CertificateDate")),
                             CertificateNumber = reader.IsDBNull(reader.GetOrdinal("CertificateNumber")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("CertificateNumber")),

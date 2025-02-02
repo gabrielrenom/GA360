@@ -2,7 +2,9 @@
 using GA360.DAL.Infrastructure.Interfaces;
 using GA360.DAL.Infrastructure.Repositories;
 using GA360.Domain.Core.Interfaces;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
 namespace GA360.Domain.Core.Services;
@@ -10,9 +12,11 @@ namespace GA360.Domain.Core.Services;
 public class TrainingCentreService : ITrainingCentreService
 {
     private readonly ITrainingCentreRepository _trainingCentreRepository;
-    public TrainingCentreService(ITrainingCentreRepository trainingCentreRepository)
+    private readonly ILogger<TrainingCentreService> _logger;
+    public TrainingCentreService(ITrainingCentreRepository trainingCentreRepository, ILogger<TrainingCentreService> logger)
     {
         _trainingCentreRepository = trainingCentreRepository;
+        _logger = logger;
     }
 
     public async Task<List<TrainingCentre>> GetTrainingCentresAsync()
@@ -31,6 +35,50 @@ public class TrainingCentreService : ITrainingCentreService
     {
         return await _trainingCentreRepository.GetAll();
     }
+
+    public async Task<List<TrainingCentre>> GetAllTrainingCentresByQualificationId(int qualificationId)
+    {
+        var trainingCentres = new List<TrainingCentre>();
+
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(_trainingCentreRepository.Context.Database.GetConnectionString()))
+            {
+                await connection.OpenAsync();
+
+                string query = @"
+                    SELECT tc.Id, tc.Name
+                    FROM TrainingCentres tc
+                    INNER JOIN QualificationTrainingCentre qtc ON tc.Id = qtc.TrainingCentreId
+                    WHERE qtc.QualificationId = @QualificationId";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@QualificationId", qualificationId);
+
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var trainingCentre = new TrainingCentre
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1)
+                            };
+                            trainingCentres.Add(trainingCentre);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching training centres: {ex.Message}");
+        }
+
+        return trainingCentres;
+    }
+
 
     public async Task<TrainingCentre> AddTrainingCentre(TrainingCentre trainingCentre)
     {

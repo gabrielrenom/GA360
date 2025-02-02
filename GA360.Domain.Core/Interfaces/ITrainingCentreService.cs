@@ -10,4 +10,5 @@ public interface ITrainingCentreService
     Task<TrainingCentre> AddTrainingCentre(TrainingCentre trainingCentre);
     Task<TrainingCentre> UpdateTrainingCentre(TrainingCentre trainingCentre);
     void DeleteTrainingCentre(int id);
+    Task<List<TrainingCentre>> GetAllTrainingCentresByQualificationId(int qualificationId);
 }

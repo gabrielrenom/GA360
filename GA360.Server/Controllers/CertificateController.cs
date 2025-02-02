@@ -4,6 +4,7 @@ using GA360.Domain.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using static GA360.Domain.Core.Interfaces.IAuditTrailService;
 
 namespace GA360.Server.Controllers
 {
@@ -15,14 +16,16 @@ namespace GA360.Server.Controllers
         private readonly ICertificateService _certificateService;
         private readonly IPermissionService _permissionService;
         private readonly IMemoryCache _cache;
+        private readonly IAuditTrailService _auditTrailService;
 
         private const string CertificatesCacheKey = "certificatesCache";
 
-        public CertificateController(ICertificateService certificateService, IPermissionService permissionService, IMemoryCache cache)
+        public CertificateController(ICertificateService certificateService, IPermissionService permissionService, IMemoryCache cache, IAuditTrailService auditTrailService)
         {
             _certificateService = certificateService;
             _permissionService = permissionService;
             _cache = cache;
+            _auditTrailService = auditTrailService;
         }
 
         [AllowAnonymous]
@@ -40,6 +43,8 @@ namespace GA360.Server.Controllers
 
                 _cache.Set(CertificatesCacheKey, certificates, cacheEntryOptions);
             }
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Certificates, AuditTrailType.Information, "Retrieved all certificates.", emailClaim);
 
             return Ok(certificates);
         }

@@ -23,6 +23,7 @@ public class QualificationCustomerCourseCertificate: Audit, IModel
     public double? QualificationPrice { get; set; }
     // Discount
     public double? QualificationDiscount { get; set; }
+    public DateTime? QualificationRegistrationDate { get; set; }
     public DateTime? CourseRegistrationDate { get; set; }
     public DateTime? CourseExpectedDate { get; set; }
     public DateTime? CourseCertificateDate { get; set; }

@@ -7,6 +7,7 @@ using GA360.Server.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using static GA360.Domain.Core.Interfaces.IAuditTrailService;
 
 namespace GA360.Server.Controllers
 {
@@ -18,7 +19,7 @@ namespace GA360.Server.Controllers
         private readonly IQualificationService _qualificationService;
         private readonly IPermissionService _permissionService;
         private readonly IMemoryCache _cache;
-
+        private readonly IAuditTrailService _auditTrailService;
 
         private const string QualificationsCacheKey = "qualificationsCache";
         private const string QualificationsTrainingCentreCacheKey = "qualificationsTrainingCentreCache";
@@ -30,41 +31,15 @@ namespace GA360.Server.Controllers
             ILogger<QualificationController> logger,
             IQualificationService qualificationService,
             IPermissionService permissionService,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            IAuditTrailService auditTrailService)
         {
             _logger = logger;
             _qualificationService = qualificationService;
             _permissionService = permissionService;
             _cache = cache;
+            _auditTrailService = auditTrailService;
         }
-
-        //[AllowAnonymous]
-        //[HttpGet]
-        //public async Task<IActionResult> GetQualifications()
-        //{
-        //    var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
-
-        //    if (!_cache.TryGetValue(QualificationsCacheKey, out List<Qualification> qualifications))
-        //    {
-        //        qualifications = await _qualificationService.GetAllQualifications();
-
-        //        var cacheEntryOptions = new MemoryCacheEntryOptions()
-        //            .SetSlidingExpiration(TimeSpan.FromMinutes(30));
-
-        //        _cache.Set(QualificationsCacheKey, qualifications, cacheEntryOptions);
-        //    }
-
-        //    var permissions = await _permissionService.GetPermissions(emailClaim);
-
-        //    if (permissions.Role != RoleConstants.SUPER_ADMIN)
-        //    {
-        //        var qualificationsPermisssions = await _permissionService.FilterPermissions(emailClaim, qualifications);
-
-        //        return Ok(qualificationsPermisssions);
-        //    }
-
-        //    return Ok(qualifications);
-        //}
 
         [AllowAnonymous]
         [HttpGet]
@@ -76,11 +51,15 @@ namespace GA360.Server.Controllers
 
             if (permissions.Role == RoleConstants.SUPER_ADMIN)
             {
-                return Ok(await _qualificationService.GetAllQualifications());
+                var result = await _qualificationService.GetAllQualifications();
+                await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, "Retrieved all qualifications.", emailClaim);
+                return Ok(result);
             }
             else if (permissions.Role == RoleConstants.TRAINING_CENTRE)
             {
-                return Ok(await _qualificationService.GetQualificationsByTrainingCentreWithEmail(emailClaim));
+                var result = await _qualificationService.GetQualificationsByTrainingCentreWithEmail(emailClaim);
+                await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, "Retrieved qualifications by training centre.", emailClaim);
+                return Ok(result);
             }
 
             return Ok();
@@ -96,64 +75,40 @@ namespace GA360.Server.Controllers
 
             if (permissions.Role == RoleConstants.SUPER_ADMIN)
             {
-                return Ok(await _qualificationService.GetAllQualificationsWithTrainingCentres());
+                var result = await _qualificationService.GetAllQualificationsWithTrainingCentres();
+                await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, "Retrieved all qualifications with training centres.", emailClaim);
+                return Ok(result);
             }
             else if (permissions.Role == RoleConstants.TRAINING_CENTRE)
             {
-                return Ok(await _qualificationService.GetAllQualificationsWithTrainingCentres(id));
+                var result = await _qualificationService.GetAllQualificationsWithTrainingCentres(id);
+                await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, $"Retrieved qualifications with training centres for training centre ID: {id}.", emailClaim);
+                return Ok(result);
             }
 
             return Ok();
-
         }
-
 
         [AllowAnonymous]
         [HttpGet("GetQualificationsByUser")]
         public async Task<IActionResult> GetQualificationsByUser()
         {
-            //var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
-
-            //if (!_cache.TryGetValue($"{UserQualifications}{emailClaim}", out List<Qualification> qualifications))
-            //{
-            //    qualifications = await _qualificationService.GetAllQualificationsByEmail(emailClaim);
-
-            //    var cacheEntryOptions = new MemoryCacheEntryOptions()
-            //        .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-            //    _cache.Set($"{UserQualifications}{emailClaim}", qualifications, cacheEntryOptions);
-            //}
-
-            //return Ok(qualifications);
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-           
-            return Ok(await _qualificationService.GetAllQualificationsByEmail(emailClaim));
+            var result = await _qualificationService.GetAllQualificationsByEmail(emailClaim);
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, "Retrieved qualifications by user email.", emailClaim);
+            return Ok(result);
         }
 
         [AllowAnonymous]
         [HttpGet("GetQualificationsByUserId/{id}")]
         public async Task<IActionResult> GetQualificationsByUserId(int id)
         {
-            //var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
-
-            //if (!_cache.TryGetValue($"{UserQualifications}{id}", out List<Qualification> qualifications))
-            //{
-            //    qualifications = await _qualificationService.GetAllQualificationsByCandidateId(id);
-
-            //    var cacheEntryOptions = new MemoryCacheEntryOptions()
-            //        .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-            //    _cache.Set($"{UserQualifications}{id}", qualifications, cacheEntryOptions);
-            //}
-
-            //return Ok(qualifications);
-
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
-            
-            var qualifications = await _qualificationService.GetAllQualificationsByCandidateId(id);
 
-            return Ok(qualifications);
+            var result = await _qualificationService.GetAllQualificationsByCandidateId(id);
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, $"Retrieved qualifications by user ID: {id}.", emailClaim);
+            return Ok(result);
         }
 
         [AllowAnonymous]
@@ -162,61 +117,44 @@ namespace GA360.Server.Controllers
         {
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            //if (!_cache.TryGetValue($"{UserDetailedQualifications}{id}", out List<QualificationLearnerModel> qualifications))
-            //{
-               var qualifications = await _qualificationService.GetAllDetailedQualificationsByCandidateId(id);
-
-            //    var cacheEntryOptions = new MemoryCacheEntryOptions()
-            //        .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-            //    _cache.Set($"{UserDetailedQualifications}{id}", qualifications, cacheEntryOptions);
-            //}
-
-            return Ok(qualifications);
+            var result = await _qualificationService.GetAllDetailedQualificationsByCandidateId(id);
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, $"Retrieved detailed qualifications by user ID: {id}.", emailClaim);
+            return Ok(result);
         }
 
         [AllowAnonymous]
         [HttpGet("GetQualificationsByTrainingId/{trainingCentreId}")]
         public async Task<IActionResult> GetQualificationsByTrainingId(int trainingCentreId)
         {
-            //var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
-
-            //if (!_cache.TryGetValue($"{QualificationsTrainingCentreCacheKey}{emailClaim}", out List<QualificationTrainingModel> qualifications))
-            //{
-            //    qualifications = await _qualificationService.GetAllQualificationsByTrainingCentreId(trainingCentreId);
-
-            //    var cacheEntryOptions = new MemoryCacheEntryOptions()
-            //        .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-            //    _cache.Set($"{QualificationsTrainingCentreCacheKey}{emailClaim}", qualifications, cacheEntryOptions);
-            //}
-
-            //return Ok(qualifications);
-
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
-            var qualifications = await _qualificationService.GetAllQualificationsByTrainingCentreId(trainingCentreId);
-
-            return Ok(qualifications);
+            var result = await _qualificationService.GetAllQualificationsByTrainingCentreId(trainingCentreId);
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, $"Retrieved qualifications by training centre ID: {trainingCentreId}.", emailClaim);
+            return Ok(result);
         }
 
         [AllowAnonymous]
         [HttpGet("qualificationstatuses")]
         public async Task<IActionResult> GetQualificationStatuses()
         {
-            var qualifications = await _qualificationService.GetAllQualificationsStatus();
-            return Ok(qualifications);
+            var result = await _qualificationService.GetAllQualificationsStatus();
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, "Retrieved qualification statuses.", null);
+            return Ok(result);
         }
 
         [AllowAnonymous]
         [HttpGet("{id}")]
-        public IActionResult GetQualification(int id)
+        public async Task<IActionResult> GetQualification(int id)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var qualification = _qualificationService.GetQualification(id);
             if (qualification == null)
             {
+                await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Warning, $"Qualification not found with ID: {id}.", emailClaim);
                 return NotFound();
             }
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, $"Retrieved qualification with ID: {id}.", emailClaim);
             return Ok(qualification);
         }
 
@@ -226,26 +164,34 @@ namespace GA360.Server.Controllers
             var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
 
             var result = await _qualificationService.AddQualification(qualification);
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, $"Added qualification: {result.Id}.", emailClaim);
             return CreatedAtAction(nameof(GetQualification), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateQualification(int id, [FromBody] QualificationWithTrainingModel qualification)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var result = await _qualificationService.UpdateQualification(qualification);
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, $"Updated qualification with ID: {id}.", emailClaim);
             return Ok(result);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteQualification(int id)
+        public async Task<IActionResult> DeleteQualification(int id)
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var existingQualification = _qualificationService.GetQualification(id);
             if (existingQualification == null)
             {
+                await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Warning, $"Qualification not found with ID: {id}.", emailClaim);
                 return NotFound();
             }
             _qualificationService.DeleteQualification(id);
             _cache.Remove(QualificationsCacheKey); // Clear cache
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, $"Deleted qualification with ID: {id}.", emailClaim);
             return NoContent();
         }
     }

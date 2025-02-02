@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using GA360.Domain.Core.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +10,12 @@ namespace GA360.Server.Controllers;
 public class ConfigurationController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+    private readonly IAuditTrailService _auditTrailService;
 
-    public ConfigurationController(IConfiguration configuration)
+    public ConfigurationController(IConfiguration configuration, IAuditTrailService auditTrailService)
     {
         _configuration = configuration;
+        _auditTrailService = auditTrailService;
     }
 
     [AllowAnonymous]

@@ -15,7 +15,7 @@ namespace GA360.Domain.Core.Interfaces
         Task<Customer> AddCustomer(CustomerModel customerModel);
         Task DeleteCustomer(int id);
         Task<List<Customer>> GetAll();
-        Task<List<CustomerModelHighPerformance>> GetAllUltraHighPerfomance(int? trainingCentreId);
+        Task<List<CustomerModelHighPerformance>> GetAllUltraHighPerformance(int? trainingCentreId);
         Task<CustomerModel> GetCustomerByEmail(string email);
         Customer GetCustomerById(int id);
         IEnumerable<Customer> GetCustomersByCountry(int countryId);

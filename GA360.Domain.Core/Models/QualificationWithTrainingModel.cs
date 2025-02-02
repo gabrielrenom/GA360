@@ -24,4 +24,5 @@ public class QualificationWithTrainingModel
     public string? AwardingBody { get; set; }
     public double? Price { get; set; }
     public string? Sector { get; set; }
+    public int[]? TrainingCentreIds { get; set; }
 }
