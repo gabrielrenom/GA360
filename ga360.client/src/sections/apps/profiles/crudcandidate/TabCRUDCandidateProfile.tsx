@@ -185,183 +185,153 @@ const renderField = (field: string, value: string | undefined, multiline: boolea
 </Stack>
 
 
-  return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} sm={5} md={4} xl={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <CandidateProfile candidate={candidate} defaultImages={avatar} />
-          </Grid>
-          <Grid item xs={12}>
-            <MyQualificationsProfile userId={Number(id)} />
-          </Grid>
+return (
+  <Grid container spacing={3}>
+    <Grid item xs={12} sm={5} md={4} xl={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <CandidateProfile candidate={candidate} defaultImages={avatar} />
         </Grid>
-      </Grid>
-      <Grid item xs={12} sm={7} md={8} xl={9}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <MainCard title="About me">
-              {renderField("about", candidate?.about, true)}
-            </MainCard>
-          </Grid>
-          <Grid item xs={12}>
-            <MainCard title="Personal Details">
-              <List sx={{ py: 0 }}>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">First Name</Typography>
-                        {renderField("firstName", candidate?.firstName)}
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Last Name</Typography>
-                        {renderField("lastName", candidate?.lastName)}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Phone</Typography>
-                        {renderField("contact", candidate?.contact)}
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Country</Typography>
-                        {renderField(
-                          "country",
-                          candidate?.country,
-                          false,
-                          true,
-                          countries.map((country) => ({
-                            value: country.name,
-                            label: country.name,
-                          }))
-                        )}{" "}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">DOB</Typography>
-                        {renderField(
-                          "dob",
-                          candidate?.dob &&
-                            new Date(candidate.dob).toLocaleDateString("en-GB")
-                        )}
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Gender</Typography>
-                        {renderField(
-                          "gender",
-                          candidate?.gender,
-                          false,
-                          true,
-                          genderOptions
-                        )}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Email</Typography>
-                        {renderField("email", candidate?.email)}
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Postcode</Typography>
-                        {renderField("postcode", candidate?.postcode)}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem divider={!matchDownMD}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Number</Typography>
-                        {renderField("number", `${candidate?.number}`)}
-                      </Stack>
-                    </Grid>
-
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Street</Typography>
-                        {renderField("street", `${candidate?.street}`)}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-                <ListItem>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">City</Typography>
-                        {renderField("city", `${candidate?.city}`)}
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">NI</Typography>
-                        {renderField(
-                          "nationalInsurance",
-                          candidate?.nationalInsurance
-                        )}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-              </List>
-            </MainCard>
-          </Grid>
-          <Grid item xs={12}>
-            <MainCard title="Employment">
-              <List sx={{ py: 0 }}>
-                <ListItem>
-                  <Grid container spacing={matchDownMD ? 0.5 : 3}>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">
-                          Employment Status
-                        </Typography>
-                        {renderField(
-                          "employeeStatus",
-                          candidate?.employeeStatus,
-                          false,
-                          true,
-                          employmentStatusOptions
-                        )}
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={0.5}>
-                        <Typography color="secondary">Employer</Typography>
-                        {renderField("employer", candidate?.employer)}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-              </List>
-            </MainCard>
-          </Grid>
+        <Grid item xs={12}>
+          <MyQualificationsProfile userId={Number(id)} />
         </Grid>
       </Grid>
     </Grid>
-  );
+    <Grid item xs={12} sm={7} md={8} xl={9}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <MainCard title="About me">
+            {candidate?.about ? renderField("about", candidate.about, true) : renderField("about", "No information available.", true)}
+          </MainCard>
+        </Grid>
+        <Grid item xs={12}>
+          <MainCard title="Personal Details">
+            <List sx={{ py: 0 }}>
+              <ListItem divider={!matchDownMD}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">First Name</Typography>
+                      {candidate?.firstName ? renderField("firstName", candidate.firstName) : renderField("firstName", "No information available.")}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Last Name</Typography>
+                      {candidate?.lastName ? renderField("lastName", candidate.lastName) : renderField("lastName", "No information available.")}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </ListItem>
+
+              <ListItem divider={!matchDownMD}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Phone</Typography>
+                      {candidate?.contact ? renderField("contact", candidate.contact) : renderField("contact", "No information available.")}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Country</Typography>
+                      {candidate?.country ? renderField("country", candidate.country, false, true, countries.map((country) => ({ value: country.name, label: country.name }))) : renderField("country", "No information available.", false, true, countries.map((country) => ({ value: country.name, label: country.name })))}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </ListItem>
+              <ListItem divider={!matchDownMD}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">DOB</Typography>
+                      {candidate?.dob ? renderField("dob", new Date(candidate.dob).toLocaleDateString("en-GB")) : renderField("dob", "No information available.")}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Gender</Typography>
+                      {candidate?.gender ? renderField("gender", candidate.gender, false, true, genderOptions) : renderField("gender", "No information available.", false, true, genderOptions)}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </ListItem>
+              <ListItem divider={!matchDownMD}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Email</Typography>
+                      {candidate?.email ? renderField("email", candidate.email) : renderField("email", "No information available.")}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Postcode</Typography>
+                      {candidate?.postcode ? renderField("postcode", candidate.postcode) : renderField("postcode", "No information available.")}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </ListItem>
+              <ListItem divider={!matchDownMD}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Number</Typography>
+                      {candidate?.number ? renderField("number", `${candidate.number}`) : renderField("number", "No information available.")}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Street</Typography>
+                      {candidate?.street ? renderField("street", `${candidate.street}`) : renderField("street", "No information available.")}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </ListItem>
+              <ListItem>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">City</Typography>
+                      {candidate?.city ? renderField("city", `${candidate.city}`) : renderField("city", "No information available.")}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">NI</Typography>
+                      {candidate?.nationalInsurance ? renderField("nationalInsurance", candidate.nationalInsurance) : renderField("nationalInsurance", "No information available.")}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </ListItem>
+            </List>
+          </MainCard>
+        </Grid>
+        <Grid item xs={12}>
+          <MainCard title="Employment">
+            <List sx={{ py: 0 }}>
+              <ListItem>
+                <Grid container spacing={matchDownMD ? 0.5 : 3}>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Employment Status</Typography>
+                      {candidate?.employeeStatus ? renderField("employeeStatus", candidate.employeeStatus, false, true, employmentStatusOptions) : renderField("employeeStatus", "No information available.", false, true, employmentStatusOptions)}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Stack spacing={0.5}>
+                      <Typography color="secondary">Employer</Typography>
+                      {candidate?.employer ? renderField("employer", candidate.employer) : renderField("employer", "No information available.")}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </ListItem>
+            </List>
+          </MainCard>
+        </Grid>
+      </Grid>
+    </Grid>
+  </Grid>
+);
+
 }

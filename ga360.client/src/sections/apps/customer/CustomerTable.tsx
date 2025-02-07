@@ -170,7 +170,10 @@ export default function CustomerTable({
             }}
           />
           <Stack direction="row" spacing={2} alignItems="center">
-            {type && (type === "learner" || type === "leads") ? (
+            {type &&
+            (type === "learner" ||
+              type === "leads" ||
+              type === "administrator") ? (
               <Button
                 variant="contained"
                 startIcon={<PlusOutlined />}
@@ -179,7 +182,13 @@ export default function CustomerTable({
                   modalToggler();
                 }}
               >
-                {type === "learner" ? "Add Learner" : "Add Lead"}
+                {type === "learner"
+                  ? "Add Learner"
+                  : type === "lead"
+                    ? "Add Lead"
+                    : type === "administrator"
+                      ? "Add Administrator"
+                      : "Add Lead"}
               </Button>
             ) : (
               <></>

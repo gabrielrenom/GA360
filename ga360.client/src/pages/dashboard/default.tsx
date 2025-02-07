@@ -97,6 +97,7 @@ export default function DashboardDefault() {
 
   const { user, isLoggedIn } = useContext(DuendeContext);
 
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -379,7 +380,7 @@ export default function DashboardDefault() {
                     <ButtonBase onClick={handleAddCandidate}>
                       <Typography variant="body1" noWrap>
                         {" "}
-                        Add New Learner{" "}
+                        Add New{" "}
                       </Typography>
                     </ButtonBase>
                   </Stack>

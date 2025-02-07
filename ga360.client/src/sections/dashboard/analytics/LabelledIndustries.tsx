@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 // material-ui
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
@@ -17,16 +17,26 @@ import MainCard from 'components/MainCard';
 import Target from 'assets/images/analytics/target.svg';
 
 // service
-import { getIndustriesStats } from 'api/dashboardService';
+import { getIndustriesStats, getIndustriesStatsByTrainingCentreId } from 'api/dashboardService';
+import DuendeContext from 'contexts/DuendeContext';
 
 export default function LabelledIndustries() {
   const [industries, setIndustries] = useState([]);
+  const { user, isLoggedIn } = useContext(DuendeContext);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await getIndustriesStats();
-        setIndustries(data);
+        if (user.role == "Super Admin")
+        {
+          const data = await getIndustriesStats();
+          setIndustries(data);
+        }
+        else
+        {
+          const data = await getIndustriesStatsByTrainingCentreId(user.trainingCentreId);
+          setIndustries(data);
+        }
       } catch (error) {
         console.error('Error fetching industry stats:', error);
       }
@@ -35,11 +45,10 @@ export default function LabelledIndustries() {
     fetchData();
   }, []);
 
-  const getColor = (percentage) => {
-    if (percentage > 0 && percentage < 5) return "error";
-    if (percentage > 5 && percentage < 10) return "warning";
-    if (percentage > 10 && percentage < 15) return "primary";
-    return "success";
+  const getRandomColor = () => {
+    const colors = ["error", "warning", "primary", "success"];
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return colors[randomIndex];
 };
 
   return (
@@ -49,7 +58,10 @@ export default function LabelledIndustries() {
           {industries.map((industry) => (
             <Grid item xs={12} key={industry.industry}>
               <Typography>{industry.industry}</Typography>
-              <LinearWithLabel value={industry.percentage} color={getColor(industry.percentage)} />
+                            <LinearWithLabel 
+                            value={industry.percentage} 
+                            // @ts-ignore
+                            color={getRandomColor()} />
             </Grid>
           ))}
           <Grid item xs={12}>

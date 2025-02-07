@@ -97,7 +97,7 @@ const CandidateCRUDProfile = ({ candidate, defaultImages }) => {
               </ListItemIcon>
               <ListItemSecondaryAction>
                 <Typography align="right">
-                  {user !== null ? user.role : <></>}
+                  {candidate !== null ? candidate.role : user.role}
                 </Typography>
               </ListItemSecondaryAction>
             </ListItem>

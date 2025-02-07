@@ -23,66 +23,27 @@ public class DashboardService : IDashboardService
         {
             await connection.OpenAsync();
 
-            // Fetch the user's role
-            string userRoleQuery = @"
-            SELECT r.Name 
-            FROM [dbo].[UserRoles] ur
-            JOIN [dbo].[Roles] r ON ur.RoleId = r.Id
-            JOIN [dbo].[Customers] c ON ur.CustomerId = c.Id
-            WHERE c.Email = @Email";
-
-            string userRole;
-
-            using (var roleCommand = new SqlCommand(userRoleQuery, connection))
-            {
-                roleCommand.Parameters.AddWithValue("@Email", email);
-                userRole = (string)await roleCommand.ExecuteScalarAsync();
-            }
-
-            // Build the main query
             var query = @"
-            SELECT DISTINCT
-                c.[Sector] AS Industry,
-                COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY tc.Id) AS Percentage
-            FROM
-                [dbo].[QualificationCustomerCourseCertificates] qccc
-            JOIN
-                [dbo].[Courses] c ON qccc.CourseId = c.Id
-            JOIN
-                [dbo].[Customers] cust ON qccc.CustomerId = cust.Id
-            JOIN
-                [dbo].[TrainingCentres] tc ON cust.TrainingCentreId = tc.Id";
+            SELECT 
+                Sector,
+                COUNT(*) AS QualificationCount,
+                (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM Qualifications WHERE Sector IS NOT NULL)) AS Percentage
+            FROM Qualifications
+            WHERE Sector IS NOT NULL
+            GROUP BY Sector";
 
-            if (userRole != "Super Admin")
+            using (var command = new SqlCommand(query, connection))
             {
-                query += @"
-            WHERE
-                cust.Email = @Email";
-            }
-
-            query += @"
-            GROUP BY
-                c.[Sector],
-                tc.Id
-            ORDER BY
-                Percentage DESC;";
-
-            var command = new SqlCommand(query, connection);
-
-            if (userRole != "Super Admin")
-            {
-                command.Parameters.AddWithValue("@Email", email);
-            }
-
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    industryList.Add(new IndustriesModel
+                    while (await reader.ReadAsync())
                     {
-                        Industry = reader["Industry"].ToString(),
-                        Percentage = Convert.ToDouble(reader["Percentage"])
-                    });
+                        industryList.Add(new IndustriesModel
+                        {
+                            Industry = reader["Sector"].ToString(),
+                            Percentage = Convert.ToDouble(reader["Percentage"])
+                        });
+                    }
                 }
             }
         }
@@ -90,6 +51,50 @@ public class DashboardService : IDashboardService
         return industryList;
     }
 
+
+    public async Task<List<IndustriesModel>> GetIndustryPercentageByTrainingCentreIdAsync(int trainingCentreId)
+    {
+        var industryList = new List<IndustriesModel>();
+
+        using (var connection = new SqlConnection(_cRMDbContext.Database.GetConnectionString()))
+        {
+            await connection.OpenAsync();
+
+            var query = @"
+            SELECT 
+                q.Sector,
+                COUNT(*) AS QualificationCount,
+                (COUNT(*) * 100.0 / (
+                    SELECT COUNT(*) 
+                    FROM QualificationTrainingCentre qtc
+                    INNER JOIN Qualifications q ON qtc.QualificationId = q.Id
+                    WHERE qtc.TrainingCentreId = @TrainingCentreId AND q.Sector IS NOT NULL
+                )) AS Percentage
+            FROM QualificationTrainingCentre qtc
+            INNER JOIN Qualifications q ON qtc.QualificationId = q.Id
+            WHERE qtc.TrainingCentreId = @TrainingCentreId AND q.Sector IS NOT NULL
+            GROUP BY q.Sector";
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@TrainingCentreId", trainingCentreId);
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        industryList.Add(new IndustriesModel
+                        {
+                            Industry = reader["Sector"].ToString(),
+                            Percentage = Convert.ToDouble(reader["Percentage"])
+                        });
+                    }
+                }
+            }
+        }
+
+        return industryList;
+    }
 
 
     //public async Task<List<IndustriesModel>> GetIndustryPercentageAsync(string email)

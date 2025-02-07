@@ -362,6 +362,7 @@ export default function DynamicTableCourse() {
           { value: "Retail", label: "Retail" },
           { value: "Manufacturing", label: "Manufacturing" },
           { value: "Construction", label: "Construction" },
+          { value: "Health & Safety", label: "Health & Safety" }
       ],
   },
   {

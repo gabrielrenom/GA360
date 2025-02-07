@@ -233,6 +233,7 @@ export default function DynamicTablesTrainingCentreQualifications() {
       getCoreRowModel: getCoreRowModel(),
       getSortedRowModel: getSortedRowModel(),
       getPaginationRowModel: getPaginationRowModel(),
+      initialState: { pagination: { pageIndex: 0, pageSize: 25 } } // Increase page size
     });
 
     let headers: LabelKeyObject[] = [];

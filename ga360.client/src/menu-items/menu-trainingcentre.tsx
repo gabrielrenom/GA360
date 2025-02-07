@@ -11,12 +11,12 @@ import { UserOutlined } from '@ant-design/icons';
 import { ProfileOutlined } from '@ant-design/icons';
 import { SolutionOutlined } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons'; // Import the UploadOutlined icon
-import { WechatOutlined, AppstoreAddOutlined } from '@ant-design/icons';
+import { WechatWorkOutlined, AppstoreAddOutlined } from '@ant-design/icons';
 // type
 import { NavItemType } from 'types/menu';
 
 // icons
-const icons = { PieChartOutlined, EnvironmentOutlined, BookOutlined, TeamOutlined, SafetyCertificateOutlined, UserOutlined, ProfileOutlined, SolutionOutlined, UploadOutlined, WechatOutlined, AppstoreAddOutlined };
+const icons = { PieChartOutlined, EnvironmentOutlined, BookOutlined, TeamOutlined, SafetyCertificateOutlined, UserOutlined, ProfileOutlined, SolutionOutlined, UploadOutlined, WechatWorkOutlined, AppstoreAddOutlined };
 
 // ==============================|| MENU ITEMS - FORMS & TABLES ||============================== //
 
@@ -37,7 +37,7 @@ const menuTrainingCentre: NavItemType = {
       id: 'training-centre-leads',
       title: <FormattedMessage id="Leads" />,
       type: 'item',
-      icon: icons.WechatOutlined,
+      icon: icons.WechatWorkOutlined,
       url: '/backoffice/leads'
     },
     {

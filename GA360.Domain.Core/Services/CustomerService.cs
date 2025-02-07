@@ -992,17 +992,18 @@ public class CustomerService : ICustomerService
                     c.AvatarImage
                 FROM 
                     Customers c
-                INNER JOIN 
-                    QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
-                LEFT JOIN 
-                    Countries co ON c.CountryId = co.Id
-                LEFT JOIN 
-                    TrainingCentres tc ON c.TrainingCentreId = tc.Id";
+                    INNER JOIN UserRoles ur ON c.Id = ur.CustomerId
+                    INNER JOIN Roles r ON ur.RoleId = r.Id
+                    INNER JOIN QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
+                    LEFT JOIN Countries co ON c.CountryId = co.Id
+                    LEFT JOIN TrainingCentres tc ON c.TrainingCentreId = tc.Id
+                WHERE 
+                    r.Name = 'Candidate'";
 
                 // Add WHERE clause if trainingCentreId is provided
                 if (trainingCentreId.HasValue)
                 {
-                    query += " WHERE c.TrainingCentreId = @TrainingCentreId";
+                    query += " AND c.TrainingCentreId = @TrainingCentreId";
                 }
 
                 query += " ORDER BY c.Id";
@@ -1072,34 +1073,33 @@ public class CustomerService : ICustomerService
             using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
             {
                 // Base query with DISTINCT
-
                 var query = @"
-                	  SELECT DISTINCT
-                        c.Id,
-                        c.FirstName,
-                        c.LastName,
-                        CONCAT(c.FirstName, ' ', c.LastName) AS Name,
-                        c.Contact,
-                        c.Email,
-                        co.Name AS Country,
-                        c.Location,
-                        c.Status,
-                        c.CountryId,
-                        c.DOB,
-                        c.DOB AS DateOfBirth,
-                        c.TrainingCentreId,
-                        tc.Name AS TrainingCentreName,
-                        c.AvatarImage
-                    FROM 
-                        Customers c
-                    LEFT JOIN 
-                        Countries co ON c.CountryId = co.Id
-                    LEFT JOIN 
-                        TrainingCentres tc ON c.TrainingCentreId = tc.Id
-                    LEFT JOIN 
-                        QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
-                    WHERE 
-                        q.CustomerId IS NULL";
+                SELECT DISTINCT
+                    c.Id,
+                    c.FirstName,
+                    c.LastName,
+                    CONCAT(c.FirstName, ' ', c.LastName) AS Name,
+                    c.Contact,
+                    c.Email,
+                    co.Name AS Country,
+                    c.Location,
+                    c.Status,
+                    c.CountryId,
+                    c.DOB,
+                    c.DOB AS DateOfBirth,
+                    c.TrainingCentreId,
+                    tc.Name AS TrainingCentreName,
+                    c.AvatarImage
+                FROM 
+                    Customers c
+                    INNER JOIN UserRoles ur ON c.Id = ur.CustomerId
+                    INNER JOIN Roles r ON ur.RoleId = r.Id
+                    LEFT JOIN Countries co ON c.CountryId = co.Id
+                    LEFT JOIN TrainingCentres tc ON c.TrainingCentreId = tc.Id
+                    LEFT JOIN QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
+                WHERE 
+                    r.Name = 'Candidate'
+                    AND q.CustomerId IS NULL";
 
                 // Add WHERE clause if trainingCentreId is provided
                 if (trainingCentreId.HasValue)
@@ -1154,6 +1154,84 @@ public class CustomerService : ICustomerService
         return customers;
     }
 
+
+    public async Task<List<CustomerModelHighPerformance>> GetAdministratorsAllUltraHighPerformance()
+    {
+        var customers = new List<CustomerModelHighPerformance>();
+
+        try
+        {
+            using (var connection = new SqlConnection(_customerRepository.GetDbContext().Database.GetConnectionString()))
+            {
+                // Base query with DISTINCT
+                var query = @"
+                SELECT DISTINCT
+                    c.Id,
+                    c.FirstName,
+                    c.LastName,
+                    CONCAT(c.FirstName, ' ', c.LastName) AS Name,
+                    c.Contact,
+                    c.Email,
+                    co.Name AS Country,
+                    c.Location,
+                    c.Status,
+                    c.CountryId,
+                    c.DOB,
+                    c.DOB AS DateOfBirth,
+                    c.TrainingCentreId,
+                    tc.Name AS TrainingCentreName,
+                    c.AvatarImage
+                FROM 
+                    Customers c
+                    INNER JOIN UserRoles ur ON c.Id = ur.CustomerId
+                    INNER JOIN Roles r ON ur.RoleId = r.Id
+                    LEFT JOIN Countries co ON c.CountryId = co.Id
+                    LEFT JOIN TrainingCentres tc ON c.TrainingCentreId = tc.Id
+                WHERE 
+                    r.Name IN ('Training Centre', 'Super Admin')
+                ORDER BY 
+                    c.Id";
+
+                var command = new SqlCommand(query, connection);
+
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var customer = new CustomerModelHighPerformance
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Contact = reader.GetString(reader.GetOrdinal("Contact")),
+                            Email = reader.GetString(reader.GetOrdinal("Email")),
+                            Country = reader.GetString(reader.GetOrdinal("Country")),
+                            Location = reader.GetString(reader.GetOrdinal("Location")),
+                            Status = reader.GetInt32(reader.GetOrdinal("Status")),
+                            Avatar = 0, // Assuming Avatar is not mapped from Customer
+                            CountryId = reader.GetInt32(reader.GetOrdinal("CountryId")),
+                            DOB = reader.GetString(reader.GetOrdinal("DOB")),
+                            DateOfBirth = reader.GetString(reader.GetOrdinal("DateOfBirth")),
+                            TrainingCentreId = reader.IsDBNull(reader.GetOrdinal("TrainingCentreId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TrainingCentreId")),
+                            TrainingCentre = reader.IsDBNull(reader.GetOrdinal("TrainingCentreName")) ? null : reader.GetString(reader.GetOrdinal("TrainingCentreName")),
+                            AvatarImage = reader.IsDBNull(reader.GetOrdinal("AvatarImage")) ? null : reader.GetString(reader.GetOrdinal("AvatarImage"))
+                        };
+
+                        customers.Add(customer);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing customers");
+        }
+
+        return customers;
+    }
+
     public async Task<List<LeadsApproachingExpirationModel>> GetAllLeadsApproachingExpiration(int? trainingCentreId)
     {
         var leads = new List<LeadsApproachingExpirationModel>();
@@ -1164,40 +1242,22 @@ public class CustomerService : ICustomerService
             {
                 // Base query with required fields and calculations
                 var query = @"
-	                          SELECT DISTINCT
-                              c.Id,
-                              CONCAT(c.FirstName, ' ', c.LastName) AS Name,
-                              c.CreatedAt AS DateAdded,
-                              DATEADD(week, 3, c.CreatedAt) AS ExpiryDate,
-                              CASE 
-                                  WHEN DATEADD(week, 3, c.CreatedAt) >= DATEADD(day, 14, GETDATE()) THEN 'Green'
-                                  WHEN DATEADD(week, 3, c.CreatedAt) >= DATEADD(day, 7, GETDATE()) THEN 'Amber'
-                                  ELSE 'Red'
-                              END AS Status
-                        FROM 
-                              Customers c
-                        LEFT JOIN 
-                              QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
-                        WHERE 
-                              q.CustomerId IS NULL";
-
-                //    var query = @"
-                //SELECT DISTINCT
-                //    c.Id,
-                //    CONCAT(c.FirstName, ' ', c.LastName) AS Name,
-                //    c.CreatedAt AS DateAdded,
-                //    DATEADD(week, 3, c.CreatedAt) AS ExpiryDate,
-                //    CASE 
-                //        WHEN DATEADD(week, 3, c.CreatedAt) >= DATEADD(day, 14, GETDATE()) THEN 'Green'
-                //        WHEN DATEADD(week, 3, c.CreatedAt) >= DATEADD(day, 7, GETDATE()) THEN 'Amber'
-                //        ELSE 'Red'
-                //    END AS Status
-                //FROM 
-                //    Customers c
-                //INNER JOIN 
-                //    QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
-                //WHERE 
-                //    q.QualificationId IS NOT NULL";
+                          SELECT DISTINCT
+                          c.Id,
+                          CONCAT(c.FirstName, ' ', c.LastName) AS Name,
+                          c.CreatedAt AS DateAdded,
+                          DATEADD(week, 3, c.CreatedAt) AS ExpiryDate,
+                          CASE 
+                              WHEN DATEADD(week, 3, c.CreatedAt) >= DATEADD(day, 14, GETDATE()) THEN 'Green'
+                              WHEN DATEADD(week, 3, c.CreatedAt) >= DATEADD(day, 7, GETDATE()) THEN 'Amber'
+                              ELSE 'Red'
+                          END AS Status
+                    FROM 
+                          Customers c
+                    LEFT JOIN 
+                          QualificationCustomerCourseCertificates q ON c.Id = q.CustomerId
+                    WHERE 
+                          q.CustomerId IS NULL";
 
                 // Add WHERE clause if trainingCentreId is provided
                 if (trainingCentreId.HasValue)
@@ -1221,6 +1281,7 @@ public class CustomerService : ICustomerService
                     {
                         var lead = new LeadsApproachingExpirationModel
                         {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             DateAdded = reader.GetDateTime(reader.GetOrdinal("DateAdded")).ToString("yyyy-MM-dd"),
                             ExpiryDate = reader.GetDateTime(reader.GetOrdinal("ExpiryDate")).ToString("yyyy-MM-dd"),
@@ -1239,6 +1300,7 @@ public class CustomerService : ICustomerService
 
         return leads;
     }
+
 
     public async Task<List<ActiveLearnersPerMonth>> GetActiveLearnersPerMonth(int? trainingCentreId)
     {

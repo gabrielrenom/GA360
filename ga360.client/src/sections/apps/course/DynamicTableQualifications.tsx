@@ -120,7 +120,6 @@ export default function DynamicTableQualifications() {
     const fetchCourses = async () => {
       try {
         const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable(0);
-        console.log("QUALUFICATIONS",qualifications)
         setRows(qualifications);
       } catch (error) {
         console.error('Failed to fetch courses:', error);
@@ -200,7 +199,6 @@ export default function DynamicTableQualifications() {
   const fetchQualifications = async () => {
     try {
       const qualifications: QualificationTable[] = await getQualificationsWithTrainingCentresForTable(0);
-      console.log("QUALIFICATIONS", qualifications);
       setRows(qualifications);
     } catch (error) {
       console.error('Failed to fetch qualifications:', error);
@@ -234,6 +232,7 @@ export default function DynamicTableQualifications() {
           showSnackbar("Failed to update record due to dependencies.", "error");
         }
       }
+      await fetchQualifications();
       settrainingCentresForQualification([]);
     } catch (error) {
       console.error('Failed to update qualification:', error);
@@ -326,6 +325,7 @@ const columns: GridColDef[] = [
         { value: "Retail", label: "Retail" },
         { value: "Manufacturing", label: "Manufacturing" },
         { value: "Construction", label: "Construction" },
+        { value: "Health & Safety", label: "Health & Safety" }
     ],
 },
   {

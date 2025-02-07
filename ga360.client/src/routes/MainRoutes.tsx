@@ -33,6 +33,7 @@ import AboutUs from 'layout/Dashboard/Footer/AboutUs';
 import Terms from 'layout/Dashboard/Footer/Terms';
 import Privacy from 'layout/Dashboard/Footer/Privacy';
 import Leads from 'pages/backoffice/leads';
+import Administrators from 'pages/backoffice/administrators';
 import TrainingCentreQualifications from 'pages/backoffice/trainingcentrequalifications';
 import TrainingCentreTableCourses from 'pages/backoffice/trainingcentrestablecourses';
 import AuditTrail from 'pages/backoffice/audit';
@@ -196,6 +197,10 @@ const MainRoutes = {
             {
               path: 'leads',
               element: <Leads />
+            },
+            {
+              path: 'administrators',
+              element: <Administrators />
             },
             {
               path: 'trainingcentres',

@@ -92,6 +92,7 @@ export interface CustomerProfileModel {
 }
 
 export interface LeadsApproachingExpirationModel {
+  id: number;
   name: string;
   dateAdded: string;
   expiryDate: string;

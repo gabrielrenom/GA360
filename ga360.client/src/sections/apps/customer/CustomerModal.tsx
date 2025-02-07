@@ -15,16 +15,19 @@ import CircularWithPath from 'components/@extended/progress/CircularWithPath';
 // types
 import { CustomerList, CustomerListExtended } from 'types/customer';
 import { getUserById } from 'api/customer';
+import FormSuperAdminAdd from './FormSuperAdminAdd';
+import FormAssesorAdd from './FormAssesorAdd';
 
 interface Props {
   open: boolean;
   modalToggler: (state: boolean) => void;
   customer?: CustomerList | null;
+  customerType?: string;
 }
 
 // ==============================|| CUSTOMER ADD / EDIT ||============================== //
 
-export default function CustomerModal({ open, modalToggler, customer }: Props) {
+export default function CustomerModal({ open, modalToggler, customer, customerType }: Props) {
   const [customerDetails, setCustomerDetails] = useState<CustomerListExtended | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
@@ -52,10 +55,23 @@ export default function CustomerModal({ open, modalToggler, customer }: Props) {
     }
   }, [customer]);
 
-  const customerForm = useMemo(
-    () => !loading && <FormCustomerAdd customer={customerDetails} closeModal={closeModal} />,
-    [customerDetails, loading, closeModal]
-  );
+  // const customerForm = useMemo(() => !loading && <FormCustomerAdd customer={customerDetails} closeModal={closeModal} />,
+  //   [customerDetails, loading, closeModal]
+  // );
+
+  const customerForm = useMemo(() => {
+    if (loading) return null;
+
+    if (customerType === 'Assessor') {
+      return <FormAssesorAdd customer={customerDetails} closeModal={closeModal} />;
+    } else if (customerType === 'Super Admin') {
+      return <FormSuperAdminAdd customer={customerDetails} closeModal={closeModal} />;
+    } else
+    {
+      return <FormCustomerAdd customer={customerDetails} closeModal={closeModal} />;
+    }
+    return null;
+  }, [customerDetails, loading, customerType, closeModal]);
   // const customerForm = !loading ? <FormCustomerAdd customer={customerDetails} closeModal={closeModal} /> : null;
 
   return (

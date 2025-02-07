@@ -137,8 +137,10 @@ namespace GA360.Server.Controllers
         [HttpGet("qualificationstatuses")]
         public async Task<IActionResult> GetQualificationStatuses()
         {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
             var result = await _qualificationService.GetAllQualificationsStatus();
-            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, "Retrieved qualification statuses.", null);
+            await _auditTrailService.InsertAudit(AuditTrailArea.Qualifications, AuditTrailType.Information, "Retrieved qualification statuses.", emailClaim);
             return Ok(result);
         }
 

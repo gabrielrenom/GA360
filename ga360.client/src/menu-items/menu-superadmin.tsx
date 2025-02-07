@@ -11,13 +11,13 @@ import { UserOutlined } from '@ant-design/icons';
 import { ProfileOutlined } from '@ant-design/icons';
 import { SolutionOutlined } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons'; // Import the UploadOutlined icon
-import { WechatOutlined, AppstoreAddOutlined, ContactsOutlined } from '@ant-design/icons';
+import { WechatWorkOutlined, AppstoreAddOutlined, ContactsOutlined, DragOutlined   } from '@ant-design/icons';
 import { AuditOutlined } from '@ant-design/icons';
 // type
 import { NavItemType } from 'types/menu';
 
 // icons
-const icons = { PieChartOutlined, EnvironmentOutlined, BookOutlined, TeamOutlined, SafetyCertificateOutlined, UserOutlined, ProfileOutlined, SolutionOutlined, UploadOutlined, WechatOutlined, AppstoreAddOutlined, ContactsOutlined,AuditOutlined };
+const icons = { PieChartOutlined, EnvironmentOutlined, BookOutlined, TeamOutlined, SafetyCertificateOutlined, UserOutlined, ProfileOutlined, SolutionOutlined, UploadOutlined, WechatWorkOutlined, AppstoreAddOutlined, ContactsOutlined,AuditOutlined, DragOutlined  };
 
 // ==============================|| MENU ITEMS - FORMS & TABLES ||============================== //
 
@@ -45,7 +45,7 @@ const menuSuperAdmin: NavItemType = {
       id: 'menu-admin-leads',
       title: <FormattedMessage id="Leads" />,
       type: 'item',
-      icon: icons.WechatOutlined,
+      icon: icons.WechatWorkOutlined,
       url: '/backoffice/leads'
     },
     {
@@ -54,6 +54,13 @@ const menuSuperAdmin: NavItemType = {
       type: 'item',
       icon: icons.TeamOutlined,
       url: '/backoffice/candidates'
+    },
+    {
+      id: 'menu-admin-administrators',
+      title: <FormattedMessage id="Administrators" />,
+      type: 'item',
+      icon: icons.DragOutlined,
+      url: '/backoffice/administrators'
     },
     {
       id: 'menu-admin-qualifications',

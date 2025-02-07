@@ -95,6 +95,18 @@ namespace GA360.Server.Controllers
 
             return Ok(await _customerService.GetLeadsAllUltraHighPerformance(trainingCentreId));
         }
+        [Authorize]
+        [HttpGet("list/administrators")]
+        public async Task<IActionResult> GetAllAdministrators(int page = 1, int pageSize = 10, int? trainingCentreId = null)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            var permissions = await _permissionService.GetPermissions(emailClaim);
+
+            await _auditTrailService.InsertAudit(IAuditTrailService.AuditTrailArea.Administrators, IAuditTrailService.AuditTrailType.Information, "Getting administrators...", emailClaim);
+
+            return Ok(await _customerService.GetAdministratorsAllUltraHighPerformance());
+        }
 
         [Authorize]
         [HttpGet("learners/month/{trainingCentreId?}")]

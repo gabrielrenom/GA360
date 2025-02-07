@@ -50,5 +50,19 @@ namespace GA360.Server.Controllers
 
             return Ok(result);
         }
+
+        [Authorize]
+        [HttpGet("industriesstatsbytrainingcentreid/{id}")]
+        public async Task<IActionResult> GetIndustriesStatsByTrainingCentreId(int id)
+        {
+            var emailClaim = User?.Claims?.FirstOrDefault(x => x.Type == "email")?.Value;
+
+            var result = await _dashboardService.GetIndustryPercentageByTrainingCentreIdAsync(id);
+
+            await _auditTrailService.InsertAudit(AuditTrailArea.Dashboard, AuditTrailType.Information, "Retrieved industries stats.", emailClaim);
+
+            return Ok(result);
+        }
+        
     }
 }

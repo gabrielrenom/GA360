@@ -48,9 +48,9 @@ public class QualificationService : IQualificationService
 
     public async Task<List<QualificationWithTrainingModel>> GetAllQualificationsWithTrainingCentres(int? id)
     {
-        var qualificationTrainingCentres = await _qualificationRepository.Context.QualificationTrainingCentre
-            .Include(qtc => qtc.Qualification)
-            .Include(qtc => qtc.TrainingCentre)
+        var qualifications = await _qualificationRepository.Context.Qualifications
+            .Include(q => q.QualificationTrainingCentres)
+            .ThenInclude(qtc => qtc.TrainingCentre)
             .ToListAsync();
 
         var qualificationCustomerCounts = await _qualificationRepository.Context.QualificationCustomerCourseCertificates
@@ -62,27 +62,26 @@ public class QualificationService : IQualificationService
             })
             .ToListAsync();
 
-        var result = qualificationTrainingCentres
-            .Where(qtc => id == null || qtc.TrainingCentreId == id.Value)
-            .GroupBy(qtc => qtc.Qualification.Id) // Group by Qualification ID for distinct qualifications
-            .Select(g => new QualificationWithTrainingModel
+        var result = qualifications
+            .Where(q => id == null || q.QualificationTrainingCentres.Any(qtc => qtc.TrainingCentreId == id.Value))
+            .Select(q => new QualificationWithTrainingModel
             {
-                Id = g.First().Qualification.Id,
-                Name = g.First().Qualification.Name,
-                RegistrationDate = g.First().Qualification.RegistrationDate,
-                ExpectedDate = g.First().Qualification.ExpectedDate,
-                CertificateDate = g.First().Qualification.CertificateDate,
-                CertificateNumber = g.First().Qualification.CertificateNumber,
-                Status = g.First().Qualification.Status,
-                TrainingCentreId = g.First().TrainingCentreId, // Fill with the first one on the list
-                TrainingCentre = g.First().TrainingCentre.Name, // Fill with the first one on the list
-                TrainingCentreIds = g.Select(qtc => qtc.TrainingCentreId).Distinct().ToArray(), // Aggregate all associated training centre IDs
-                InternalReference = g.First().Qualification.InternalReference,
-                QAN = g.First().Qualification.QAN,
-                AwardingBody = g.First().Qualification.AwardingBody,
-                Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == g.Key)?.LearnersCount ?? 0,
-                Price = g.First().Price,
-                Sector = g.First().Qualification.Sector
+                Id = q.Id,
+                Name = q.Name,
+                RegistrationDate = q.RegistrationDate,
+                ExpectedDate = q.ExpectedDate,
+                CertificateDate = q.CertificateDate,
+                CertificateNumber = q.CertificateNumber,
+                Status = q.Status,
+                TrainingCentreId = q.QualificationTrainingCentres.FirstOrDefault()?.TrainingCentreId, // Nullable in case there are no training centers
+                TrainingCentre = q.QualificationTrainingCentres.FirstOrDefault()?.TrainingCentre?.Name, // Nullable in case there are no training centers
+                TrainingCentreIds = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentreId).Distinct().ToArray(), // Aggregate all associated training center IDs
+                InternalReference = q.InternalReference,
+                QAN = q.QAN,
+                AwardingBody = q.AwardingBody,
+                Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == q.Id)?.LearnersCount ?? 0,
+                Price = q.QualificationTrainingCentres.FirstOrDefault()?.Price ?? 0, // Nullable price
+                Sector = q.Sector
             })
             .OrderBy(q => q.Id) // Order by Qualification ID
             .ToList();
@@ -109,69 +108,31 @@ public class QualificationService : IQualificationService
 
     //    var result = qualificationTrainingCentres
     //        .Where(qtc => id == null || qtc.TrainingCentreId == id.Value)
-    //        .Select(qtc => new QualificationWithTrainingModel
+    //        .GroupBy(qtc => qtc.Qualification.Id) // Group by Qualification ID for distinct qualifications
+    //        .Select(g => new QualificationWithTrainingModel
     //        {
-    //            Id = qtc.Id,
-    //            Name = qtc.Qualification.Name,
-    //            RegistrationDate = qtc.Qualification.RegistrationDate,
-    //            ExpectedDate = qtc.Qualification.ExpectedDate,
-    //            CertificateDate = qtc.Qualification.CertificateDate,
-    //            CertificateNumber = qtc.Qualification.CertificateNumber,
-    //            Status = qtc.Qualification.Status,
-    //            TrainingCentreId = qtc.TrainingCentreId,
-    //            TrainingCentre = qtc.TrainingCentre.Name,
-    //            InternalReference = qtc.Qualification.InternalReference,
-    //            QAN = qtc.Qualification.QAN,
-    //            AwardingBody = qtc.Qualification.AwardingBody,
-    //            Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == qtc.Qualification.Id)?.LearnersCount ?? 0,
-    //            Price = qtc.Price,
-    //            Sector = qtc.Qualification.Sector
+    //            Id = g.First().Qualification.Id,
+    //            Name = g.First().Qualification.Name,
+    //            RegistrationDate = g.First().Qualification.RegistrationDate,
+    //            ExpectedDate = g.First().Qualification.ExpectedDate,
+    //            CertificateDate = g.First().Qualification.CertificateDate,
+    //            CertificateNumber = g.First().Qualification.CertificateNumber,
+    //            Status = g.First().Qualification.Status,
+    //            TrainingCentreId = g.First().TrainingCentreId, // Fill with the first one on the list
+    //            TrainingCentre = g.First().TrainingCentre.Name, // Fill with the first one on the list
+    //            TrainingCentreIds = g.Select(qtc => qtc.TrainingCentreId).Distinct().ToArray(), // Aggregate all associated training centre IDs
+    //            InternalReference = g.First().Qualification.InternalReference,
+    //            QAN = g.First().Qualification.QAN,
+    //            AwardingBody = g.First().Qualification.AwardingBody,
+    //            Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == g.Key)?.LearnersCount ?? 0,
+    //            Price = g.First().Price,
+    //            Sector = g.First().Qualification.Sector
     //        })
+    //        .OrderBy(q => q.Id) // Order by Qualification ID
     //        .ToList();
 
     //    return result;
     //}
-
-
-
-    //public async Task<List<QualificationWithTrainingModel>> GetAllQualificationsWithTrainingCentres(int? id)
-    //{
-    //    var qualifications = await _qualificationRepository.Context.Qualifications
-    //        .Include(x => x.QualificationTrainingCentres)
-    //        .ThenInclude(x => x.TrainingCentre)
-    //        .ToListAsync();
-
-    //    var qualificationCustomerCounts = await _qualificationRepository.Context.QualificationCustomerCourseCertificates
-    //        .GroupBy(qccc => qccc.QualificationId)
-    //        .Select(g => new
-    //        {
-    //            QualificationId = g.Key,
-    //            LearnersCount = g.Select(qccc => qccc.CustomerId).Distinct().Count()
-    //        })
-    //        .ToListAsync();
-
-    //    var result = qualifications.Select(q => new QualificationWithTrainingModel
-    //    {
-    //        Id = q.Id,
-    //        Name = q.Name,
-    //        RegistrationDate = q.RegistrationDate,
-    //        ExpectedDate = q.ExpectedDate,
-    //        CertificateDate = q.CertificateDate,
-    //        CertificateNumber = q.CertificateNumber,
-    //        Status = q.Status,
-    //        TrainingCentreId = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Id).FirstOrDefault(),
-    //        TrainingCentre = q.QualificationTrainingCentres.Select(qtc => qtc.TrainingCentre.Name).FirstOrDefault(),
-    //        InternalReference = q.InternalReference,
-    //        QAN = q.QAN,
-    //        AwardingBody = q.AwardingBody,
-    //        Learners = qualificationCustomerCounts.FirstOrDefault(x => x.QualificationId == q.Id)?.LearnersCount ?? 0,
-    //        Price = q.QualificationTrainingCentres.Select(qtc => qtc.Price).FirstOrDefault(),
-    //        Sector = q.Sector
-    //    }).ToList();
-
-    //    return result;
-    //}
-
 
     public async Task<Qualification> AddQualification(Qualification qualification)
     {

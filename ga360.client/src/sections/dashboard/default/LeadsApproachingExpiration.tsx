@@ -26,6 +26,7 @@ import { CSVExport, HeaderSort, SelectColumnSorting, TablePagination } from 'com
 import { getAllLeadsApproachingExpiration, LeadsApproachingExpirationModel } from 'api/customer';
 import DuendeContext from 'contexts/DuendeContext';
 import { ColorProps } from 'types/extended';
+import { useNavigate } from 'react-router';
 
 interface OrderStatusProps {
   status: string;
@@ -55,22 +56,25 @@ function OrderStatus({ status, showTitle }: OrderStatusProps) {
   }
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
+    <Stack direction="row" spacing={1}  sx={{paddingLeft:'10px'}}>
       <Dot color={color} />
       {showTitle && <Typography>{title}</Typography>}
     </Stack>
   );
 }
 
+
 export default function LeadsApproachingExpiration() {
   const [leads, setLeads] = useState<LeadsApproachingExpirationModel[]>([]);
   const { user } = useContext(DuendeContext);
   const [sorting, setSorting] = useState<SortingState>([]);
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     async function fetchData() {
       try {
         const data = await getAllLeadsApproachingExpiration(user.trainingCentreId);
+        console.log("My data", data);
         setLeads(data);
       } catch (error) {
         console.error('Failed to fetch leads:', error);
@@ -83,13 +87,23 @@ export default function LeadsApproachingExpiration() {
   const columns = useMemo<ColumnDef<LeadsApproachingExpirationModel>[]>(
     () => [
       {
-        accessorKey: 'name',
-        header: 'Name'
-      },
-      {
         accessorKey: 'status',
         header: '',
         cell: info => <OrderStatus status={info.getValue() as string} showTitle={false} />
+      },
+      {
+        accessorKey: 'name',
+        header: 'Name',
+        cell: info => (
+          <Typography
+            variant="h6"
+            color="primary"
+            onClick={() => navigate(`/apps/profiles/crudcandidate/profile/${info.row.original.id}`)}
+            style={{ cursor: 'pointer' }}
+          >
+            {info.getValue() as string}
+          </Typography>
+        )
       },
       {
         accessorKey: 'dateAdded',
@@ -192,3 +206,4 @@ export default function LeadsApproachingExpiration() {
     </MainCard>
   );
 }
+

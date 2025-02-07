@@ -22,6 +22,7 @@ namespace GA360.Domain.Core.Interfaces
         public static class AuditTrailArea
         {
             public const string Learners = "Learners";
+            public const string Administrators = "Administrators";
             public const string Leads = "Leads";
             public const string Courses = "Courses";
             public const string Country = "Country";
