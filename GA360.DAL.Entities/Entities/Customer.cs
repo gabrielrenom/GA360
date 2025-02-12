@@ -35,6 +35,7 @@ public class Customer : Audit, IModel
     public int EthnicOriginId {  get; set; }
     public string? AvatarImage { get; set; }
     public int? TrainingCentreId { get; set; }
+    public DateTime? AppointmentDate { get; set; }
     public virtual Address Address { get; set; }
     public virtual EthnicOrigin EthnicOrigin { get; set; }
     public virtual List<CustomerSkills>? CustomerSkills { get; set; }

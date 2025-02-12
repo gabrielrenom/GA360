@@ -2,12 +2,15 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { useTheme } from '@mui/material/styles';
+import System360LogoPNG from 'components/logo/SYSTEM360_Logo_Dark.png'
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   SaveOutlined,
   CloseOutlined,
+  CameraOutlined,
+  QuestionCircleOutlined,
 } from "@ant-design/icons";
 import {
   GridRowsProp,
@@ -22,11 +25,14 @@ import {
   GridRowModel,
   GridRowEditStopReasons,
   GridSlots,
+  GridRowParams,
 } from "@mui/x-data-grid";
 import MainCard from "components/MainCard";
-import { Stack, Tooltip, useMediaQuery } from "@mui/material";
+import { FormLabel, Stack, Tooltip, useMediaQuery } from "@mui/material";
 import IconButton from "components/@extended/IconButton";
 import { addTrainingCentre, deleteTrainingCentre, getTrainingCentres, TrainingCentre, TrainingCentreWithAddress, updateTrainingCentre } from "api/trainingcentreService";
+import LogoUpload from "./components/LogoUpload";
+import { useEffect, useState } from "react";
 
 
 const initialRows: GridRowsProp = [];
@@ -83,14 +89,15 @@ export default function DynamicTableTrainingCentre() {
 
   const [rows, setRows] = React.useState<GridRowsProp>(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+  const [imageURL, setImageURL] = React.useState<string | undefined>(undefined);
 
   React.useEffect(() => {
     const fetchTrainingCentres = async () => {
       try {
         const trainingCentres: TrainingCentre[] = await getTrainingCentres();
-        console.log("TRAINING CENTRES", trainingCentres);
   
         const trainingCentresWithAddress: TrainingCentreWithAddress[] = trainingCentres.map(mapTrainingCentreToWithAddress);
+
         setRows(trainingCentresWithAddress);
       } catch (error) {
         console.error('Failed to fetch training centres:', error);
@@ -102,7 +109,7 @@ export default function DynamicTableTrainingCentre() {
   
 
   const mapTrainingCentreToWithAddress = (centre: TrainingCentre): TrainingCentreWithAddress => {
-    const { id, name, addressId, address } = centre;
+    const { id, name, addressId, address, logo } = centre;
     const { street, number, postcode, city } = address;
     return {
       id,
@@ -111,7 +118,8 @@ export default function DynamicTableTrainingCentre() {
       street,
       number,
       postcode,
-      city
+      city,
+      logo
     };
   };
   
@@ -165,7 +173,8 @@ export default function DynamicTableTrainingCentre() {
       street: row.street as string,
       number: row.number as string,
       postcode: row.postcode as string,
-      city: row.city as string
+      city: row.city as string,
+      logo: row.logo as string
     };
   };
   
@@ -177,6 +186,10 @@ export default function DynamicTableTrainingCentre() {
       if (newRow.isNew) {
         const trainingCentre = mapWithAddressToTrainingCentre(newRow as TrainingCentreWithAddress);
         trainingCentre.id = 0;
+        if (!trainingCentre.logo) { // Check if logo is undefined or empty
+          trainingCentre.logo = System360LogoPNG; // Assign the default PNG image
+      }
+
         const createdCentre = await addTrainingCentre(trainingCentre);
         setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? createdCentre : row)));
       } else {
@@ -190,14 +203,34 @@ export default function DynamicTableTrainingCentre() {
     return updatedRow;
   };
   
-  
-  
-  
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef[] = [
+  const handleFileUpload = (file: File, setImageUrl: React.Dispatch<React.SetStateAction<string | undefined>>, id: GridRowParams['id']) => {
+    console.log('File uploaded:', file);
+    const reader = new FileReader();
+  
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const newImageUrl = e.target?.result as string;
+      setImageUrl(newImageUrl);
+  
+      const copyRows = [...rows]; // Create a copy of the rows
+      const rowIndex = copyRows.findIndex(row => row.id === id);
+      console.log("MY ID", id);
+      console.log(rowIndex);
+      if (rowIndex !== -1) {
+        copyRows[rowIndex].logo = newImageUrl;
+        setRows(copyRows);
+      }
+      
+      console.log('Updated rows:', rows);
+    };
+  
+    reader.readAsDataURL(file);
+  };
+  
+  const columns = [
     {
       field: "id",
       headerName: "#",
@@ -206,8 +239,94 @@ export default function DynamicTableTrainingCentre() {
       headerAlign: 'center', // Aligns the header text to the center
       align: 'center', // Aligns the cell content to the center
       flex: 0.5,
-
     },
+    {
+      field: 'logo',
+      //headerName: 'Logo',
+      flex: 0.5,
+      
+      headerName: (
+        
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          Logo
+            <IconButton size="small" sx={{ ml: 0.5 }}>
+            <QuestionCircleOutlined />
+            </IconButton>
+            We recomend PNG with 2084 × 903 pixels 
+        </div>
+      ),
+      renderCell: (params) => {
+        const [imageUrl, setImageUrl] = useState<string | undefined>(params.value);
+        const rowId = params.id; // Explicitly get the row ID from params
+  
+        useEffect(() => {
+          setImageUrl(params.value);
+        }, [params.value]);
+  
+        const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            handleFileUpload(file, setImageUrl, rowId); // Pass id to handleFileUpload
+          }
+        };
+  
+        console.log("MY ROW FROM INSIDE", rowId);
+        return (
+          <div onClick={handleEditClick(params.id)}>
+          <Stack direction="row" justifyContent="center" sx={{ mt: 0.5, mr: 5 }}>
+            <FormLabel
+              htmlFor={`change-logo-${rowId}`} // Unique ID for each row
+              sx={{
+                position: 'relative',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                '&:hover .MuiBox-root': { opacity: 1 },
+                cursor: 'pointer',
+              }}
+            >
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  borderRadius: '50%',
+                }}
+              >
+                {imageUrl ? <CameraOutlined style={{ fontSize: '2rem', opacity: 0}} />:<CameraOutlined style={{ fontSize: '2rem'}} />}
+
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt="Uploaded logo"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                )}
+              </Box>
+            </FormLabel>
+            <input
+              type="file"
+              id={`change-logo-${rowId}`} // Unique ID for each row
+              style={{ display: 'none' }}
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+          </Stack>
+          </div>
+        );
+      },
+    },
+  
     {
       field: 'name',
       headerName: 'NAME',
@@ -330,6 +449,7 @@ export default function DynamicTableTrainingCentre() {
             >
               <DataGrid
                 rows={rows}
+                //@ts-ignore
                 columns={columns}
                 editMode="row"
                 rowModesModel={rowModesModel}

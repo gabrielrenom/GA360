@@ -554,7 +554,7 @@ namespace GA360.Server.Controllers
             destination.Time = DateTime.Now.ToString("HH:mm"); // Set current time
             destination.Date = DateTime.Now.ToString("yyyy-MM-dd"); // Set current date
             destination.Avatar = 0; // Set default or calculate based on your logic
-
+         
             destination.FileDocuments = source.Files != null ? source.Files.Select(x => new FileModel
             {
                 BlobId = x.BlobId,
@@ -562,6 +562,13 @@ namespace GA360.Server.Controllers
                 Name = x.Name,
                 Url = x.Url// $"{x.Url}?{_configuration.GetSection("BlobStorageSettings:SharedAccessSignature").Value}"
             }).ToList() : new List<FileModel>();
+
+            if (source.AppointmentDate != null)
+            {
+                destination.AppointmentDate = source.AppointmentDate?.ToString("yyyy-MM-dd");
+                destination.AppointmentTime = source.AppointmentDate?.ToString("HH:mm");
+            }
+
             return destination;
         }
 
@@ -575,6 +582,17 @@ namespace GA360.Server.Controllers
                 return age;
             }
             return 0;
+        }
+        private DateTime? CombineDateAndTime(string? date, string? time)
+        {
+            if (!string.IsNullOrEmpty(date) && !string.IsNullOrEmpty(time))
+            {
+                if (DateTime.TryParse($"{date} {time}", out var dateTime))
+                {
+                    return dateTime;
+                }
+            }
+            return null;
         }
 
         private CustomerModel FromUserViewModelToCustomerModel(UserViewModel userViewModel, IList<FileModel> files = null)
@@ -612,7 +630,8 @@ namespace GA360.Server.Controllers
                 Street = userViewModel.Street,
                 TrainingCentre = userViewModel.TrainingCentre,
                 Ethnicity = userViewModel.Ethnicity,
-                Files = files
+                Files = files,
+                AppointmentDate = CombineDateAndTime(userViewModel.AppointmentDate, userViewModel.AppointmentTime)
             };
         }
 

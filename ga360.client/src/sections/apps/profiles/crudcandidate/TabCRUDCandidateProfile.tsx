@@ -33,6 +33,7 @@ export default function TabCRUDCandidateProfile() {
   const [countries, setCountries] = useState<Country[]>([]);
   const [showCountryDropdown, setShowCountryDropdown] =
     useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(true);
 
   const genderOptions = [
     { value: "Female", label: "Female" },
@@ -53,6 +54,8 @@ export default function TabCRUDCandidateProfile() {
         const response = await getUserById(Number(id));
         setAvatar(response.avatarImage);
         setCandidate(response);
+        setIsAdmin((response.role === "Super Admin" || response.role === "Training Centre"));
+
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -187,23 +190,29 @@ const renderField = (field: string, value: string | undefined, multiline: boolea
 
 return (
   <Grid container spacing={3}>
+    
     <Grid item xs={12} sm={5} md={4} xl={3}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <CandidateProfile candidate={candidate} defaultImages={avatar} />
         </Grid>
+        {!isAdmin &&
         <Grid item xs={12}>
           <MyQualificationsProfile userId={Number(id)} />
         </Grid>
+        }
       </Grid>
     </Grid>
+    
     <Grid item xs={12} sm={7} md={8} xl={9}>
       <Grid container spacing={3}>
+      {!isAdmin &&
         <Grid item xs={12}>
           <MainCard title="About me">
             {candidate?.about ? renderField("about", candidate.about, true) : renderField("about", "No information available.", true)}
           </MainCard>
         </Grid>
+      }
         <Grid item xs={12}>
           <MainCard title="Personal Details">
             <List sx={{ py: 0 }}>
@@ -264,14 +273,17 @@ return (
                       {candidate?.email ? renderField("email", candidate.email) : renderField("email", "No information available.")}
                     </Stack>
                   </Grid>
+                  {!isAdmin &&
                   <Grid item xs={12} md={6}>
                     <Stack spacing={0.5}>
                       <Typography color="secondary">Postcode</Typography>
                       {candidate?.postcode ? renderField("postcode", candidate.postcode) : renderField("postcode", "No information available.")}
                     </Stack>
                   </Grid>
+                  }
                 </Grid>
               </ListItem>
+              {!isAdmin &&
               <ListItem divider={!matchDownMD}>
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={6}>
@@ -288,6 +300,8 @@ return (
                   </Grid>
                 </Grid>
               </ListItem>
+              }
+              {!isAdmin &&
               <ListItem>
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={6}>
@@ -304,9 +318,11 @@ return (
                   </Grid>
                 </Grid>
               </ListItem>
+              }
             </List>
           </MainCard>
         </Grid>
+        {!isAdmin &&
         <Grid item xs={12}>
           <MainCard title="Employment">
             <List sx={{ py: 0 }}>
@@ -329,6 +345,7 @@ return (
             </List>
           </MainCard>
         </Grid>
+        }
       </Grid>
     </Grid>
   </Grid>

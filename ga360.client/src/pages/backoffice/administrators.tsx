@@ -97,39 +97,43 @@ export default function Administrators({ triggerAddCandidate = false, onModalClo
                 cell: ({ getValue }) => <PatternFormat displayType="text" format="(+##) ###-####" mask="_" defaultValue={getValue() as number} />
             },
             {
-                header: 'DOB',
-                accessorKey: 'dob',
-                meta: {
-                    className: 'cell-right'
-                },
-                cell: ({ row }) => {
-                    return formatDateUK(row.original.dob);
-                }
+                header: 'Gender',
+                accessorKey: 'gender',
             },
-            {
-                header: 'Country',
-                accessorKey: 'country'
-            },
+            // {
+            //     header: 'DOB',
+            //     accessorKey: 'dob',
+            //     meta: {
+            //         className: 'cell-right'
+            //     },
+            //     cell: ({ row }) => {
+            //         return formatDateUK(row.original.dob);
+            //     }
+            // },
+            // {
+            //     header: 'Country',
+            //     accessorKey: 'country',
+            // },
         // Conditionally add the training centre column
         ...(user?.role === "Super Admin" ? [{
             header: 'Training Centre',
             accessorKey: 'trainingCentre'
         }] : []),
-            {
-                header: 'Status',
-                accessorKey: 'status',
-                cell: (cell) => {
-                    switch (cell.getValue()) {
-                        case 3:
-                            return <Chip color="error" label="Rejected" size="small" variant="light" />;
-                        case 1:
-                            return <Chip color="success" label="Verified" size="small" variant="light" />;
-                        case 2:
-                        default:
-                            return <Chip color="info" label="Pending" size="small" variant="light" />;
-                    }
-                }
-            },
+            // {
+            //     header: 'Status',
+            //     accessorKey: 'status',
+            //     cell: (cell) => {
+            //         switch (cell.getValue()) {
+            //             case 3:
+            //                 return <Chip color="error" label="Rejected" size="small" variant="light" />;
+            //             case 1:
+            //                 return <Chip color="success" label="Verified" size="small" variant="light" />;
+            //             case 2:
+            //             default:
+            //                 return <Chip color="info" label="Pending" size="small" variant="light" />;
+            //         }
+            //     }
+            // },
             {
                 header: 'Actions',
                 meta: {
@@ -202,7 +206,7 @@ export default function Administrators({ triggerAddCandidate = false, onModalClo
 
         const fetchCustomerData = async () => {
             try {
-                const customers = await fetchLeadsList();
+                const customers = await fetchAdminList();
                 console.log(customers);
                 const mappedCustomers = customers.map((customer: CustomerApiModelExtended) => mapCustomerApiModelToCustomerListExtended(customer));
                 console.log(customers)
@@ -245,7 +249,7 @@ export default function Administrators({ triggerAddCandidate = false, onModalClo
         </Grid>
     )
 
-    async function fetchLeadsList() {
+    async function fetchAdminList() {
         let url = "/api/customer/list/administrators";
     
         const response = await fetch(url, {

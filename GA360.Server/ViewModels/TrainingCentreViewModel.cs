@@ -12,6 +12,7 @@ public class TrainingCentreViewModel
     public string Number { get; set; }
     public string Postcode { get; set; }
     public string City { get; set; }
+    public string? Logo { get; set; }
 }
 
 public static class TrainingMapper
@@ -26,7 +27,8 @@ public static class TrainingMapper
             Street = trainingCentre.Address.Street,
             Number = trainingCentre.Address.Number,
             Postcode = trainingCentre.Address.Postcode,
-            City = trainingCentre.Address.City
+            City = trainingCentre.Address.City,
+            Logo = trainingCentre.Logo,
         };
     }
 
@@ -36,6 +38,7 @@ public static class TrainingMapper
         {
             Id = trainingViewModel.Id,
             Name = trainingViewModel.Name,
+            Logo = trainingViewModel.Logo,
             AddressId = trainingViewModel.AddressId,
             Address = new Address
             {

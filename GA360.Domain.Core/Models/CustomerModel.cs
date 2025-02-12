@@ -47,6 +47,7 @@ namespace GA360.Domain.Core.Models
         public int Status { get; set; }
         public int? TrainingCentre { get; set; }
         public string NationalInsurance { get; set; }
+        public DateTime? AppointmentDate { get; set; }
         public string[] Skills { get; set; }
         public IList<FileModel> Files { get; set; }
         public IList<CourseModel> Courses { get; set; }

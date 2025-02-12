@@ -13,6 +13,7 @@ export interface TrainingCentre {
   name: string;
   addressId: number;
   address: Address;
+  logo: string;
 }
 
 export interface TrainingCentreWithAddress {
@@ -23,6 +24,7 @@ export interface TrainingCentreWithAddress {
   number: string;
   postcode: string;
   city: string;
+  logo: string;
 }
 
 

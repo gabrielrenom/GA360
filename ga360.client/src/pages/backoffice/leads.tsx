@@ -3,7 +3,7 @@ import { Avatar, Chip, Grid, IconButton, Paper, Stack, Tooltip, Typography } fro
 import Box from "@mui/system/Box";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { styled } from '@mui/material/styles';
-import { CustomerList, CustomerListExtended } from "../../types/customer";
+import { CustomerList, CustomerListExtended, LeadListExtended } from "../../types/customer";
 import CustomerTable from "../../sections/apps/customer/CustomerTable";
 import { PatternFormat } from "react-number-format";
 import EditOutlined from "@ant-design/icons/EditOutlined";
@@ -26,9 +26,9 @@ export default function Leads({ triggerAddCandidate = false, onModalClose = () =
     const navigate = useNavigate();
 
     const [open, setOpen] = useState<boolean>(false);
-    const [allowedCustomers, setAllowedCustomers] = useState<CustomerListExtended[] | undefined>(undefined);
+    const [allowedCustomers, setAllowedCustomers] = useState<LeadListExtended[] | undefined>(undefined);
     const [customerModal, setCustomerModal] = useState<boolean>(false);
-    const [selectedCustomer, setSelectedCustomer] = useState<CustomerListExtended | null>(null);
+    const [selectedCustomer, setSelectedCustomer] = useState<LeadListExtended | null>(null);
     const [customerDeleteId, setCustomerDeleteId] = useState<any>('');
 
     const { user, isLoggedIn } = useContext(DuendeContext);
@@ -44,7 +44,7 @@ export default function Leads({ triggerAddCandidate = false, onModalClose = () =
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
       };
-    const columns = useMemo<ColumnDef<CustomerListExtended>[]>(
+    const columns = useMemo<ColumnDef<LeadListExtended>[]>(
         () => [
             {
                 id: 'select',
@@ -240,7 +240,7 @@ export default function Leads({ triggerAddCandidate = false, onModalClose = () =
                     onAddCustomer={handleAddCustomer}
                     type ={"leads"} />
                 <AlertCustomerDelete id={Number(customerDeleteId)} title={customerDeleteId} open={open} handleClose={handleClose} />
-                <CustomerModal open={customerModal} modalToggler={setCustomerModal} customer={selectedCustomer} />
+                <CustomerModal open={customerModal} modalToggler={setCustomerModal} customer={selectedCustomer} customerType="Leads" />
             </>
             }
         </Grid>

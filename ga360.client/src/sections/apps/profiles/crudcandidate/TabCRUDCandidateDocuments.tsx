@@ -77,6 +77,8 @@ export default function TabCRUDCandidateDocuments() {
     candidate?.avatarImage ? candidate.avatarImage : defaultImages
   );
 
+  const [isAdmin, setIsAdmin] = useState<boolean>(true);
+
   const columns = useMemo<ColumnDef<DocumentViewDataProps>[]>(
     () => [
       {
@@ -131,6 +133,8 @@ export default function TabCRUDCandidateDocuments() {
       console.log(learner)
       setAvatar(learner.avatarImage);
       setCandidate(learner);
+      setIsAdmin((learner.role === "Super Admin" || learner.role === "Training Centre"));
+
   
       const mappedFiles: DocumentViewDataProps[] = mapDocumentFilesToViewData(learner.fileDocuments);
   
@@ -337,9 +341,11 @@ export default function TabCRUDCandidateDocuments() {
               defaultImages={avatar}
             ></CandidateProfile>}
           </Grid>
+          {!isAdmin &&
           <Grid item xs={12}>
             <MyQualificationsProfile userId={Number(id)} />
           </Grid>
+          }
         </Grid>
       </Grid>
       <Grid item xs={12} sm={7} md={8} xl={9}>

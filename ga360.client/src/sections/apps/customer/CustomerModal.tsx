@@ -17,6 +17,7 @@ import { CustomerList, CustomerListExtended } from 'types/customer';
 import { getUserById } from 'api/customer';
 import FormSuperAdminAdd from './FormSuperAdminAdd';
 import FormAssesorAdd from './FormAssesorAdd';
+import FormLeadsAdd from './FormLeadsAdd';
 
 interface Props {
   open: boolean;
@@ -62,13 +63,11 @@ export default function CustomerModal({ open, modalToggler, customer, customerTy
   const customerForm = useMemo(() => {
     if (loading) return null;
 
-    if (customerType === 'Assessor') {
-      return <FormAssesorAdd customer={customerDetails} closeModal={closeModal} />;
-    } else if (customerType === 'Super Admin') {
-      return <FormSuperAdminAdd customer={customerDetails} closeModal={closeModal} />;
-    } else
-    {
-      return <FormCustomerAdd customer={customerDetails} closeModal={closeModal} />;
+    switch (customerType) {
+      case 'Assessor':  return <FormAssesorAdd customer={customerDetails} closeModal={closeModal} />;
+      case 'Super Admin': return <FormSuperAdminAdd customer={customerDetails} closeModal={closeModal} />;
+      case 'Leads': return <FormLeadsAdd customer={customerDetails} closeModal={closeModal} />;
+      default:  return <FormCustomerAdd customer={customerDetails} closeModal={closeModal} />;
     }
     return null;
   }, [customerDetails, loading, customerType, closeModal]);

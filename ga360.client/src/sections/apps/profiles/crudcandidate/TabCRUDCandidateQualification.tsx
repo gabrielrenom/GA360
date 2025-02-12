@@ -98,6 +98,7 @@ export default function TabCRUDCandidateQualification() {
   const [avatar, setAvatar] = useState<string | undefined>(
     candidate?.avatarImage ? candidate.avatarImage : defaultImages
   );
+  const [isAdmin, setIsAdmin] = useState<boolean>(true);
 
   const mapQualifications = (
     qualifications: QualificationExtended[]
@@ -185,6 +186,7 @@ export default function TabCRUDCandidateQualification() {
       try {
         const learner = await getUserById(Number(id));
         setAvatar(learner.avatarImage);
+        setIsAdmin((learner.role === "Super Admin" || learner.role === "Training Centre"));
         setCandidate(learner);
 
         const response = await getQualificationDetailByUserId(Number(id));
@@ -405,10 +407,11 @@ export default function TabCRUDCandidateQualification() {
               defaultImages={avatar}
             ></CandidateProfile>
           </Grid>
+          {!isAdmin &&
           <Grid item xs={12}>
-            {/* <CourseProgressions candidate={candidate} /> */}
             <MyQualificationsProfile userId={Number(id)} />
           </Grid>
+          }
         </Grid>
       </Grid>
       <Grid item xs={12} sm={7} md={8} xl={9}>

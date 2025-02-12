@@ -25,4 +25,9 @@ namespace GA360.Domain.Core.Models
         public string TrainingCentre { get; set; }
         public string AvatarImage { get; set; }
     }
+
+    public class AdministratorModelHighPerformance:CustomerModelHighPerformance
+    {
+        public string Gender { get; set; }
+    }
 }

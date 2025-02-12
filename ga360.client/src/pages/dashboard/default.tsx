@@ -642,6 +642,7 @@ export default function DashboardDefault() {
       </Grid> */}
 
       {/* row 3 */}
+      {user.role == "Training Centre" &&
       <Grid item xs={12} md={12} lg={12}>
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid item>
@@ -673,7 +674,7 @@ export default function DashboardDefault() {
         {/*    <OrdersTable />*/}
         {/*</MainCard>*/}
       </Grid>
-
+      }
       {/* row 4 */}
       {/* <Grid item xs={12} md={7} lg={8}>
         <SaleReportCard />

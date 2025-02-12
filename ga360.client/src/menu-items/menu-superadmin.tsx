@@ -41,13 +41,13 @@ const menuSuperAdmin: NavItemType = {
       icon: icons.ContactsOutlined,
       url: '/backoffice/trainingcentres'    
     },
-    {
-      id: 'menu-admin-leads',
-      title: <FormattedMessage id="Leads" />,
-      type: 'item',
-      icon: icons.WechatWorkOutlined,
-      url: '/backoffice/leads'
-    },
+    // {
+    //   id: 'menu-admin-leads',
+    //   title: <FormattedMessage id="Leads" />,
+    //   type: 'item',
+    //   icon: icons.WechatWorkOutlined,
+    //   url: '/backoffice/leads'
+    // },
     {
       id: 'menu-admin-learners',
       title: <FormattedMessage id="Learners" />,
@@ -76,13 +76,13 @@ const menuSuperAdmin: NavItemType = {
       icon: icons.ProfileOutlined,
       url: '/backoffice/courses'
     },
-    {
-      id: 'training-centre-batch-upload',
-      title: <FormattedMessage id="Batch Upload" />,
-      type: 'item',
-      icon: icons.UploadOutlined,
-      url: '/backoffice/candidatebatchuploader'
-    },
+    // {
+    //   id: 'training-centre-batch-upload',
+    //   title: <FormattedMessage id="Batch Upload" />,
+    //   type: 'item',
+    //   icon: icons.UploadOutlined,
+    //   url: '/backoffice/candidatebatchuploader'
+    // },
     {
       id: 'menu-admin-audit-trail',
       title: <FormattedMessage id="Audit Trail" />,

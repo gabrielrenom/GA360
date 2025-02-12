@@ -110,7 +110,7 @@ export interface ActiveLearnersPerMonth {
 import { fetcher } from 'utils/axios';
 
 // types
-import { BasicCustomer, CustomerList, CustomerListExtended, CustomerProps, User } from 'types/customer';
+import { BasicCustomer, CustomerList, CustomerListExtended, CustomerProps, LeadListExtended, User } from 'types/customer';
 import { DocumentFileModel, mapCustomerApiModelToCustomerList, mapCustomerListToCustomerApiModel, mapCustomerListToCustomerApiModelExtended } from 'types/customerApiModel';
 
 const initialState: CustomerProps = {
@@ -241,7 +241,7 @@ export async function getUser(): Promise<User> {
   return result;
 }
 
-export async function getUserById(id: number): Promise<CustomerListExtended> {
+export async function getUserById(id: number): Promise<CustomerListExtended | LeadListExtended> {
   const response = await fetch(`/api/customer/get/full/${id}`, {
       headers: {
           "X-CSRF": "Dog",
@@ -350,7 +350,7 @@ export async function getBasicCandidate() {
   return result;
 }
 
-export async function insertCustomerWithDocuments(newCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
+export async function insertCustomerWithDocuments(newCustomer: CustomerListExtended | LeadListExtended, documents: File[]): Promise<boolean> {
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(newCustomer);
   const formData = new FormData();
   formData.append('Customer', JSON.stringify(mappedCustomer));
@@ -389,7 +389,7 @@ export async function insertCustomerWithDocuments(newCustomer: CustomerListExten
   return true;
 }
 
-export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended, documents: File[]): Promise<boolean> {
+export async function updateCustomerWithDocuments(customerId: number, updatedCustomer: CustomerListExtended | LeadListExtended, documents: File[]): Promise<boolean> {
   const mappedCustomer = mapCustomerListToCustomerApiModelExtended(updatedCustomer);
 
   const formData = new FormData();

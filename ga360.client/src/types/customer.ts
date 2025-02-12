@@ -54,6 +54,11 @@ export interface CustomerListExtended extends CustomerList {
   employmentStatus: string;
 }
 
+export interface LeadListExtended extends CustomerListExtended {
+  appointmentDate?: string;
+  appointmentTime?: string;
+}
+
 export interface BasicCustomer {
   id: number;
   email: string;

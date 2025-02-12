@@ -39,6 +39,8 @@ namespace GA360.Server.ViewModels
         public string EmployeeStatus { get; set; }
         public string Employer { get; set; }
         public int TrainingCentre { get; set; }
+        public string? AppointmentDate { get; set; }
+        public string? AppointmentTime { get; set; }
         public string NationalInsurance { get; set; }
         public List<FileModel>? FileDocuments { get; internal set; }
     }

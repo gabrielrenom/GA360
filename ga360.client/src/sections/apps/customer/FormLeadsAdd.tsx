@@ -60,7 +60,7 @@ import DeleteFilled from "@ant-design/icons/DeleteFilled";
 
 // types
 import { SnackbarProps } from "types/snackbar";
-import { CustomerList, CustomerListExtended } from "types/customer";
+import { CustomerList, CustomerListExtended, LeadListExtended } from "types/customer";
 // import { TrainingCentre } from "types/trainingcentretypes";
 import { getTrainingCentres, TrainingCentre } from "api/trainingcentreService";
 import { getEthnicities } from "api/ethnicity";
@@ -120,7 +120,9 @@ const getInitialValues = (customer: CustomerListExtended | null) => {
         postcode: "",
         documents: [],
         fileDocuments: [],
-        trainingCentreId:0
+        trainingCentreId:0,
+        appointmentDate: "",
+        appointmentTime: "",
     };
 
     if (customer) {
@@ -138,11 +140,11 @@ const allStatus: StatusProps[] = [
 
 // ==============================|| CUSTOMER ADD / EDIT - FORM ||============================== //
 
-export default function FormCustomerAdd({
+export default function FormLeadsAdd({
     customer,
     closeModal,
 }: {
-    customer: CustomerListExtended | null;
+    customer: LeadListExtended | null;
     closeModal: () => void;
 }) {
     const theme = useTheme();
@@ -170,7 +172,7 @@ export default function FormCustomerAdd({
     const [documents, setDocuments] = useState<File[]>([]);
 
     const { user, isLoggedIn } = useContext(DuendeContext);
-    console.log(user)
+    console.log("LEAD", customer)
     useEffect(() => {
         if (customer != null) {
             const files: File[] = customer.fileDocuments.map(
@@ -280,14 +282,12 @@ export default function FormCustomerAdd({
         location: Yup.string().max(500),
         about: Yup.string().max(500),
         gender: Yup.mixed().oneOf([Gender.MALE, Gender.FEMALE, Gender.NONBINARY, Gender.PREFERNOTTOSAY], 'Invalid gender').required('Gender is required'),
-        // role: Yup.string().max(255).required("Role is required"),
         country: Yup.string().max(255).required("Country is required"),
         dateOfBirth: Yup.date()
             .max(new Date(new Date().setFullYear(new Date().getFullYear() - 18)), "You must be at least 18 years old")
             .required("Date of birth is required"),
         ethnicity: Yup.string().max(255).required("Ethnicity of birth is required"),
         employeeStatus: Yup.string().max(255).required("Employee status is required"),
-        // trainingCentre: Yup.string().max(255).required("Training centre is required"),
         city: Yup.string().max(255).required("City is required"),
         postcode: Yup.string().max(255).required("Postcode is required"),
         street: Yup.string().max(255).required("Street is required"),
@@ -307,13 +307,13 @@ export default function FormCustomerAdd({
         validationSchema: CustomerSchema,
         enableReinitialize: true,
         onSubmit: async (values, { setSubmitting }) => {
-            console.log("ADDDDINGs")
             SetHasBeenSubmitted(true);
 
             try {
-                let newCustomer: CustomerListExtended = values as CustomerListExtended;
+                let newCustomer: LeadListExtended = values as unknown as LeadListExtended;
                 newCustomer.name = newCustomer.firstName + " " + newCustomer.lastName;
                 newCustomer.avatarImage = avatarBase64;
+                console.log("NEWLEAD",newCustomer);
                 if (customer) {
                     setSubmitting(true); // Set submitting state to true
                     updateCustomerWithDocuments(
@@ -423,7 +423,6 @@ export default function FormCustomerAdd({
             <Tabs value={value} onChange={handleChange} aria-label="tabs">
                 <Tab label="Candidate" />
                 <Tab label="Qualifications" />
-                {/* <Tab label="Batch Upload" /> */}
             </Tabs>:<></>}
             <Box sx={{ mt: 2 }}>
                 {value === 0 && (
@@ -432,7 +431,7 @@ export default function FormCustomerAdd({
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
                                     <DialogTitle>
-                                        {customer ? "Edit Candidate" : "New Candidate"}
+                                        {customer ? "Edit Lead" : "New Lead"}
                                     </DialogTitle>
                                     <Divider />
                                     <DialogContent sx={{ p: 2.5 }}>
@@ -490,9 +489,6 @@ export default function FormCustomerAdd({
                                                         placeholder="Outlined"
                                                         variant="outlined"
                                                         sx={{ display: "none" }}
-                                                        // onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                                        //   setSelectedImage(e.target.files?.[0])
-                                                        // }
                                                         onChange={handleFileChange}
                                                     />
                                                 </Stack>
@@ -542,23 +538,32 @@ export default function FormCustomerAdd({
                                                             />
                                                         </Stack>
                                                     </Grid>
-                                                    {/* <Grid item xs={12} sm={6}>
+                                                    <Grid item xs={12} sm={6}>
                                                         <Stack spacing={1}>
-                                                            <InputLabel htmlFor="customer-fatherName">
-                                                                Father Name
+                                                            <InputLabel htmlFor="customer-appointmentDate">
+                                                                Appointment Date
                                                             </InputLabel>
                                                             <TextField
                                                                 fullWidth
-                                                                id="customer-fatherName"
-                                                                placeholder="Enter Father Name"
-                                                                {...getFieldProps("fatherName")}
-                                                                error={Boolean(
-                                                                    touched.fatherName && errors.fatherName
-                                                                )}
-                                                                helperText={touched.fatherName && errors.fatherName}
+                                                                id="customer-appointmentDate"
+                                                                type="date"
+                                                                {...getFieldProps("appointmentDate")}
                                                             />
-                                                        </Stack>
-                                                    </Grid> */}
+                                                        </Stack>{" "}
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Stack spacing={1}>
+                                                            <InputLabel htmlFor="customer-appointmentTime">
+                                                                Appointment Time
+                                                            </InputLabel>
+                                                            <TextField
+                                                                fullWidth
+                                                                id="customer-appointmentTime"
+                                                                type="time"
+                                                                {...getFieldProps("appointmentTime")}
+                                                            />
+                                                        </Stack>{" "}
+                                                    </Grid>
                                                     <Grid item xs={12} sm={6}>
                                                         <Stack spacing={1}>
                                                             <InputLabel htmlFor="customer-dateOfBirth">
@@ -672,30 +677,6 @@ export default function FormCustomerAdd({
 ) : user && user.role === "Training Centre" ? (
     <Grid item xs={12}>
         <input type="hidden" id="customer-trainingCentre" value={user.trainingCentreId} {...getFieldProps("trainingCentre")} />
-        {/* <Stack spacing={1}>
-            <InputLabel htmlFor="customer-trainingCentre">
-                Training Centre
-            </InputLabel>
-            <Select
-                fullWidth
-                id="customer-trainingCentre"
-                {...getFieldProps("trainingCentre")}
-                error={Boolean(touched.trainingCentre && errors.trainingCentre)}
-                value={user.trainingCentreId} // Preselect the training centre
-            >
-                {trainingCentres.length > 0 ? (
-                    trainingCentres.map((centre) => (
-                        <MenuItem key={centre.id} value={centre.id}>
-                            {centre.name}
-                        </MenuItem>
-                    ))
-                ) : (
-                    <MenuItem value="" disabled>
-                        No training centres available
-                    </MenuItem>
-                )}
-            </Select>
-        </Stack> */}
     </Grid>
 ) : (
     <></>
@@ -1019,12 +1000,7 @@ export default function FormCustomerAdd({
                                                             <InputLabel htmlFor="customer-documents">
                                                                 Documents
                                                             </InputLabel>
-                                                            {/* <MultipleFileUploader
-                                                                onFilesUpload={handleFilesUpload}
-                                                                // @ts-ignore
-                                                                detailedFiles={documents}
-                                                                initialFiles={documents}
-                                                            /> */}
+
                                                                   <MultipleFileUploader
         onFilesUpload={handleFilesUpload}
         onFileRemove={handleFileRemove} // Add this line
@@ -1115,15 +1091,6 @@ export default function FormCustomerAdd({
                         <DynamicTableCustomerWithCourseQualificationRecords customerId={customer.id}/>
                     </>
                 )}
-                {/* {user && (user.role === "Training Centre" || user.role === "Super Admin") && value === 2 && (
-                    <Box>
-                        <Typography variant="h6">Batch Upload</Typography>
-                        <Button variant="contained" component="label">
-                            Upload File
-                            <input type="file" hidden />
-                        </Button>
-                    </Box>
-                )} */}
             </Box>
         </Box>
     );

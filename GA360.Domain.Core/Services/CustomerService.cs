@@ -5,6 +5,7 @@ using GA360.Domain.Core.Interfaces;
 using GA360.Domain.Core.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -96,7 +97,7 @@ public class CustomerService : ICustomerService
                                 City = reader.IsDBNull(16) ? null : reader.GetString(16),
                                 Number = reader.IsDBNull(17) ? null : reader.GetString(17),
                                 Postcode = reader.IsDBNull(18) ? null : reader.GetString(18),
-                                AvgQualificationProgression = reader.IsDBNull(19) ? 0 : reader.GetInt32(19) // Added field for average qualification progression
+                                AvgQualificationProgression = reader.IsDBNull(19) ? 0 : reader.GetInt32(19)
                             };
                         }
                     }
@@ -185,10 +186,16 @@ public class CustomerService : ICustomerService
             if (customerModel.Country != null)
             {
                 var country = await _customerRepository.Get<Country>(x => x.Name.ToLower() == customerModel.Country.ToLower());
+                if (country == null)
+                    country = await _customerRepository.Context.Countries.FirstOrDefaultAsync();
+
                 countryId = country.Id;
             }
 
-            var ethnicOriginId = await _ethnicityRepository.Get<EthnicOrigin>(x => x.Name.ToLower() == customerModel.Ethnicity.ToLower());
+            var ethnicOrigin = await _ethnicityRepository.Get<EthnicOrigin>(x => x.Name.ToLower() == customerModel.Ethnicity.ToLower());
+
+            if (ethnicOrigin == null)
+                ethnicOrigin = await _ethnicityRepository.Context.EthnicOrigins.FirstOrDefaultAsync();
 
             var customer = new Customer
             {
@@ -205,7 +212,7 @@ public class CustomerService : ICustomerService
                 Employer = customerModel.Employer,
                 ePortfolio = customerModel.ePortfolio,
                 EmploymentStatus = customerModel.EmploymentStatus,
-                EthnicOriginId = ethnicOriginId.Id,
+                EthnicOriginId = ethnicOrigin.Id,
                 FatherName = customerModel.FatherName,
                 Gender = customerModel.Gender,
                 Location = customerModel.Location,
@@ -213,11 +220,17 @@ public class CustomerService : ICustomerService
                 Status = DAL.Entities.Enums.StatusEnum.Status.ProcessingRequest,
                 Role = customerModel.Role,
                 AvatarImage = customerModel.AvatarImage,
+                AppointmentDate = customerModel.AppointmentDate
             };
 
             if (customerModel.TrainingCentre != null && customerModel.TrainingCentre > 0)
             {
                 customer.TrainingCentreId = customerModel.TrainingCentre;
+                var trainingCentre = await _customerRepository.Context.TrainingCentres?.FirstOrDefaultAsync(x => x.Id == customerModel.TrainingCentre);
+                if (trainingCentre != null)
+                {
+                    customer.CreatedBy = trainingCentre.Name;
+                }
             }
             else
             {
@@ -351,6 +364,7 @@ public class CustomerService : ICustomerService
             customerdb.ePortfolio = customer.ePortfolio;
             customerdb.EthnicOrigin = ethnicOrigin;
             customerdb.AvatarImage = customer.AvatarImage;
+            customerdb.AppointmentDate = customer.AppointmentDate;
 
             _customerRepository.Context.Customers.Update(customerdb);
             await _customerRepository.SaveChangesAsync();
@@ -713,6 +727,7 @@ public class CustomerService : ICustomerService
         destination.Number = source.Address?.Number;
         destination.Postcode = source.Address?.Postcode;
         destination.Skills = source.CustomerSkills?.Select(cs => cs.Skill.Name).ToArray();
+        destination.AppointmentDate = source.AppointmentDate;
 
         //TOdo
         destination.Qualifications = source.QualificationCustomerCourseCertificates != null ?
@@ -1155,9 +1170,9 @@ public class CustomerService : ICustomerService
     }
 
 
-    public async Task<List<CustomerModelHighPerformance>> GetAdministratorsAllUltraHighPerformance()
+    public async Task<List<AdministratorModelHighPerformance>> GetAdministratorsAllUltraHighPerformance()
     {
-        var customers = new List<CustomerModelHighPerformance>();
+        var customers = new List<AdministratorModelHighPerformance>();
 
         try
         {
@@ -1175,6 +1190,7 @@ public class CustomerService : ICustomerService
                     co.Name AS Country,
                     c.Location,
                     c.Status,
+                    c.Gender,
                     c.CountryId,
                     c.DOB,
                     c.DOB AS DateOfBirth,
@@ -1199,7 +1215,7 @@ public class CustomerService : ICustomerService
                 {
                     while (await reader.ReadAsync())
                     {
-                        var customer = new CustomerModelHighPerformance
+                        var customer = new AdministratorModelHighPerformance
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
@@ -1207,6 +1223,7 @@ public class CustomerService : ICustomerService
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             Contact = reader.GetString(reader.GetOrdinal("Contact")),
                             Email = reader.GetString(reader.GetOrdinal("Email")),
+                            Gender = reader.GetString(reader.GetOrdinal("Gender")),
                             Country = reader.GetString(reader.GetOrdinal("Country")),
                             Location = reader.GetString(reader.GetOrdinal("Location")),
                             Status = reader.GetInt32(reader.GetOrdinal("Status")),

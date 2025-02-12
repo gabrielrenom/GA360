@@ -7,6 +7,7 @@ public class TrainingCentre : Audit, IModel
     public int Id { get; set; }
     public string Name { get; set; }
     public int AddressId { get; set; }
+    public string? Logo { get; set; }
     public virtual Address Address { get; set; }
     public virtual List<Customer> Customers { get; set; }
     public virtual List<TrainingCentrePermission> TrainingCentrePermission { get; set; }

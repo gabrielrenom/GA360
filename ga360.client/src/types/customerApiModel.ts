@@ -1,5 +1,5 @@
 import { Gender } from "config";
-import { CustomerList, CustomerListExtended } from "./customer";
+import { CustomerList, CustomerListExtended, LeadListExtended } from "./customer";
 import { i, S } from "vite/dist/node/types.d-aGj9QkWt";
 
 export interface CustomerApiModel {
@@ -96,6 +96,8 @@ export interface CustomerApiModelExtended {
   courses: CourseModel []
   qualifications: QualificationModel []
   certificates: CertificateModel []
+  appointmentDate?: string
+  appointmentTime?: string
 }
 
 export const mapCustomerApiModelToCustomerListExtended = (
@@ -221,7 +223,7 @@ export const mapCustomerListToCustomerApiModel = (
 };
 
 export const mapCustomerListToCustomerApiModelExtended = (
-  user: CustomerListExtended
+  user: CustomerListExtended | LeadListExtended
 ): CustomerApiModelExtended => {
   let genderEnum;
   switch (user.gender.toString()) {
@@ -278,7 +280,9 @@ export const mapCustomerListToCustomerApiModelExtended = (
     fileDocuments: [],
     courses: [],
     qualifications: [],
-    certificates: []
+    certificates: [],
+    appointmentDate: (user as LeadListExtended).appointmentDate,
+    appointmentTime: (user as LeadListExtended).appointmentTime,
   };
 };
 
